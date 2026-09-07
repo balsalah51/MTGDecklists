@@ -389,6 +389,29 @@ def load_decks() -> list[dict]:
     return out
 
 
+def cap_per_format(decks: list[dict], n: int = 200) -> list[dict]:
+    by = defaultdict(list)
+    for d in decks:
+        by[d["format"]].append(d)
+    out = []
+    for fmt in FMT_BY:
+        group = by.get(fmt, [])
+        curated = [d for d in group if str(d.get("id") or "").startswith("mentor-")]
+        rest = [d for d in group if not str(d.get("id") or "").startswith("mentor-")]
+        chosen, seen = [], set()
+        for d in curated + rest:
+            key = d["id"]
+            if key in seen:
+                continue
+            seen.add(key)
+            chosen.append(d)
+            if len(chosen) >= n:
+                break
+        out.extend(chosen)
+    out.sort(key=lambda x: (x["date"], x.get("place") or ""), reverse=True)
+    return out
+
+
 def write(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text)
@@ -549,12 +572,8 @@ def color_section(fmt_decks: list[dict], slug: str) -> str:
 
 def page_format(fmt: dict, decks: list[dict]) -> str:
     fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
-    shown = fmt_decks[:120]
     art = ARTS[hash(fmt["slug"]) % 3]
-    items = "".join(recent_item(d) for d in shown)
-    more = ""
-    if len(fmt_decks) > len(shown):
-        more = f" · showing the latest {len(shown)} — search this format for older tables"
+    items = "".join(recent_item(d) for d in fmt_decks)
     return head(
         f"{fmt['name']} decklists | MTG Decklists",
         f"{fmt['name']} Magic: The Gathering lists from August and September 2026, with colors, popular color combos, and TCGPlayer buy links.",
@@ -572,7 +591,7 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
         {color_section(fmt_decks, fmt['slug'])}
         <div class="section-title" style="margin-top:28px">
           <h3>Recent lists</h3>
-          <span class="muted">{len(fmt_decks)} from Aug–Sep 2026{more}</span>
+          <span class="muted">{len(fmt_decks)} from Aug–Sep 2026</span>
         </div>
         <div class="filter-bar" aria-label="Filter by color">
           <button type="button" data-color="all">All</button>
@@ -1006,7 +1025,7 @@ def _parse(blob: str) -> list[dict]:
 
 
 def main() -> None:
-    decks = add_curated(load_decks())
+    decks = cap_per_format(add_curated(load_decks()), 200)
     decks = [d for d in decks if d.get("format") in FMT_BY]
     write(ROOT / "index.html", page_index(decks))
     write(ROOT / "formats" / "index.html", page_formats_index(decks))
