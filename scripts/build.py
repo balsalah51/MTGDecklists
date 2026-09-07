@@ -19,7 +19,7 @@ FORMATS = [
         "slug": "standard",
         "name": "Standard",
         "short": "Rotating 60-card constructed",
-        "blurb": "Current Standard uses Wilds of Eldraine forward. There is no fall 2026 rotation; the next rotation is with Nauctis: The Sunken Realm in early 2027. Store RCQs through November 29 are Standard or Limited.",
+        "blurb": "Current Standard uses Wilds of Eldraine forward. There is no fall 2026 rotation; the next rotation is with Nauctis: The Sunken Realm in early 2027. Store RCQs through November 29 are Standard constructed.",
         "official": "https://magic.wizards.com/en/formats/standard",
         "popular": True,
     },
@@ -69,14 +69,6 @@ FORMATS = [
         "short": "Commons only",
         "blurb": "Pauper is constructed using only cards printed at common. Wizards also clarified Secret Lair Zeta commons legality in September 2026.",
         "official": "https://magic.wizards.com/en/formats/pauper",
-        "popular": False,
-    },
-    {
-        "slug": "limited",
-        "name": "Limited",
-        "short": "Draft and Sealed",
-        "blurb": "Limited is built from boosters at the table. Magic: The Gathering | The Hobbit is the current Premier Draft and Sealed set on Arena through late September 2026. Store RCQs may be Limited.",
-        "official": "https://magic.wizards.com/en/formats/limited",
         "popular": False,
     },
 ]
@@ -293,7 +285,6 @@ def header(current="") -> str:
       </a>
       <nav aria-label="Primary">
         {nav("/tier-list.html", "Tier List", "tier")}
-        {nav("/#recent", "Recent lists", "recent")}
         {nav("/formats/", "Formats", "formats")}
         {nav("/format.html", "Rules", "rules")}
         {nav("/events.html", "Events", "events")}
@@ -310,7 +301,7 @@ def footer() -> str:
     return f"""    <footer>
       © <span id="year">{YEAR}</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
-      <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> · <a href="/#recent">Recent lists</a> ·
+      <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
       <a href="/format.html">Rules</a> · <a href="/search.html">Search</a> · <a href="/shop/">Shop</a> ·
       <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
     </footer>
@@ -387,6 +378,8 @@ def load_decks() -> list[dict]:
         d["combo"] = combo_label(colors)
         slug = f"{slugify(d['archetype'])}-{d['id']}"
         d["page_slug"] = slug
+        if d.get("format") not in FMT_BY:
+            continue
         key = d["id"]
         if key in seen:
             continue
@@ -402,7 +395,6 @@ def write(path: Path, text: str) -> None:
 
 
 def page_index(decks: list[dict]) -> str:
-    recent = "".join(recent_item(d) for d in decks[:80])
     format_tiles = ""
     counts = Counter(d["format"] for d in decks)
     for fmt in FORMATS:
@@ -432,7 +424,7 @@ def page_index(decks: list[dict]) -> str:
             <h2>MTG Decklists</h2>
             <p class="home-splash-formats">Commander · Standard · Modern</p>
           </div>
-          <p>Tournament lists by format. Jump a color, then keep scrolling into August and September 2026 results.</p>
+          <p>Pick a format first. Colors, popular color combos, and that format's August–September 2026 lists live on the format page.</p>
         </div>
       </section>
 
@@ -450,13 +442,9 @@ def page_index(decks: list[dict]) -> str:
           <span class="home-big-title">Tier List</span>
           <span class="home-big-note">August–September 2026 metas by format</span>
         </a>
-        <a class="home-big home-big-recent" href="#recent">
-          <span class="home-big-title">Recent Lists</span>
-          <span class="home-big-note">Newest Challenge, League, and RCQ tables</span>
-        </a>
         <a class="home-big home-big-leaders" href="#formats">
           <span class="home-big-title">Formats</span>
-          <span class="home-big-note">Standard through Pauper, plus Limited</span>
+          <span class="home-big-note">Click a format, then see that format's lists</span>
         </a>
         <a class="home-big home-big-shop" href="/shop/">
           <span class="home-big-title">Shop</span>
@@ -487,7 +475,7 @@ def page_index(decks: list[dict]) -> str:
           <div class="home-leaders-intro-row">
             <div>
               <h3>Formats</h3>
-              <p>Pick a format. Each page opens on colors and popular color combos, then recent lists — the same shape as OPDB leader pages, rebuilt for Magic.</p>
+              <p>Pick a format first. Each format page opens on colors and popular color combos, then that format's recent lists.</p>
             </div>
             <a href="/formats/">All format pages →</a>
           </div>
@@ -497,14 +485,6 @@ def page_index(decks: list[dict]) -> str:
         </div>
       </section>
 
-      <section class="card home-panel" id="recent" style="margin-top:18px">
-        <div class="section-title">
-          <h3>Recent lists</h3>
-          <a href="/formats/">By format →</a>
-        </div>
-        <p class="muted">{len(decks)} lists from August and September 2026 Challenges, Leagues, and qualifiers. Public tables from MTGGoldfish, with TCGPlayer buy links on every list.</p>
-        <div class="recent-list">{recent}</div>
-      </section>
       <p class="site-disclaimer">MTG Decklists is a fan site. Card names and tournament results are reported for commentary and news reporting. Original illustrations on this site are not official Magic: The Gathering card art. Not affiliated with Wizards of the Coast LLC.</p>
       {amazon_line()}
     </main>
@@ -525,7 +505,7 @@ def page_formats_index(decks: list[dict]) -> str:
       {crumb(("/formats/", "Formats"))}
       <article class="card">
         <h2>Formats</h2>
-        <p>Magic is organized by format, not by leader. Commander, Standard, and Modern are the three most-played right now; Legacy, Vintage, Pioneer, Pauper, and Limited sit beside them.</p>
+        <p>Magic is organized by format. Commander, Standard, and Modern are the three most-played right now; Pioneer, Legacy, Vintage, and Pauper sit beside them. Open a format to see its lists.</p>
         <div class="leader-grid">{tiles}</div>
       </article>
     </main>
@@ -569,17 +549,12 @@ def color_section(fmt_decks: list[dict], slug: str) -> str:
 
 def page_format(fmt: dict, decks: list[dict]) -> str:
     fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
+    shown = fmt_decks[:120]
     art = ARTS[hash(fmt["slug"]) % 3]
-    items = "".join(recent_item(d) for d in fmt_decks)
-    extra_limited = ""
-    if fmt["slug"] == "limited":
-        extra_limited = """
-        <div class="meta-strip">
-          <div class="kicker">Current Limited product</div>
-          <p>Magic: The Gathering | The Hobbit Premier Draft runs on Arena through September 29, 2026. September Arena Championship qualifiers are The Hobbit Sealed (Play-In Sept 12 and 18, Weekend Sept 19–20).</p>
-          <p><a href="https://magic.wizards.com/en/news/mtg-arena/the-hobbit-event-schedule" target="_blank" rel="noopener">Official Arena Hobbit schedule</a> ·
-          <a href="https://magic.wizards.com/en/formats/limited" target="_blank" rel="noopener">Limited rules</a></p>
-        </div>"""
+    items = "".join(recent_item(d) for d in shown)
+    more = ""
+    if len(fmt_decks) > len(shown):
+        more = f" · showing the latest {len(shown)} — search this format for older tables"
     return head(
         f"{fmt['name']} decklists | MTG Decklists",
         f"{fmt['name']} Magic: The Gathering lists from August and September 2026, with colors, popular color combos, and TCGPlayer buy links.",
@@ -595,10 +570,9 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
         <p class="muted"><a href="{e(fmt['official'])}" target="_blank" rel="noopener">Official {e(fmt['name'])} page</a> ·
         <a href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener">Aug 10, 2026 banned &amp; restricted</a></p>
         {color_section(fmt_decks, fmt['slug'])}
-        {extra_limited}
         <div class="section-title" style="margin-top:28px">
           <h3>Recent lists</h3>
-          <span class="muted">{len(fmt_decks)} from Aug–Sep 2026</span>
+          <span class="muted">{len(fmt_decks)} from Aug–Sep 2026{more}</span>
         </div>
         <div class="filter-bar" aria-label="Filter by color">
           <button type="button" data-color="all">All</button>
@@ -722,7 +696,6 @@ GUIDES = [
     ("legacy", "Legacy", "Eternal constructed with a banned list. The Fantasticar was banned on August 10, 2026."),
     ("vintage", "Vintage", "Eternal constructed with a restricted list. The Fantasticar was restricted on August 10, 2026."),
     ("pauper", "Pauper", "Commons-only constructed. Watch Secret Lair common legality notes from Wizards."),
-    ("limited", "Limited", "Draft and Sealed. The Hobbit is the current Arena Premier product through September 29, 2026."),
     ("colors", "Colors and mana", "White, blue, black, red, and green. This site uses original mana marks, not the official pentagon."),
     ("color-pairs", "Color pairs", "The ten two-color guilds plus shards and wedges. Format pages rank the combos that are actually posting."),
     ("rcq", "Regional Championship Qualifiers", "Store RCQs run August 15–November 29, 2026 in Standard or Limited. Destination RCQs may use other constructed formats."),
@@ -816,7 +789,7 @@ def page_events() -> str:
 def page_rules() -> str:
     return head(
         "MTG format rules and banlist | MTG Decklists",
-        "How Standard, Modern, Pioneer, Commander, Legacy, Vintage, Pauper, and Limited work, plus the August 10, 2026 banned and restricted changes.",
+        "How Standard, Modern, Pioneer, Commander, Legacy, Vintage, and Pauper work, plus the August 10, 2026 banned and restricted changes.",
         f"{SITE}/format.html",
     ) + header("rules") + f"""
     <main class="single" role="main">
@@ -824,7 +797,7 @@ def page_rules() -> str:
       <article class="card policy">
         <h2>Formats and the banlist</h2>
         <img class="inline-art" src="/img/art/art-crimson-bolt.jpg" alt="Original crimson bolt illustration" />
-        <p>Lists on this site are public constructed tables from August and September 2026 unless a page says otherwise. Commander pages are Duel Commander leagues (still 100-card singleton).</p>
+        <p>Lists on this site are public constructed tables from August and September 2026 unless a page says otherwise. Commander pages are Duel Commander leagues (still 100-card singleton). Pick a format first — lists are not mixed on the homepage.</p>
         <section>
           <h3>August 10, 2026 changes</h3>
           <p>From the official <a href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener">banned and restricted announcement</a>:</p>
@@ -1034,12 +1007,30 @@ def _parse(blob: str) -> list[dict]:
 
 def main() -> None:
     decks = add_curated(load_decks())
+    decks = [d for d in decks if d.get("format") in FMT_BY]
     write(ROOT / "index.html", page_index(decks))
     write(ROOT / "formats" / "index.html", page_formats_index(decks))
     for fmt in FORMATS:
         write(ROOT / "formats" / f"{fmt['slug']}.html", page_format(fmt, decks))
+    keep_pages = set()
     for deck in decks:
-        write(ROOT / "decklists" / deck["format"] / f"{deck['page_slug']}.html", page_deck(deck))
+        path = ROOT / "decklists" / deck["format"] / f"{deck['page_slug']}.html"
+        write(path, page_deck(deck))
+        keep_pages.add(path.resolve())
+    deck_root = ROOT / "decklists"
+    if deck_root.exists():
+        for path in deck_root.rglob("*.html"):
+            if path.resolve() not in keep_pages:
+                path.unlink()
+        limited = deck_root / "limited"
+        if limited.exists():
+            for path in limited.rglob("*"):
+                if path.is_file():
+                    path.unlink()
+            limited.rmdir()
+    for stale in (ROOT / "formats" / "limited.html", ROOT / "guides" / "limited.html"):
+        if stale.exists():
+            stale.unlink()
     write(ROOT / "shop" / "index.html", page_shop())
     for slug, *_ in SHOP:
         write(ROOT / "shop" / f"{slug}.html", page_shop(slug))

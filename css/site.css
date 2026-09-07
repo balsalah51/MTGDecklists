@@ -102,7 +102,7 @@ main.single{grid-template-columns:1fr}
 .home-splash-bar h2{margin:0;font-size:18px;letter-spacing:-.01em;color:#fff}
 .home-splash-bar p{margin:0;font-size:13px;opacity:.9;font-weight:600}
 .home-big3{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 6px
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 6px
 }
 .home-big{
   display:flex;flex-direction:column;justify-content:center;gap:6px;
