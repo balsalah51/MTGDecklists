@@ -174,8 +174,11 @@ main.single{grid-template-columns:1fr}
 }
 .recent-item:hover{border-color:color-mix(in srgb, var(--tile, var(--accent)) 55%, white)}
 .recent-leader{
-  width:28px;height:40px;object-fit:cover;border-radius:4px;flex-shrink:0;background:#eee;
-  border:2px solid var(--tile, var(--accent))
+  width:46px;height:64px;object-fit:contain;object-position:center top;border-radius:5px;flex-shrink:0;
+  background:#1b1514;border:1px solid rgba(0,0,0,.14)
+}
+.inline-art.card-face{
+  width:min(176px,40vw);height:auto;aspect-ratio:63/88;object-fit:contain;background:#1b1514
 }
 .recent-copy{min-width:0;flex:1}
 .recent-item .who{font-weight:800;font-size:14px;overflow-wrap:anywhere}

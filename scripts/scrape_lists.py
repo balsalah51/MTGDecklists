@@ -15,9 +15,10 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "decks.json"
 UA = "Mozilla/5.0 (compatible; MTGDecklistsBot/1.0; +https://mtgdecklists.com)"
 FORMATS = ("standard", "modern", "pioneer", "legacy", "vintage", "pauper", "commander")
-PER_EVENT = 40
+TARGET_PER_FORMAT = 200
+PER_EVENT = 16
 MAX_PAGES = 8
-DATE_RANGE = "08/01/2026 - 09/07/2026"
+DATE_RANGE = "08/01/2026 - 09/30/2026"
 SKIP_NAME = re.compile(r"\b(limited|draft|sealed|cube)\b", re.I)
 ROW_RE = re.compile(
     r"<tr>\s*<td>(\d{4}-\d{2}-\d{2})</td>\s*<td>\s*<a href=\"/tournament/(\d+)\">([^<]+)</a>",
@@ -101,6 +102,66 @@ def search_url(fmt: str, page: int) -> str:
     return "https://www.mtggoldfish.com/tournament_searches/create?" + urllib.parse.urlencode(params)
 
 
+def in_window(date: str) -> bool:
+    return bool(date) and date[:7] in ("2026-08", "2026-09")
+
+
+def _spread(subset: list, k: int) -> list:
+    """Newest events first, round-robin so one challenge does not fill the cap."""
+    if k <= 0 or not subset:
+        return []
+    by_event = defaultdict(list)
+    for d in subset:
+        by_event[d.get("event") or ""].append(d)
+    for rows in by_event.values():
+        rows.sort(key=lambda x: (x.get("date") or "", x.get("place") or ""), reverse=True)
+    events = sorted(by_event, key=lambda e: by_event[e][0].get("date") or "", reverse=True)
+    out, idx = [], {e: 0 for e in events}
+    while len(out) < k:
+        progressed = False
+        for e in events:
+            i = idx[e]
+            if i < len(by_event[e]):
+                out.append(by_event[e][i])
+                idx[e] += 1
+                progressed = True
+                if len(out) >= k:
+                    break
+        if not progressed:
+            break
+    return out
+
+
+def select_target(decks: list, n: int = TARGET_PER_FORMAT) -> list:
+    """Keep n lists per format from Aug–Sep 2026, split across both months."""
+    by = defaultdict(list)
+    seen = set()
+    for d in decks:
+        did = str(d.get("id"))
+        fmt = d.get("format")
+        if did in seen or fmt not in FORMATS or not in_window(d.get("date") or ""):
+            continue
+        seen.add(did)
+        by[fmt].append(d)
+    out = []
+    for fmt in FORMATS:
+        group = by.get(fmt, [])
+        sep = [d for d in group if (d.get("date") or "").startswith("2026-09")]
+        aug = [d for d in group if (d.get("date") or "").startswith("2026-08")]
+        take_sep = min(n // 2, len(sep), n)
+        take_aug = min(n - take_sep, len(aug))
+        chosen = _spread(sep, take_sep) + _spread(aug, take_aug)
+        leftover = [d for d in (sep + aug) if d not in chosen]
+        leftover.sort(key=lambda x: x.get("date") or "", reverse=True)
+        for d in leftover:
+            if len(chosen) >= n:
+                break
+            chosen.append(d)
+        out.extend(chosen[:n])
+    out.sort(key=lambda x: (x.get("date") or "", str(x.get("id"))), reverse=True)
+    return out
+
+
 def discover(fmt: str):
     found = []
     seen = set()
@@ -138,15 +199,25 @@ def discover(fmt: str):
     return found
 
 
+def fmt_count(existing, fmt: str) -> int:
+    return sum(1 for d in existing if d.get("format") == fmt and in_window(d.get("date") or ""))
+
+
 def main():
     existing = json.loads(OUT.read_text()) if OUT.exists() else []
     have = {str(d.get("id")) for d in existing}
     added = 0
     for fmt in FORMATS:
-        print(f"{fmt}: discovering", flush=True)
+        have_fmt = fmt_count(existing, fmt)
+        if have_fmt >= TARGET_PER_FORMAT:
+            print(f"{fmt}: already {have_fmt}, skip scrape", flush=True)
+            continue
+        print(f"{fmt}: discovering (have {have_fmt}, need {TARGET_PER_FORMAT})", flush=True)
         events = discover(fmt)
         print(f"{fmt}: {len(events)} events", flush=True)
         for fmt_name, url, event, date in events:
+            if fmt_count(existing, fmt) >= TARGET_PER_FORMAT:
+                break
             try:
                 html = fetch(url)
             except urllib.error.HTTPError as e:
@@ -162,6 +233,8 @@ def main():
                 continue
             new_here = 0
             for deck_id, arche, player, place in rows:
+                if fmt_count(existing, fmt) >= TARGET_PER_FORMAT:
+                    break
                 if deck_id in have:
                     continue
                 try:
@@ -189,15 +262,21 @@ def main():
                 added += 1
                 new_here += 1
             if new_here:
-                print(f"  {event} {date}: +{new_here}/{len(rows)}", flush=True)
+                print(f"  {event} {date}: +{new_here}/{len(rows)} now {fmt_count(existing, fmt)}", flush=True)
             time.sleep(0.12)
-        # checkpoint per format so a later fail does not lose work
         OUT.parent.mkdir(parents=True, exist_ok=True)
-        json.dump(existing, OUT.open("w"), indent=2)
+        json.dump(existing, OUT.open("w"), separators=(",", ":"))
+    trimmed = select_target(existing, TARGET_PER_FORMAT)
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    json.dump(trimmed, OUT.open("w"), separators=(",", ":"))
     counts = defaultdict(int)
-    for d in existing:
+    months = defaultdict(lambda: defaultdict(int))
+    for d in trimmed:
         counts[d.get("format")] += 1
-    print("added", added, "total", len(existing), dict(counts), flush=True)
+        months[d.get("format")][(d.get("date") or "")[:7]] += 1
+    print("added", added, "kept", len(trimmed), dict(counts), flush=True)
+    for fmt in FORMATS:
+        print(f"  {fmt}: {dict(months[fmt])}", flush=True)
 
 
 if __name__ == "__main__":
