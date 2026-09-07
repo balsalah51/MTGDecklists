@@ -1,1 +1,743 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MTG Decklists | Magic: The Gathering lists by format</title>
+  <meta name="description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-1" />
+  <link rel="canonical" href="https://mtgdecklists.com/" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="theme-color" content="#9c1c28" />
+  <link rel="icon" href="/img/mtg-logo-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="/img/mtg-logo-192.png" sizes="192x192" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta property="og:site_name" content="MTG Decklists" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MTG Decklists | Magic: The Gathering lists by format" />
+  <meta property="og:description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <meta property="og:url" content="https://mtgdecklists.com/" />
+  <meta property="og:image" content="https://mtgdecklists.com/img/mtg-banner-hero.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MTG Decklists | Magic: The Gathering lists by format" />
+  <meta name="twitter:description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <meta name="twitter:image" content="https://mtgdecklists.com/img/mtg-banner-hero.jpg" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MTG Decklists","url":"https://mtgdecklists.com/","potentialAction":{"@type":"SearchAction","target":"https://mtgdecklists.com/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="/">
+        <img class="logo" src="/img/mtg-logo-192.png" width="56" height="56" alt="MTG Decklists" />
+        <div>
+          <h1>MTG Decklists</h1>
+          <div class="subtitle">Commander · Standard · Modern</div>
+        </div>
+      </a>
+      <nav aria-label="Primary">
+        <a href="/tier-list.html">Tier List</a>
+        <a href="/#recent">Recent lists</a>
+        <a href="/formats/">Formats</a>
+        <a href="/format.html">Rules</a>
+        <a href="/events.html">Events</a>
+        <a href="/guides/">Guides</a>
+        <a href="/shop/">Shop</a>
+        <a href="/search.html">Search</a>
+        <span class="muted" title="Discord coming soon">Discord</span>
+      </nav>
+    </header>
 
+    <main class="single home" role="main">
+      <section class="home-splash" aria-label="MTG Decklists">
+        <img class="home-splash-bg" src="/img/mtg-banner-hero.jpg" alt="Original MTG Decklists banner with a flashback mage, goblin scout, and crimson bolt" width="1400" height="636" fetchpriority="high" decoding="async">
+        <div class="home-splash-art" aria-hidden="true">
+          <img src="/img/art/art-flashback-mage.jpg" alt="" />
+          <img src="/img/art/art-goblin-scout.jpg" alt="" />
+          <img src="/img/art/art-crimson-bolt.jpg" alt="" />
+        </div>
+        <div class="home-splash-bar">
+          <div>
+            <h2>MTG Decklists</h2>
+            <p class="home-splash-formats">Commander · Standard · Modern</p>
+          </div>
+          <p>Tournament lists by format. Jump a color, then keep scrolling into August and September 2026 results.</p>
+        </div>
+      </section>
+
+      <a class="events-banner" id="events" href="/events.html">
+        <div>
+          <div class="kicker">Official Wizards / Magic.gg</div>
+          <div class="title">Events and schedules</div>
+          <div class="muted" style="color:rgba(255,255,255,0.82);margin-top:4px">RCQs, Regional Championships, Arena, and Spotlight weekends</div>
+        </div>
+        <div class="go">Official calendar →</div>
+      </a>
+
+      <nav class="home-big3" aria-label="Main sections">
+        <a class="home-big home-big-tier" href="/tier-list.html">
+          <span class="home-big-title">Tier List</span>
+          <span class="home-big-note">August–September 2026 metas by format</span>
+        </a>
+        <a class="home-big home-big-recent" href="#recent">
+          <span class="home-big-title">Recent Lists</span>
+          <span class="home-big-note">Newest Challenge, League, and RCQ tables</span>
+        </a>
+        <a class="home-big home-big-leaders" href="#formats">
+          <span class="home-big-title">Formats</span>
+          <span class="home-big-note">Standard through Pauper, plus Limited</span>
+        </a>
+        <a class="home-big home-big-shop" href="/shop/">
+          <span class="home-big-title">Shop</span>
+          <span class="home-big-note">Sleeves, dice, playmats, and deck boxes</span>
+        </a>
+        <div class="discord-placeholder" role="note">
+          <span class="home-big-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M19.3 5.2A17.4 17.4 0 0 0 14.9 4l-.2.4a15.2 15.2 0 0 1 3.6 1.1c-3.3-1.5-6.6-1.5-9.8 0 .4-.2.9-.4 1.3-.6l-.2-.4A17.3 17.3 0 0 0 4.7 5.2C1.9 9.4 1.1 13.5 1.5 17.5a17.7 17.7 0 0 0 5.4 2.7l.7-1.1a11.5 11.5 0 0 1-2.1-1l.2-.1c1.6.7 3.3 1.2 5.1 1.2s3.5-.4 5.1-1.2l.2.1a11.5 11.5 0 0 1-2.1 1l.7 1.1a17.7 17.7 0 0 0 5.4-2.7c.5-4.6-.7-8.7-3.8-12.3ZM8.8 14.8c-1 0-1.9-.9-1.9-2s.8-2 1.9-2 1.9.9 1.9 2-.8 2-1.9 2Zm6.4 0c-1 0-1.9-.9-1.9-2s.8-2 1.9-2 1.9.9 1.9 2-.8 2-1.9 2Z"/></svg>
+          </span>
+          <div>
+            <div class="home-big-title">Discord</div>
+            <div class="home-big-note">Placeholder — invite coming soon. No link yet.</div>
+          </div>
+        </div>
+      </nav>
+
+      <form class="site-search home-search" method="get" action="/search.html" role="search">
+        <label class="site-search-label" for="home-q">Search MTG decklists</label>
+        <div class="site-search-row">
+          <input id="home-q" type="search" name="q" placeholder="Format, color, player, archetype, or card" aria-label="Search MTG decklists" />
+          <button type="submit">Search</button>
+        </div>
+      </form>
+
+      <section class="home-leaders-flow" id="formats">
+        <div class="home-leaders-intro">
+          <p class="home-leaders-kicker">The formats</p>
+          <div class="home-leaders-intro-row">
+            <div>
+              <h3>Formats</h3>
+              <p>Pick a format. Each page opens on colors and popular color combos, then recent lists — the same shape as OPDB leader pages, rebuilt for Magic.</p>
+            </div>
+            <a href="/formats/">All format pages →</a>
+          </div>
+        </div>
+        <div class="card home-panel">
+          <div class="format-grid"><a class="format-tile" href="/formats/standard.html">
+          <div class="name">Standard</div>
+          <div class="meta">Rotating 60-card constructed</div>
+          <div class="meta">62 recent lists</div>
+        </a><a class="format-tile" href="/formats/modern.html">
+          <div class="name">Modern</div>
+          <div class="meta">Non-rotating from Eighth Edition on</div>
+          <div class="meta">61 recent lists</div>
+        </a><a class="format-tile" href="/formats/pioneer.html">
+          <div class="name">Pioneer</div>
+          <div class="meta">Return to Ravnica forward</div>
+          <div class="meta">53 recent lists</div>
+        </a><a class="format-tile" href="/formats/commander.html">
+          <div class="name">Commander</div>
+          <div class="meta">100-card singleton, most-played format</div>
+          <div class="meta">45 recent lists</div>
+        </a><a class="format-tile" href="/formats/legacy.html">
+          <div class="name">Legacy</div>
+          <div class="meta">Vintage-adjacent, banned list not restricted list</div>
+          <div class="meta">67 recent lists</div>
+        </a><a class="format-tile" href="/formats/vintage.html">
+          <div class="name">Vintage</div>
+          <div class="meta">The original constructed format</div>
+          <div class="meta">49 recent lists</div>
+        </a><a class="format-tile" href="/formats/pauper.html">
+          <div class="name">Pauper</div>
+          <div class="meta">Commons only</div>
+          <div class="meta">53 recent lists</div>
+        </a><a class="format-tile" href="/formats/limited.html">
+          <div class="name">Limited</div>
+          <div class="meta">Draft and Sealed</div>
+          <div class="meta">0 recent lists</div>
+        </a></div>
+        </div>
+      </section>
+
+      <section class="card home-panel" id="recent" style="margin-top:18px">
+        <div class="section-title">
+          <h3>Recent lists</h3>
+          <a href="/formats/">By format →</a>
+        </div>
+        <p class="muted">390 lists from August and September 2026 Challenges, Leagues, and qualifiers. Public tables from MTGGoldfish, with TCGPlayer buy links on every list.</p>
+        <div class="recent-list"><a class="recent-item" href="/decklists/standard/izzet-spellementals-7943569.html" data-colors="UR">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Izzet Spellementals</div>
+    <div class="meta muted">Based · 5 - 0 · Standard League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/standard/boros-dwarves-7943548.html" data-colors="WR">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Boros Dwarves</div>
+    <div class="meta muted">ice100 · 5 - 0 · Standard League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/standard/boros-dragons-7943313.html" data-colors="WR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Boros Dragons</div>
+    <div class="meta muted">ObiJuanDaHomie · 5 - 0 · Standard League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/standard/boros-tokens-7943312.html" data-colors="WR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Boros Tokens</div>
+    <div class="meta muted">Sapoa · 5 - 0 · Standard League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/ruby-storm-7943616.html" data-colors="WUBR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Ruby Storm</div>
+    <div class="meta muted">azax · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/amulet-titan-7943458.html" data-colors="G">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Amulet Titan</div>
+    <div class="meta muted">bamn20 · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/goryo-s-vengeance-7943297.html" data-colors="WUB">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Goryo&#x27;s Vengeance</div>
+    <div class="meta muted">CHAR_AZNABLE · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/domain-zoo-7943298.html" data-colors="WUBRG">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Domain Zoo</div>
+    <div class="meta muted">gabbii_ · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/affinity-7943300.html" data-colors="UR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Affinity</div>
+    <div class="meta muted">HDG_BorisE · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/grixis-prowess-7943460.html" data-colors="UBRG">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Grixis Prowess</div>
+    <div class="meta muted">Jeans8bit · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/mono-red-burn-7943459.html" data-colors="WUBRG">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono-Red Burn</div>
+    <div class="meta muted">KangarooDrew · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/boros-burn-7943301.html" data-colors="WBR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Boros Burn</div>
+    <div class="meta muted">KerlosOlmo · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/izzet-prowess-7943504.html" data-colors="WUBRG">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Izzet Prowess</div>
+    <div class="meta muted">KrauLMagic · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/tron-7943503.html" data-colors="G">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Tron</div>
+    <div class="meta muted">schnda · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/dimir-midrange-7943617.html" data-colors="WUBR">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Midrange</div>
+    <div class="meta muted">SlavSlays · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/dimir-midrange-7943299.html" data-colors="UBG">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Midrange</div>
+    <div class="meta muted">ZKG · 5 - 0 · Modern League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/pioneer/mono-red-prowess-7943627.html" data-colors="R">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono-Red Prowess</div>
+    <div class="meta muted">alfonseelric · 5 - 0 · Pioneer League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/pioneer/mono-red-prowess-7943626.html" data-colors="R">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono-Red Prowess</div>
+    <div class="meta muted">carabinid · 5 - 0 · Pioneer League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/legacy/tron-7943572.html" data-colors="U">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Tron</div>
+    <div class="meta muted">AndrewWa · 5 - 0 · Legacy League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/legacy/rakdos-reanimator-7943304.html" data-colors="UBRG">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Rakdos Reanimator</div>
+    <div class="meta muted">Magic_Dads71522 · 5 - 0 · Legacy League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/legacy/u-7943303.html" data-colors="U">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">U</div>
+    <div class="meta muted">masakitaro · 5 - 0 · Legacy League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/legacy/painter-7943573.html" data-colors="R">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Painter</div>
+    <div class="meta muted">Snoff · 5 - 0 · Legacy League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/legacy/doomsday-7943461.html" data-colors="UBG">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Doomsday</div>
+    <div class="meta muted">thescuba96 · 5 - 0 · Legacy League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/legacy/dimir-tempo-7943571.html" data-colors="UBG">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Tempo</div>
+    <div class="meta muted">triplesleeved · 5 - 0 · Legacy League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/legacy/sultai-aluren-7943581.html" data-colors="WUBG">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Sultai Aluren</div>
+    <div class="meta muted">vinilopes · 5 - 0 · Legacy League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/vintage/dimir-lurrus-control-7943570.html" data-colors="WUB">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Lurrus Control</div>
+    <div class="meta muted">toughluck · 5 - 0 · Vintage League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/pauper/mono-red-madness-7943463.html" data-colors="R">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono Red Madness</div>
+    <div class="meta muted">Bombvoyage02 · 5 - 0 · Pauper League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/pauper/elves-7943464.html" data-colors="G">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Elves</div>
+    <div class="meta muted">Boquinha · 5 - 0 · Pauper League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/pauper/mono-red-madness-7943476.html" data-colors="R">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono Red Madness</div>
+    <div class="meta muted">GilbertoAntunes · 5 - 0 · Pauper League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/pauper/mono-red-rally-7943315.html" data-colors="R">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono Red Rally</div>
+    <div class="meta muted">Hatsunelol · 5 - 0 · Pauper League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/pauper/mono-red-rally-7943568.html" data-colors="R">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono Red Rally</div>
+    <div class="meta muted">prKL · 5 - 0 · Pauper League 2026-09-07</div>
+  </div>
+  <div class="when">2026-09-07</div>
+</a><a class="recent-item" href="/decklists/modern/eldrazi-7942908.html" data-colors="G">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Eldrazi</div>
+    <div class="meta muted">CavalloGoloso · 9th · Modern Challenge 64</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/boros-energy-7942211.html" data-colors="WUBRG">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Boros Energy</div>
+    <div class="meta muted">Sarlanga · 9th · Legacy Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/raker-shops-7943526.html" data-colors="">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Raker Shops</div>
+    <div class="meta muted">hermanomlg · 9th · Vintage Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pauper/mono-red-madness-7943244.html" data-colors="R">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono Red Madness</div>
+    <div class="meta muted">AlessandroPiraccini · 9th · Pauper Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/modern/belcher-7943409.html" data-colors="C">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Belcher</div>
+    <div class="meta muted">PrismaticPrism · 9th · Modern Challenge 64 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pioneer/izzet-prowess-7943158.html" data-colors="UR">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Izzet Prowess</div>
+    <div class="meta muted">_ZNT_ · 9th · Pioneer RC Super Qualifier 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/boros-energy-7943349.html" data-colors="WUBRG">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Boros Energy</div>
+    <div class="meta muted">Sarlanga · 9th · Legacy Challenge 32 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/tron-7943130.html" data-colors="U">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Tron</div>
+    <div class="meta muted">kyataoka · 9th · Legacy Challenge 32 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/dimir-lurrus-control-7942393.html" data-colors="UBR">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Lurrus Control</div>
+    <div class="meta muted">etoustar · 9th · Vintage Challenge 16 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/dimir-lurrus-control-7943334.html" data-colors="UBR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Lurrus Control</div>
+    <div class="meta muted">etoustar · 9th · Vintage Challenge 16 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/modern/dimir-midrange-7942912.html" data-colors="UBR">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Midrange</div>
+    <div class="meta muted">Zoob5555 · 8th · Modern Challenge 64</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/death-and-taxes-yorion-black-white-7942220.html" data-colors="WBR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Death and Taxes (Yorion) - Black/White</div>
+    <div class="meta muted">ProggyBoog · 8th · Legacy Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/mono-white-initiative-7943536.html" data-colors="W">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono-White Initiative</div>
+    <div class="meta muted">Shaolimatadordeporco · 8th · Vintage Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pauper/grixis-control-7943217.html" data-colors="UBR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Grixis Control</div>
+    <div class="meta muted">morpheus38 · 8th · Pauper Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/modern/tron-7943398.html" data-colors="UG">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Tron</div>
+    <div class="meta muted">narca · 8th · Modern Challenge 64 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pioneer/ur-7943160.html" data-colors="UR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">UR</div>
+    <div class="meta muted">TrueHero · 8th · Pioneer RC Super Qualifier 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/death-and-taxes-yorion-black-white-7943358.html" data-colors="WBR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Death and Taxes (Yorion) - Black/White</div>
+    <div class="meta muted">ProggyBoog · 8th · Legacy Challenge 32 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/doomsday-7943126.html" data-colors="WUBRG">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Doomsday</div>
+    <div class="meta muted">Enrichetta · 8th · Legacy Challenge 32 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/dimir-lurrus-control-7942375.html" data-colors="UBR">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Lurrus Control</div>
+    <div class="meta muted">duke12 · 8th · Vintage Challenge 16 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/dimir-lurrus-control-7943316.html" data-colors="UBR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Lurrus Control</div>
+    <div class="meta muted">duke12 · 8th · Vintage Challenge 16 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/modern/mono-green-basking-broodscale-combo-7942905.html" data-colors="G">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono-Green Basking Broodscale Combo</div>
+    <div class="meta muted">RCMerriam · 7th · Modern Challenge 64</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/dimir-control-7942215.html" data-colors="WUB">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Control</div>
+    <div class="meta muted">ecobaronen · 7th · Legacy Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/dimir-lurrus-control-7943506.html" data-colors="WUB">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Lurrus Control</div>
+    <div class="meta muted">duke12 · 7th · Vintage Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pauper/jund-wildfire-7943238.html" data-colors="BRG">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Jund Wildfire</div>
+    <div class="meta muted">Yugi_Muto · 7th · Pauper Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/modern/mono-green-eldrazi-7943382.html" data-colors="G">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono-Green Eldrazi</div>
+    <div class="meta muted">TheAdonis · 7th · Modern Challenge 64 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pioneer/dimir-self-bounce-7943148.html" data-colors="UB">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Self-Bounce</div>
+    <div class="meta muted">Willthepill · 7th · Pioneer RC Super Qualifier 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/dimir-control-7943353.html" data-colors="WUB">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Control</div>
+    <div class="meta muted">ecobaronen · 7th · Legacy Challenge 32 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/lands-7943134.html" data-colors="G">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Lands</div>
+    <div class="meta muted">DandyAndy360 · 7th · Legacy Challenge 32 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/dimir-lurrus-control-7942376.html" data-colors="WUB">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Lurrus Control</div>
+    <div class="meta muted">Dreddybajs · 7th · Vintage Challenge 16 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/dimir-lurrus-control-7943317.html" data-colors="WUB">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Lurrus Control</div>
+    <div class="meta muted">Dreddybajs · 7th · Vintage Challenge 16 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/modern/dimir-midrange-7942922.html" data-colors="WUB">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Midrange</div>
+    <div class="meta muted">yulinl · 6th · Modern Challenge 64</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/u-7942241.html" data-colors="U">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">U</div>
+    <div class="meta muted">LuRu · 6th · Legacy Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/raker-shops-7943513.html" data-colors="">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Raker Shops</div>
+    <div class="meta muted">crK · 6th · Vintage Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pauper/gruul-ramp-7943225.html" data-colors="RG">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Gruul Ramp</div>
+    <div class="meta muted">benjamin13 · 6th · Pauper Challenge 32</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/modern/boros-ponza-7943384.html" data-colors="WR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Boros Ponza</div>
+    <div class="meta muted">ionez · 6th · Modern Challenge 64 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pioneer/abzan-greasefang-7943151.html" data-colors="WBG">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Abzan Greasefang</div>
+    <div class="meta muted">WrzoBuSeks · 6th · Pioneer RC Super Qualifier 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/u-7943379.html" data-colors="U">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">U</div>
+    <div class="meta muted">LuRu · 6th · Legacy Challenge 32 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/legacy/sewer-cam-combo-7943135.html" data-colors="UR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Sewer-Cam Combo</div>
+    <div class="meta muted">CJBS · 6th · Legacy Challenge 32 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/paradoxical-outcome-7942403.html" data-colors="U">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Paradoxical Outcome</div>
+    <div class="meta muted">choutin · 6th · Vintage Challenge 16 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/vintage/paradoxical-outcome-7943344.html" data-colors="U">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Paradoxical Outcome</div>
+    <div class="meta muted">choutin · 6th · Vintage Challenge 16 2026-09-06 (1)</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/standard/4c-control-7942001.html" data-colors="WUBR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">4c Control</div>
+    <div class="meta muted">Algol · 5 - 0 · Standard League</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/standard/dimir-midrange-7942943.html" data-colors="UB">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Dimir Midrange</div>
+    <div class="meta muted">Aster17 · 5 - 0 · Standard League</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/standard/boros-dwarves-7943256.html" data-colors="WR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Boros Dwarves</div>
+    <div class="meta muted">Fizzical · 5 - 0 · Standard League</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/standard/jeskai-control-7942854.html" data-colors="WUR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Jeskai Control</div>
+    <div class="meta muted">fullerluke30 · 5 - 0 · Standard League</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/standard/mono-green-landfall-7942000.html" data-colors="G">
+  <img class="recent-leader" src="/img/art/art-goblin-scout.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Mono-Green Landfall</div>
+    <div class="meta muted">ice100 · 5 - 0 · Standard League</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/standard/jeskai-artifacts-7941914.html" data-colors="WUR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Jeskai Artifacts</div>
+    <div class="meta muted">mommydom_manifesto · 5 - 0 · Standard League</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/standard/izzet-spellementals-7942505.html" data-colors="UR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Izzet Spellementals</div>
+    <div class="meta muted">RiuuK1 · 5 - 0 · Standard League</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/standard/izzet-spellementals-7942541.html" data-colors="UR">
+  <img class="recent-leader" src="/img/art/art-crimson-bolt.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">Izzet Spellementals</div>
+    <div class="meta muted">StanUA · 5 - 0 · Standard League</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a><a class="recent-item" href="/decklists/pioneer/4c-indomitable-creativity-7942767.html" data-colors="UR">
+  <img class="recent-leader" src="/img/art/art-flashback-mage.jpg" alt="" />
+  <div class="recent-copy">
+    <div class="who">4c Indomitable Creativity</div>
+    <div class="meta muted">HEROtsukai · 5 - 0 · Pioneer League 2026-09-06</div>
+  </div>
+  <div class="when">2026-09-06</div>
+</a></div>
+      </section>
+      <p class="site-disclaimer">MTG Decklists is a fan site. Card names and tournament results are reported for commentary and news reporting. Original illustrations on this site are not official Magic: The Gathering card art. Not affiliated with Wizards of the Coast LLC.</p>
+      <p class="amazon-disclosure-line">As an Amazon Associate I earn from qualifying purchases. TCGplayer links are affiliate links.</p>
+    </main>
+    <footer>
+      © <span id="year">2026</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
+      Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
+      <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> · <a href="/#recent">Recent lists</a> ·
+      <a href="/format.html">Rules</a> · <a href="/search.html">Search</a> · <a href="/shop/">Shop</a> ·
+      <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
+    </footer>
+  </div>
+  <script src="/js/site.js?v=mtg-1"></script>
+  <script src="/js/tcgplayer.js?v=mtg-1"></script>
+</body>
+</html>
