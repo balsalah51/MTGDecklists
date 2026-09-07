@@ -5,8 +5,10 @@ from __future__ import annotations
 import html
 import json
 import re
+import time
+import urllib.error
+import urllib.request
 from collections import Counter, defaultdict
-from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -156,6 +158,13 @@ ARTS = [
     ("/img/art/art-goblin-scout.jpg", "Original goblin scout illustration"),
     ("/img/art/art-crimson-bolt.jpg", "Original crimson bolt illustration"),
 ]
+BASICS = {
+    "plains", "island", "swamp", "mountain", "forest", "wastes",
+    "snow-covered plains", "snow-covered island", "snow-covered swamp",
+    "snow-covered mountain", "snow-covered forest", "snow-covered wastes",
+}
+SCRYFALL_CACHE = ROOT / "data" / "scryfall_cards.json"
+SCRYFALL_UA = "MTGDecklistsBot/1.0 (+https://mtgdecklists.com)"
 
 
 def e(text) -> str:
@@ -246,7 +255,7 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>{e(title)}</title>
   <meta name="description" content="{e(desc)}" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-1" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-2" />
   <link rel="canonical" href="{e(canonical)}" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="theme-color" content="#9c1c28" />
@@ -259,11 +268,11 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <meta property="og:title" content="{e(title)}" />
   <meta property="og:description" content="{e(desc)}" />
   <meta property="og:url" content="{e(canonical)}" />
-  <meta property="og:image" content="{SITE}{image}" />
+  <meta property="og:image" content="{e(abs_url(image))}" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{e(title)}" />
   <meta name="twitter:description" content="{e(desc)}" />
-  <meta name="twitter:image" content="{SITE}{image}" />
+  <meta name="twitter:image" content="{e(abs_url(image))}" />
   {extra}
 </head>
 """
@@ -327,7 +336,160 @@ def amazon_line() -> str:
     return '<p class="amazon-disclosure-line">As an Amazon Associate I earn from qualifying purchases. TCGplayer links are affiliate links.</p>'
 
 
-def art_for(deck) -> tuple[str, str]:
+def abs_url(path: str) -> str:
+    if str(path).startswith(("http://", "https://")):
+        return path
+    return SITE + path
+
+
+def is_skip_land_name(name: str) -> bool:
+    n = unescape(name).lower().strip()
+    if n in BASICS or n in LAND_PIPS:
+        return True
+    return bool(re.match(r"^(snow-covered )?(plains|island|swamp|mountain|forest|wastes)$", n))
+
+
+def face_candidates(deck: dict) -> list[str]:
+    arche = unescape(deck.get("archetype") or "").lower()
+    parts = [p.strip() for p in re.split(r"\s*/\s*", arche) if p.strip()]
+    scored = []
+    for row in deck.get("main") or []:
+        name = unescape(row.get("name") or "").strip()
+        qty = int(row.get("qty") or 0)
+        if not name or is_skip_land_name(name):
+            continue
+        ln = name.lower()
+        score = qty
+        if qty >= 4:
+            score += 100
+        elif qty == 3:
+            score += 30
+        elif qty == 2:
+            score += 8
+        if ln == arche or (arche and (ln in arche or arche in ln)):
+            score += 90
+        for part in parts:
+            if part and (part == ln or part in ln or ln in part):
+                score += 80
+                break
+        scored.append((score, qty, name))
+    scored.sort(key=lambda x: (-x[0], -x[1], x[2]))
+    seen, out = set(), []
+    for _, _, name in scored:
+        if name in seen:
+            continue
+        seen.add(name)
+        out.append(name)
+        if len(out) >= 8:
+            break
+    return out
+
+
+def _scryfall_images(card: dict) -> dict:
+    uris = card.get("image_uris") or {}
+    if not uris:
+        faces = card.get("card_faces") or []
+        if faces:
+            uris = faces[0].get("image_uris") or {}
+    type_line = card.get("type_line") or ""
+    if not type_line and card.get("card_faces"):
+        type_line = card["card_faces"][0].get("type_line") or ""
+    is_land = "Land" in type_line and "Creature" not in type_line
+    return {
+        "name": card.get("name") or "",
+        "type_line": type_line,
+        "land": is_land,
+        "small": uris.get("small") or "",
+        "normal": uris.get("normal") or "",
+        "art_crop": uris.get("art_crop") or "",
+    }
+
+
+def load_scryfall(names: set[str]) -> dict:
+    cache = {}
+    if SCRYFALL_CACHE.exists():
+        try:
+            cache = json.loads(SCRYFALL_CACHE.read_text())
+        except json.JSONDecodeError:
+            cache = {}
+    missing = [n for n in sorted(names) if n and n not in cache]
+    if missing:
+        print(f"scryfall: lookup {len(missing)} cards", flush=True)
+        for i in range(0, len(missing), 75):
+            chunk = missing[i:i + 75]
+            body = json.dumps({"identifiers": [{"name": n} for n in chunk]}).encode()
+            req = urllib.request.Request(
+                "https://api.scryfall.com/cards/collection",
+                data=body,
+                headers={
+                    "User-Agent": SCRYFALL_UA,
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                },
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=40) as r:
+                    payload = json.loads(r.read().decode("utf-8", "replace"))
+            except Exception as err:
+                print("scryfall fail", err, flush=True)
+                time.sleep(0.4)
+                continue
+            cards = payload.get("data") or []
+            for card in cards:
+                info = _scryfall_images(card)
+                keys = {card.get("name") or "", info.get("name") or ""}
+                for face in card.get("card_faces") or []:
+                    keys.add(face.get("name") or "")
+                for key in keys:
+                    if key:
+                        cache[key] = info
+            for ident in payload.get("not_found") or []:
+                nm = ident.get("name") or ""
+                if nm:
+                    cache[nm] = {"name": nm, "land": True, "small": "", "normal": ""}
+            by_lower = {k.lower(): v for k, v in cache.items() if k}
+            for n in chunk:
+                if n in cache:
+                    continue
+                hit = by_lower.get(n.lower())
+                if not hit:
+                    for key, info in cache.items():
+                        if key and (n.lower() in key.lower() or key.lower().startswith(n.lower())):
+                            hit = info
+                            break
+                cache[n] = hit or {"name": n, "land": False, "small": "", "normal": ""}
+            time.sleep(0.12)
+        SCRYFALL_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        SCRYFALL_CACHE.write_text(json.dumps(cache, indent=2, sort_keys=True))
+    return cache
+
+
+def assign_faces(decks: list[dict]) -> None:
+    names = {n for d in decks for n in face_candidates(d)}
+    catalog = load_scryfall(names)
+    by_lower = {k.lower(): v for k, v in catalog.items() if k}
+    for deck in decks:
+        face = None
+        for name in face_candidates(deck):
+            info = catalog.get(name) or by_lower.get(name.lower())
+            if not info or info.get("land") or not (info.get("small") or info.get("normal")):
+                continue
+            face = info
+            break
+        deck["face"] = face or {}
+    print("  faces", sum(1 for d in decks if (d.get("face") or {}).get("small")), "of", len(decks), flush=True)
+
+
+def art_for(deck, size: str = "small") -> tuple[str, str]:
+    face = deck.get("face") or {}
+    src = ""
+    if size == "large":
+        src = face.get("normal") or face.get("small") or face.get("art_crop") or ""
+    else:
+        src = face.get("small") or face.get("normal") or face.get("art_crop") or ""
+    if src:
+        return src, face.get("name") or "Card"
     key = str(deck.get("id") or "")
     try:
         n = int(key)
@@ -337,10 +499,11 @@ def art_for(deck) -> tuple[str, str]:
 
 
 def recent_item(deck: dict) -> str:
-    art = art_for(deck)
+    art = art_for(deck, "small")
     colors = deck.get("colors") or ""
+    alt = art[1] if not art[0].startswith("/img/art/") else ""
     return f"""<a class="recent-item" href="{deck_url(deck)}" data-colors="{e(colors)}">
-  <img class="recent-leader" src="{art[0]}" alt="" />
+  <img class="recent-leader" src="{e(art[0])}" alt="{e(alt)}" width="46" height="64" loading="lazy" decoding="async" />
   <div class="recent-copy">
     <div class="who">{e(unescape(deck['archetype']))}</div>
     <div class="meta muted">{e(deck.get('player') or 'Unknown')} · {e(deck.get('place') or '')} · {e(deck['event'])}</div>
@@ -624,7 +787,8 @@ def card_lines(cards, heading) -> str:
 
 
 def page_deck(deck: dict) -> str:
-    art = art_for(deck)
+    art = art_for(deck, "large")
+    card_class = "inline-art card-face" if not art[0].startswith("/img/art/") else "inline-art"
     all_cards = (deck.get("main") or []) + (deck.get("side") or [])
     buy = partner_mass(all_cards)
     fmt = FMT_BY[deck["format"]]
@@ -637,7 +801,7 @@ def page_deck(deck: dict) -> str:
     <main class="single" role="main">
       {crumb(("/formats/", "Formats"), (f"/formats/{deck['format']}.html", fmt["name"]), ("", deck["archetype"]))}
       <article class="card">
-        <img class="inline-art" src="{art[0]}" alt="{e(art[1])}" />
+        <img class="{card_class}" src="{e(art[0])}" alt="{e(art[1])}" />
         <h2>{e(deck['archetype'])}</h2>
         <p class="muted">{e(fmt['name'])} · {e(deck['event'])} · {e(deck['place'] or '')} · {e(deck['date'])}</p>
         <p><strong>{e(deck['player'] or 'Unknown pilot')}</strong> · {pip_html(deck.get('colors') or '')} {e(deck.get('combo') or '')}</p>
@@ -653,7 +817,7 @@ def page_deck(deck: dict) -> str:
             {card_lines(deck.get('side'), "Sideboard")}
           </div>
         </div>
-        <p class="site-disclaimer">Public tournament table transcribed for news and commentary. Not affiliated with Wizards of the Coast. Original site art is not official card art.</p>
+        <p class="site-disclaimer">Public tournament table transcribed for news and commentary. Card images identify the list and come from Scryfall. Not affiliated with Wizards of the Coast. Banner art on this site is original, not official card art.</p>
       </article>
     </main>
 """ + footer()
@@ -886,7 +1050,7 @@ def page_privacy() -> str:
         </section>
         <section>
           <h3>Fair use and trademarks</h3>
-          <p>MTG Decklists reports publicly posted tournament decklists and official event schedules for news, commentary, and education. Card names, format names, and event names are used to identify Magic: The Gathering products and organized play. Original illustrations on this site are newly created and are not official Magic card art. They are inspired by iconic card <em>ideas</em> (a flashback mage, a goblin mountain scout, a red lightning spell) without copying Wizards' artwork or the official mana pentagon.</p>
+          <p>MTG Decklists reports publicly posted tournament decklists and official event schedules for news, commentary, and education. Card names, format names, and event names are used to identify Magic: The Gathering products and organized play. List and deck-page thumbnails use publicly available card images (via Scryfall) to identify those lists. Banner and format illustrations on this site are newly created and are not official Magic card art. They are inspired by iconic card <em>ideas</em> (a flashback mage, a goblin mountain scout, a red lightning spell) without copying Wizards' artwork or the official mana pentagon.</p>
           <p>Magic: The Gathering, Magic, and associated logos and mana symbols are trademarks of Wizards of the Coast LLC, a subsidiary of Hasbro, Inc. This site is not affiliated with, endorsed by, or sponsored by Wizards of the Coast, Hasbro, or any official organized-play partner.</p>
         </section>
         <section>
@@ -1027,6 +1191,7 @@ def _parse(blob: str) -> list[dict]:
 def main() -> None:
     decks = cap_per_format(add_curated(load_decks()), 200)
     decks = [d for d in decks if d.get("format") in FMT_BY]
+    assign_faces(decks)
     write(ROOT / "index.html", page_index(decks))
     write(ROOT / "formats" / "index.html", page_formats_index(decks))
     for fmt in FORMATS:
