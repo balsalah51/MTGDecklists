@@ -1,4 +1,36 @@
 (function () {
+  var THEME_COOKIE = "mtg-theme";
+  var THEME_MAX_AGE = 365 * 24 * 60 * 60;
+
+  function readTheme() {
+    var match = document.cookie.match(/(?:^|; )mtg-theme=(dark|light)/);
+    if (match) return match[1];
+    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  }
+
+  function applyTheme(theme) {
+    theme = theme === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.colorScheme = theme;
+    document.cookie = THEME_COOKIE + "=" + theme + "; path=/; max-age=" + THEME_MAX_AGE + "; SameSite=Lax";
+    var btn = document.getElementById("theme-toggle");
+    if (btn) {
+      var dark = theme === "dark";
+      btn.setAttribute("aria-pressed", dark ? "true" : "false");
+      btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    }
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", theme === "dark" ? "#161213" : "#9c1c28");
+  }
+
+  applyTheme(readTheme());
+  var toggle = document.getElementById("theme-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      applyTheme(readTheme() === "dark" ? "light" : "dark");
+    });
+  }
+
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 

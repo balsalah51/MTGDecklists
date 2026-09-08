@@ -253,9 +253,19 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script>
+    (function(){{
+      try {{
+        var m = document.cookie.match(/(?:^|; )mtg-theme=(dark|light)/);
+        var t = m ? m[1] : "light";
+        document.documentElement.setAttribute("data-theme", t);
+        document.documentElement.style.colorScheme = t;
+      }} catch (err) {{}}
+    }})();
+  </script>
   <title>{e(title)}</title>
   <meta name="description" content="{e(desc)}" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-2" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-3" />
   <link rel="canonical" href="{e(canonical)}" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="theme-color" content="#9c1c28" />
@@ -292,6 +302,10 @@ def header(current="") -> str:
           <div class="subtitle">Commander · Standard · Modern</div>
         </div>
       </a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
+        <span data-theme-when="light">Dark mode</span>
+        <span data-theme-when="dark">Light mode</span>
+      </button>
       <nav aria-label="Primary">
         {nav("/tier-list.html", "Tier List", "tier")}
         {nav("/formats/", "Formats", "formats")}
@@ -315,7 +329,7 @@ def footer() -> str:
       <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-1"></script>
+  <script src="/js/site.js?v=mtg-2"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>
@@ -1024,7 +1038,8 @@ def page_privacy() -> str:
         </section>
         <section>
           <h3>Cookies</h3>
-          <p>We use cookies and similar tracking technologies to understand how visitors use the site, remember basic preferences, and support advertising if ads are enabled. You can disable cookies through your browser settings.</p>
+          <p>We use a first-party cookie named <code>mtg-theme</code> to remember whether you chose light mode or dark mode on this site. It stores only the values <code>light</code> or <code>dark</code>, lasts up to one year, and is not used for advertising or tracking. You can delete it in your browser settings; the site will then default to light mode.</p>
+          <p>We may also use cookies and similar tracking technologies to understand how visitors use the site and to support advertising if ads are enabled. You can disable cookies through your browser settings.</p>
         </section>
         <section>
           <h3>Advertising</h3>

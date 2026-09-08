@@ -1,21 +1,48 @@
 :root{
   --bg:#f6f3ef;
   --surface:#ffffff;
+  --panel:#ffffff;
   --text:#222222;
   --muted:#6b6f73;
   --accent:#9c1c28;
   --accent-bleed: rgba(156,28,40,0.08);
+  --border: rgba(0,0,0,0.08);
+  --input-bg:#ffffff;
   --radius:12px;
   --maxw:980px;
   --shadow:0 6px 20px rgba(16,22,26,0.08);
   --leader: var(--accent);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color-scheme: light;
+}
+html[data-theme="dark"]{
+  --bg:#161213;
+  --surface:#221c1e;
+  --panel:#2a2325;
+  --text:#f4ece8;
+  --muted:#b8ada8;
+  --accent:#e45b64;
+  --accent-bleed: rgba(228,91,100,0.16);
+  --border: rgba(255,255,255,0.12);
+  --input-bg:#2a2325;
+  --shadow:0 8px 24px rgba(0,0,0,0.45);
+  color-scheme: dark;
 }
 html{box-sizing:border-box}
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 .wrap{max-width:var(--maxw);width:100%;margin:36px auto;padding:28px;min-width:0}
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 18px}
+.theme-toggle{
+  margin-left:auto;padding:8px 12px;border-radius:999px;
+  border:1px solid var(--border);background:var(--panel);color:var(--text);
+  font:inherit;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap
+}
+.theme-toggle [data-theme-when="dark"]{display:none}
+html[data-theme="dark"] .theme-toggle [data-theme-when="light"]{display:none}
+html[data-theme="dark"] .theme-toggle [data-theme-when="dark"]{display:inline}
+.theme-toggle:hover{border-color:var(--accent)}
+.theme-toggle[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
 header > nav[aria-label="Primary"]{
   flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:2px
 }
@@ -636,3 +663,53 @@ a.format-tile .meta{font-size:13px;color:var(--muted)}
 @media (max-width:420px){
   .format-grid{grid-template-columns:1fr}
 }
+html[data-theme="dark"] .home-ghost,
+html[data-theme="dark"] .home-jump-recent,
+html[data-theme="dark"] .home-big-recent,
+html[data-theme="dark"] .home-big-shop,
+html[data-theme="dark"] .home-big-discord,
+html[data-theme="dark"] .recent-item,
+html[data-theme="dark"] .leader-card-link,
+html[data-theme="dark"] .leader-tile,
+html[data-theme="dark"] .card-entry,
+html[data-theme="dark"] .copy-sim,
+html[data-theme="dark"] .deck-stats,
+html[data-theme="dark"] .list-filters input,
+html[data-theme="dark"] .list-filters select,
+html[data-theme="dark"] .meta-strip,
+html[data-theme="dark"] .meta-blurbs li,
+html[data-theme="dark"] .shop-card,
+html[data-theme="dark"] .faq details,
+html[data-theme="dark"] .mana-chip,
+html[data-theme="dark"] a.mana-chip,
+html[data-theme="dark"] a.combo-card,
+html[data-theme="dark"] a.format-tile,
+html[data-theme="dark"] .filter-bar button,
+html[data-theme="dark"] .discord-placeholder,
+html[data-theme="dark"] .site-search input,
+html[data-theme="dark"] .text-line .card-pop{
+  background:var(--panel);
+  color:inherit;
+  border-color:var(--border)
+}
+html[data-theme="dark"] .home-big-shop{color:#e8c56a;border-color:rgba(201,162,39,.42)}
+html[data-theme="dark"] .discord-placeholder{color:#c4c0f0;border-color:rgba(180,176,232,.4);background:#1e1c2a}
+html[data-theme="dark"] .filter-bar button.is-on,
+html[data-theme="dark"] .theme-toggle[aria-pressed="true"]{
+  background:var(--accent);color:#fff;border-color:var(--accent)
+}
+html[data-theme="dark"] .shop-photo{background:#1b1516}
+html[data-theme="dark"] .card-entry .text{color:var(--text)}
+html[data-theme="dark"] .item{border-color:var(--border);background:transparent}
+html[data-theme="dark"] .text-line,
+html[data-theme="dark"] .text-leader-list li,
+html[data-theme="dark"] .picture-summary,
+html[data-theme="dark"] .tier-table th,
+html[data-theme="dark"] .tier-table td{
+  border-bottom-color:var(--border)
+}
+html[data-theme="dark"] .copy-sim{color:var(--accent)}
+html[data-theme="dark"] .site-search button{background:var(--accent);color:#fff}
+html[data-theme="dark"] footer{color:var(--muted)}
+html[data-theme="dark"] .home-big-tier{color:#f5d76e}
+html[data-theme="dark"] .qty{color:#fff}
