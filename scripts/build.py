@@ -267,6 +267,8 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <meta name="description" content="{e(desc)}" />
   <link rel="stylesheet" href="/css/site.css?v=mtg-3" />
   <link rel="canonical" href="{e(canonical)}" />
+  <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="theme-color" content="#9c1c28" />
   <link rel="icon" href="/img/mtg-logo-192.png" type="image/png" sizes="192x192" />
@@ -1043,7 +1045,7 @@ def page_privacy() -> str:
         </section>
         <section>
           <h3>Advertising</h3>
-          <p>This site may display advertisements served by third-party providers, including Google AdSense. Google and its partners may use cookies to serve ads based on your prior visits. You can opt out of personalized advertising in Google's Ads Settings.</p>
+          <p>This site displays advertisements served by Google AdSense (publisher <code>ca-pub-1074015774205047</code>). Google and its partners may use cookies to serve ads based on your prior visits. You can opt out of personalized advertising in Google's Ads Settings.</p>
         </section>
         <section>
           <h3>Affiliate partnerships</h3>
@@ -1279,6 +1281,7 @@ def main() -> None:
     sitemap.append("</urlset>")
     write(ROOT / "sitemap.xml", "\n".join(sitemap))
     write(ROOT / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://mtgdecklists.com/sitemap.xml\n")
+    write(ROOT / "ads.txt", "google.com, pub-1074015774205047, DIRECT, f08c47fec0942fa0\n")
     write(ROOT / "site.webmanifest", json.dumps({
         "name": "MTG Decklists",
         "short_name": "MTG Lists",
