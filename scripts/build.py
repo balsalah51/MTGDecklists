@@ -13,15 +13,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://mtgdecklists.com"
-TODAY = "2026-09-07"
+TODAY = "2026-09-10"
 YEAR = "2026"
+TARGET_PER_FORMAT = 400
+LISTS_WINDOW = "August–September 2026"
 
 FORMATS = [
     {
         "slug": "standard",
         "name": "Standard",
         "short": "Rotating 60-card constructed",
-        "blurb": "Current Standard uses Wilds of Eldraine forward. There is no fall 2026 rotation; the next rotation is with Nauctis: The Sunken Realm in early 2027. Store RCQs through November 29 are Standard constructed.",
+        "blurb": "Current Standard uses Wilds of Eldraine forward. There is no fall 2026 rotation; the next rotation is with Nauctis: The Sunken Realm in early 2027. Store RCQs through November 29 are Standard constructed. This hub indexes 400 recent Standard tournament lists from August and September 2026.",
         "official": "https://magic.wizards.com/en/formats/standard",
         "popular": True,
     },
@@ -29,7 +31,7 @@ FORMATS = [
         "slug": "modern",
         "name": "Modern",
         "short": "Non-rotating from Eighth Edition on",
-        "blurb": "Modern is the constructed format for the September–October 2026 Regional Championships that feed the first Pro Tour of 2027. Spotlight: The Hobbit in Dallas (Sept 4–6) was Modern.",
+        "blurb": "Modern is the constructed format for the September–October 2026 Regional Championships that feed the first Pro Tour of 2027. Spotlight: The Hobbit in Dallas (Sept 4–6) was Modern. This hub indexes 400 recent Modern tournament lists from August and September 2026.",
         "official": "https://magic.wizards.com/en/formats/modern",
         "popular": True,
     },
@@ -37,7 +39,7 @@ FORMATS = [
         "slug": "pioneer",
         "name": "Pioneer",
         "short": "Return to Ravnica forward",
-        "blurb": "Pioneer sits between Standard and Modern. After the Cori-Steel Cutter ban, Izzet spells shells and green Badgermole Cub piles split the winner's metagame in August 2026.",
+        "blurb": "Pioneer sits between Standard and Modern. After the Cori-Steel Cutter ban, Izzet spells shells and green Badgermole Cub piles split the winner's metagame in August 2026. This hub indexes 400 recent Pioneer tournament lists from August and September 2026.",
         "official": "https://magic.wizards.com/en/formats/pioneer",
         "popular": False,
     },
@@ -45,7 +47,7 @@ FORMATS = [
         "slug": "commander",
         "name": "Commander",
         "short": "100-card singleton, most-played format",
-        "blurb": "Commander (EDH) is the most popular way to play Magic. Lists here are recent Duel Commander league tables from August–September 2026, plus the same 100-card singleton rules used at Commander night.",
+        "blurb": "Commander (EDH) is the most popular way to play Magic. Lists here are recent Duel Commander league tables from August–September 2026, plus the same 100-card singleton rules used at Commander night. This hub targets 400 public Commander lists in that window.",
         "official": "https://magic.wizards.com/en/formats/commander",
         "popular": True,
     },
@@ -53,7 +55,7 @@ FORMATS = [
         "slug": "legacy",
         "name": "Legacy",
         "short": "Vintage-adjacent, banned list not restricted list",
-        "blurb": "Legacy is eternal constructed with a banned list. The Fantasticar was banned in Legacy on August 10, 2026.",
+        "blurb": "Legacy is eternal constructed with a banned list. The Fantasticar was banned in Legacy on August 10, 2026. This hub indexes 400 recent Legacy tournament lists from August and September 2026.",
         "official": "https://magic.wizards.com/en/formats/legacy",
         "popular": False,
     },
@@ -61,7 +63,7 @@ FORMATS = [
         "slug": "vintage",
         "name": "Vintage",
         "short": "The original constructed format",
-        "blurb": "Vintage uses a restricted list instead of a wide ban list. The Fantasticar was restricted in Vintage on August 10, 2026.",
+        "blurb": "Vintage uses a restricted list instead of a wide ban list. The Fantasticar was restricted in Vintage on August 10, 2026. This hub indexes 400 recent Vintage tournament lists from August and September 2026.",
         "official": "https://magic.wizards.com/en/formats/vintage",
         "popular": False,
     },
@@ -69,7 +71,7 @@ FORMATS = [
         "slug": "pauper",
         "name": "Pauper",
         "short": "Commons only",
-        "blurb": "Pauper is constructed using only cards printed at common. Wizards also clarified Secret Lair Zeta commons legality in September 2026.",
+        "blurb": "Pauper is constructed using only cards printed at common. Wizards also clarified Secret Lair Zeta commons legality in September 2026. This hub indexes 400 recent Pauper tournament lists from August and September 2026.",
         "official": "https://magic.wizards.com/en/formats/pauper",
         "popular": False,
     },
@@ -247,7 +249,151 @@ def partner_mass(cards) -> str:
     return "https://partner.tcgplayer.com/c/7670706/1780961/21018?u=" + quote(dest, safe="")
 
 
-def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg", extra="") -> str:
+def json_ld(data) -> str:
+    return '<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "</script>"
+
+
+def org_entity() -> dict:
+    return {
+        "@type": "Organization",
+        "@id": SITE + "/#org",
+        "name": "MTG Decklists",
+        "url": SITE + "/",
+        "logo": {
+            "@type": "ImageObject",
+            "url": SITE + "/img/mtg-logo-192.png",
+            "width": 192,
+            "height": 192,
+        },
+    }
+
+
+def website_entity() -> dict:
+    return {
+        "@type": "WebSite",
+        "@id": SITE + "/#website",
+        "name": "MTG Decklists",
+        "url": SITE + "/",
+        "inLanguage": "en-US",
+        "publisher": {"@id": SITE + "/#org"},
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": SITE + "/search.html?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+        },
+    }
+
+
+def breadcrumb_ld(parts: list[tuple[str, str]]) -> dict:
+    elements = []
+    for i, (url, name) in enumerate(parts, 1):
+        item = {"@type": "ListItem", "position": i, "name": name}
+        if url:
+            item["item"] = url if str(url).startswith("http") else SITE + url
+        elements.append(item)
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": elements}
+
+
+def item_list_ld(name: str, url: str, entries: list[tuple[str, str]], list_type="ItemList") -> dict:
+    elements = []
+    for i, (href, label) in enumerate(entries[:80], 1):
+        loc = href if str(href).startswith("http") else SITE + href
+        elements.append({
+            "@type": "ListItem",
+            "position": i,
+            "url": loc,
+            "name": label,
+        })
+    return {
+        "@context": "https://schema.org",
+        "@type": list_type,
+        "name": name,
+        "url": url if url.startswith("http") else SITE + url,
+        "numberOfItems": len(entries),
+        "itemListElement": elements,
+    }
+
+
+def top_cards(deck: dict, n: int = 6) -> list[str]:
+    scored = []
+    for row in deck.get("main") or []:
+        name = unescape(row.get("name") or "").strip()
+        qty = int(row.get("qty") or 0)
+        if not name or is_skip_land_name(name):
+            continue
+        scored.append((qty, name))
+    scored.sort(key=lambda x: (-x[0], x[1]))
+    seen, out = set(), []
+    for _, name in scored:
+        if name in seen:
+            continue
+        seen.add(name)
+        out.append(name)
+        if len(out) >= n:
+            break
+    return out
+
+
+def event_key(deck: dict) -> str:
+    src = deck.get("source") or ""
+    m = re.search(r"/tournament/(\d+)", src)
+    if m:
+        return f"{deck['format']}-{m.group(1)}"
+    return f"{deck['format']}-{slugify(deck.get('event') or 'event')}-{slugify(deck.get('date') or '')}"
+
+
+def event_url(deck: dict) -> str:
+    return f"/tournaments/{event_key(deck)}.html"
+
+
+def archetype_slug(deck: dict) -> str:
+    return slugify(deck.get("archetype") or "unknown")
+
+
+def archetype_url(deck: dict) -> str:
+    return f"/archetypes/{deck['format']}/{archetype_slug(deck)}.html"
+
+
+def related_decks(deck: dict, decks: list[dict], n: int = 6) -> list[dict]:
+    same_arch, same_event, same_fmt = [], [], []
+    for d in decks:
+        if d.get("id") == deck.get("id"):
+            continue
+        if d["format"] == deck["format"] and d.get("archetype") == deck.get("archetype"):
+            same_arch.append(d)
+        elif d["format"] == deck["format"] and d.get("event") == deck.get("event"):
+            same_event.append(d)
+        elif d["format"] == deck["format"]:
+            same_fmt.append(d)
+    out, seen = [], set()
+    for group in (same_arch, same_event, same_fmt):
+        for d in group:
+            if d["id"] in seen:
+                continue
+            seen.add(d["id"])
+            out.append(d)
+            if len(out) >= n:
+                return out
+    return out
+
+
+def head(
+    title: str,
+    desc: str,
+    canonical: str,
+    image="/img/mtg-banner-hero.jpg",
+    extra="",
+    og_type="website",
+    published="",
+    image_alt="Original MTG Decklists banner art",
+    keywords="",
+) -> str:
+    img = abs_url(image)
+    article = ""
+    if published:
+        article = f'\n  <meta property="article:published_time" content="{e(published)}" />'
+        article += '\n  <meta property="article:section" content="Magic: The Gathering" />'
+    kw = f'\n  <meta name="keywords" content="{e(keywords)}" />' if keywords else ""
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -264,25 +410,31 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
     }})();
   </script>
   <title>{e(title)}</title>
-  <meta name="description" content="{e(desc)}" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-3" />
+  <meta name="description" content="{e(desc)}" />{kw}
+  <link rel="stylesheet" href="/css/site.css?v=mtg-4" />
   <link rel="canonical" href="{e(canonical)}" />
+  <link rel="preconnect" href="https://cards.scryfall.io" crossorigin />
+  <link rel="dns-prefetch" href="https://cards.scryfall.io" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="author" content="MTG Decklists" />
   <meta name="theme-color" content="#9c1c28" />
   <link rel="icon" href="/img/mtg-logo-192.png" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/img/mtg-logo-192.png" sizes="192x192" />
   <link rel="manifest" href="/site.webmanifest" />
   <meta property="og:site_name" content="MTG Decklists" />
   <meta property="og:locale" content="en_US" />
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="{e(og_type)}" />
   <meta property="og:title" content="{e(title)}" />
   <meta property="og:description" content="{e(desc)}" />
   <meta property="og:url" content="{e(canonical)}" />
-  <meta property="og:image" content="{e(abs_url(image))}" />
+  <meta property="og:image" content="{e(img)}" />
+  <meta property="og:image:alt" content="{e(image_alt)}" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{e(title)}" />
   <meta name="twitter:description" content="{e(desc)}" />
-  <meta name="twitter:image" content="{e(abs_url(image))}" />
+  <meta name="twitter:image" content="{e(img)}" />
+  <meta name="twitter:image:alt" content="{e(image_alt)}" />{article}
   {extra}
 </head>
 """
@@ -293,12 +445,13 @@ def header(current="") -> str:
         cur = ' aria-current="page"' if current == key else ""
         return f'<a href="{href}"{cur}>{label}</a>'
     return f"""<body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <div class="wrap">
     <header>
       <a class="brand" href="/">
         <img class="logo" src="/img/mtg-logo-192.png" width="56" height="56" alt="MTG Decklists" />
         <div>
-          <h1>MTG Decklists</h1>
+          <span class="brand-name">MTG Decklists</span>
           <div class="subtitle">Commander · Standard · Modern</div>
         </div>
       </a>
@@ -309,6 +462,7 @@ def header(current="") -> str:
       <nav aria-label="Primary">
         {nav("/tier-list.html", "Tier List", "tier")}
         {nav("/formats/", "Formats", "formats")}
+        {nav("/archetypes/", "Archetypes", "archetypes")}
         {nav("/format.html", "Rules", "rules")}
         {nav("/events.html", "Events", "events")}
         {nav("/guides/", "Guides", "guides")}
@@ -321,15 +475,20 @@ def header(current="") -> str:
 
 
 def footer() -> str:
+    fmt_links = " · ".join(
+        f'<a href="/formats/{fmt["slug"]}.html">{e(fmt["name"])}</a>' for fmt in FORMATS
+    )
     return f"""    <footer>
       © <span id="year">{YEAR}</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
+      <nav class="footer-formats" aria-label="Formats">{fmt_links}</nav>
       <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
+      <a href="/archetypes/">Archetypes</a> · <a href="/tournaments/">Tournaments</a> ·
       <a href="/format.html">Rules</a> · <a href="/search.html">Search</a> · <a href="/shop/">Shop</a> ·
       <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-2"></script>
+  <script src="/js/site.js?v=mtg-3"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>
@@ -342,8 +501,15 @@ def crumb(*parts) -> str:
         if href:
             bits.append(f'<a href="{href}">{e(label)}</a>')
         else:
-            bits.append(e(label))
-    return '<div class="crumb">' + " / ".join(bits) + "</div>"
+            bits.append(f'<span aria-current="page">{e(label)}</span>')
+    return '<nav class="crumb" aria-label="Breadcrumb">' + " / ".join(bits) + "</nav>"
+
+
+def crumb_parts(*parts) -> list[tuple[str, str]]:
+    out = [("/", "Home")]
+    for href, label in parts:
+        out.append((href or "", label))
+    return out
 
 
 def amazon_line() -> str:
@@ -522,7 +688,7 @@ def recent_item(deck: dict) -> str:
     <div class="who">{e(unescape(deck['archetype']))}</div>
     <div class="meta muted">{e(deck.get('player') or 'Unknown')} · {e(deck.get('place') or '')} · {e(deck['event'])}</div>
   </div>
-  <div class="when">{e(deck['date'])}</div>
+  <time class="when" datetime="{e(deck['date'])}">{e(deck['date'])}</time>
 </a>"""
 
 
@@ -566,7 +732,7 @@ def load_decks() -> list[dict]:
     return out
 
 
-def cap_per_format(decks: list[dict], n: int = 200) -> list[dict]:
+def cap_per_format(decks: list[dict], n: int = TARGET_PER_FORMAT) -> list[dict]:
     by = defaultdict(list)
     for d in decks:
         by[d["format"]].append(d)
@@ -604,14 +770,37 @@ def page_index(decks: list[dict]) -> str:
           <div class="meta">{e(fmt['short'])}</div>
           <div class="meta">{n} recent lists</div>
         </a>"""
-    extra = """<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MTG Decklists","url":"https://mtgdecklists.com/","potentialAction":{"@type":"SearchAction","target":"https://mtgdecklists.com/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>"""
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            org_entity(),
+            website_entity(),
+            {
+                "@type": "CollectionPage",
+                "@id": SITE + "/#home",
+                "url": SITE + "/",
+                "name": "MTG Decklists",
+                "description": "Magic: The Gathering tournament decklists by format, archetype, and event.",
+                "isPartOf": {"@id": SITE + "/#website"},
+                "about": {"@type": "Thing", "name": "Magic: The Gathering"},
+                "mainEntity": item_list_ld(
+                    "Magic: The Gathering formats",
+                    SITE + "/",
+                    [(f"/formats/{fmt['slug']}.html", f"{fmt['name']} decklists") for fmt in FORMATS],
+                ),
+            },
+        ],
+    })
+    total = len(decks)
     return head(
-        "MTG Decklists | Magic: The Gathering lists by format",
-        "Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page.",
+        f"MTG Decklists | {total} Magic: The Gathering lists by format",
+        f"Browse {total} Magic: The Gathering tournament decklists from {LISTS_WINDOW}. Commander, Standard, Modern, Pioneer, Legacy, Vintage, and Pauper — up to {TARGET_PER_FORMAT} lists per format with TCGPlayer buy links.",
         SITE + "/",
         extra=extra,
+        keywords="MTG decklists, Magic the Gathering decks, Standard decklists, Modern decklists, Commander decks, Pioneer, Legacy, Vintage, Pauper",
+        image_alt="Original MTG Decklists banner with a flashback mage, goblin scout, and crimson bolt",
     ) + header("home") + f"""
-    <main class="single home" role="main">
+    <main class="single home" id="main" role="main">
       <section class="home-splash" aria-label="MTG Decklists">
         <img class="home-splash-bg" src="/img/mtg-banner-hero.jpg" alt="Original MTG Decklists banner with a flashback mage, goblin scout, and crimson bolt" width="1400" height="636" fetchpriority="high" decoding="async">
         <div class="home-splash-art" aria-hidden="true">
@@ -621,10 +810,10 @@ def page_index(decks: list[dict]) -> str:
         </div>
         <div class="home-splash-bar">
           <div>
-            <h2>MTG Decklists</h2>
+            <h1>MTG Decklists</h1>
             <p class="home-splash-formats">Commander · Standard · Modern</p>
           </div>
-          <p>Pick a format first. Colors, popular color combos, and that format's August–September 2026 lists live on the format page.</p>
+          <p>{total} public tournament lists from {LISTS_WINDOW}. Pick a format first. Colors, archetypes, and that format's lists live on the format page.</p>
         </div>
       </section>
 
@@ -700,12 +889,29 @@ def page_formats_index(decks: list[dict]) -> str:
           <img src="{ARTS[hash(fmt['slug']) % 3][0]}" alt="" />
           <div><div class="name">{e(fmt['name'])}</div><div class="meta">{e(fmt['short'])} · {n} lists</div></div>
         </a>"""
-    return head("MTG formats | MTG Decklists", "Iconic Magic: The Gathering formats with recent tournament lists.", f"{SITE}/formats/") + header("formats") + f"""
-    <main class="single" role="main">
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(("/formats/", "Formats"))),
+            item_list_ld(
+                "Magic: The Gathering format decklists",
+                "/formats/",
+                [(f"/formats/{fmt['slug']}.html", f"{fmt['name']} — {counts.get(fmt['slug'], 0)} lists") for fmt in FORMATS],
+            ),
+        ],
+    })
+    return head(
+        "MTG formats | Standard, Modern, Pioneer, Commander, Legacy, Vintage, Pauper",
+        f"Magic: The Gathering format hubs with {sum(counts.values())} tournament decklists from {LISTS_WINDOW}. Open a format for colors, archetypes, and full lists.",
+        f"{SITE}/formats/",
+        extra=extra,
+        keywords="MTG formats, Standard, Modern, Pioneer, Commander, Legacy, Vintage, Pauper",
+    ) + header("formats") + f"""
+    <main class="single" id="main" role="main">
       {crumb(("/formats/", "Formats"))}
       <article class="card">
-        <h2>Formats</h2>
-        <p>Magic is organized by format. Commander, Standard, and Modern are the three most-played right now; Pioneer, Legacy, Vintage, and Pauper sit beside them. Open a format to see its lists.</p>
+        <h1>Magic: The Gathering formats</h1>
+        <p>Magic is organized by format. Commander, Standard, and Modern are the three most-played right now; Pioneer, Legacy, Vintage, and Pauper sit beside them. Each format page holds up to {TARGET_PER_FORMAT} public lists from {LISTS_WINDOW}.</p>
         <div class="leader-grid">{tiles}</div>
       </article>
     </main>
@@ -742,7 +948,7 @@ def color_section(fmt_decks: list[dict], slug: str) -> str:
         <p class="muted">Unique mana marks for White, Blue, Black, Red, and Green. Filter the lists below.</p>
         <div class="mana-row">{''.join(chips)}</div>
         <div class="section-title" style="margin-top:22px"><h3>Most popular color combos</h3></div>
-        <p class="muted">Counted from August–September 2026 lists on this page.</p>
+        <p class="muted">Counted from {LISTS_WINDOW} lists on this page.</p>
         <div class="combo-grid">{''.join(combos) or '<p class="muted">No constructed lists in this slice yet.</p>'}</div>
     """
 
@@ -751,24 +957,64 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
     fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
     art = ARTS[hash(fmt["slug"]) % 3]
     items = "".join(recent_item(d) for d in fmt_decks)
+    arche = Counter(d["archetype"] for d in fmt_decks)
+    arch_links = []
+    for name, n in arche.most_common(12):
+        slug = slugify(name)
+        arch_links.append(
+            f'<a class="combo-card" href="/archetypes/{fmt["slug"]}/{slug}.html">'
+            f'<div style="font-weight:800">{e(name)}</div>'
+            f'<div class="meta">{n} lists</div></a>'
+        )
+    path = f"/formats/{fmt['slug']}.html"
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(("/formats/", "Formats"), (path, fmt["name"]))),
+            {
+                "@type": "CollectionPage",
+                "url": SITE + path,
+                "name": f"{fmt['name']} decklists",
+                "description": fmt["blurb"],
+                "isPartOf": {"@id": SITE + "/#website"},
+                "about": {"@type": "Thing", "name": f"Magic: The Gathering {fmt['name']}"},
+            },
+            item_list_ld(
+                f"{fmt['name']} tournament decklists",
+                path,
+                [(deck_url(d), f"{d['archetype']} — {d.get('player') or 'list'}") for d in fmt_decks],
+            ),
+        ],
+    })
+    desc = (
+        f"{len(fmt_decks)} {fmt['name']} Magic: The Gathering decklists from {LISTS_WINDOW}. "
+        f"Colors, popular archetypes, and TCGPlayer buy links. {fmt['short']}."
+    )
     return head(
-        f"{fmt['name']} decklists | MTG Decklists",
-        f"{fmt['name']} Magic: The Gathering lists from August and September 2026, with colors, popular color combos, and TCGPlayer buy links.",
-        f"{SITE}/formats/{fmt['slug']}.html",
+        f"{fmt['name']} Decklists ({len(fmt_decks)}) | MTG {fmt['name']} lists {YEAR}",
+        desc,
+        SITE + path,
         image=art[0],
+        extra=extra,
+        keywords=f"{fmt['name']} decklists, MTG {fmt['name']}, {fmt['name']} metagame, Magic {fmt['name']} decks",
+        image_alt=art[1],
     ) + header("formats") + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       {crumb(("/formats/", "Formats"), ("", fmt["name"]))}
       <article class="card">
         <img class="inline-art" src="{art[0]}" alt="{e(art[1])}" />
-        <h2>{e(fmt['name'])}</h2>
+        <h1>{e(fmt['name'])} decklists</h1>
         <p>{e(fmt['blurb'])}</p>
         <p class="muted"><a href="{e(fmt['official'])}" target="_blank" rel="noopener">Official {e(fmt['name'])} page</a> ·
-        <a href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener">Aug 10, 2026 banned &amp; restricted</a></p>
+        <a href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener">Aug 10, 2026 banned &amp; restricted</a> ·
+        <a href="/archetypes/{fmt['slug']}/">All {e(fmt['name'])} archetypes</a></p>
         {color_section(fmt_decks, fmt['slug'])}
+        <div class="section-title" style="margin-top:22px"><h2>Top archetypes</h2>
+          <a href="/archetypes/{fmt['slug']}/">See all</a></div>
+        <div class="combo-grid">{''.join(arch_links) or '<p class="muted">Archetype pages appear after lists land.</p>'}</div>
         <div class="section-title" style="margin-top:28px">
-          <h3>Recent lists</h3>
-          <span class="muted">{len(fmt_decks)} from Aug–Sep 2026</span>
+          <h2>Recent lists</h2>
+          <span class="muted">{len(fmt_decks)} from {LISTS_WINDOW}</span>
         </div>
         <div class="filter-bar" aria-label="Filter by color">
           <button type="button" data-color="all">All</button>
@@ -797,28 +1043,79 @@ def card_lines(cards, heading) -> str:
           <span class="card-title">{e(name)}</span>
           <a class="buy-tcg-inline" href="{e(href)}" target="_blank" rel="noopener nofollow sponsored">Buy</a>
         </li>""")
-    return f"<div><h4>{e(heading)}</h4><ul class='text-lines'>{''.join(lines)}</ul></div>"
+    return f"<div><h3>{e(heading)}</h3><ul class='text-lines'>{''.join(lines)}</ul></div>"
 
 
-def page_deck(deck: dict) -> str:
+def page_deck(deck: dict, decks: list[dict] | None = None) -> str:
     art = art_for(deck, "large")
     card_class = "inline-art card-face" if not art[0].startswith("/img/art/") else "inline-art"
     all_cards = (deck.get("main") or []) + (deck.get("side") or [])
     buy = partner_mass(all_cards)
     fmt = FMT_BY[deck["format"]]
+    stars = top_cards(deck, 5)
+    star_txt = ", ".join(stars[:4]) if stars else deck["archetype"]
+    player = deck.get("player") or "Unknown pilot"
+    title = f"{deck['archetype']} {fmt['name']} Decklist by {player} ({deck['date']})"
+    desc = (
+        f"{fmt['name']} {deck['archetype']} decklist piloted by {player} at {deck['event']} on {deck['date']}. "
+        f"Key cards: {star_txt}. Copy the list or buy it on TCGplayer."
+    )
+    related = related_decks(deck, decks or [], 6)
+    related_html = ""
+    if related:
+        related_html = (
+            '<div class="section-title" style="margin-top:28px"><h2>Related lists</h2></div>'
+            f'<div class="recent-list">{"".join(recent_item(d) for d in related)}</div>'
+        )
+    path = deck_url(deck)
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(
+                ("/formats/", "Formats"),
+                (f"/formats/{deck['format']}.html", fmt["name"]),
+                (archetype_url(deck), deck["archetype"]),
+                (path, f"{deck['archetype']} — {player}"),
+            )),
+            {
+                "@type": "Article",
+                "headline": title,
+                "description": desc,
+                "datePublished": deck.get("date") or TODAY,
+                "dateModified": deck.get("date") or TODAY,
+                "mainEntityOfPage": SITE + path,
+                "image": abs_url(art[0]),
+                "author": {"@type": "Person", "name": player},
+                "publisher": {"@id": SITE + "/#org"},
+                "about": [
+                    {"@type": "Thing", "name": f"Magic: The Gathering {fmt['name']}"},
+                    {"@type": "Thing", "name": deck["archetype"]},
+                ],
+                "articleSection": fmt["name"],
+            },
+        ],
+    })
     return head(
-        f"{deck['archetype']} — {deck['player'] or 'list'} ({fmt['name']}) | MTG Decklists",
-        f"{fmt['name']} {deck['archetype']} by {deck['player'] or 'unknown'} from {deck['event']} on {deck['date']}.",
-        SITE + deck_url(deck),
+        f"{title} | MTG Decklists",
+        desc,
+        SITE + path,
         image=art[0],
+        extra=extra,
+        og_type="article",
+        published=deck.get("date") or TODAY,
+        image_alt=art[1] if not art[0].startswith("/img/art/") else f"{deck['archetype']} {fmt['name']} deck",
+        keywords=f"{deck['archetype']}, {fmt['name']} decklist, MTG {fmt['name']}, {star_txt}",
     ) + header("formats") + f"""
-    <main class="single" role="main">
-      {crumb(("/formats/", "Formats"), (f"/formats/{deck['format']}.html", fmt["name"]), ("", deck["archetype"]))}
+    <main class="single" id="main" role="main">
+      {crumb(("/formats/", "Formats"), (f"/formats/{deck['format']}.html", fmt["name"]), (archetype_url(deck), deck["archetype"]), ("", deck["archetype"]))}
       <article class="card">
         <img class="{card_class}" src="{e(art[0])}" alt="{e(art[1])}" />
-        <h2>{e(deck['archetype'])}</h2>
-        <p class="muted">{e(fmt['name'])} · {e(deck['event'])} · {e(deck['place'] or '')} · {e(deck['date'])}</p>
-        <p><strong>{e(deck['player'] or 'Unknown pilot')}</strong> · {pip_html(deck.get('colors') or '')} {e(deck.get('combo') or '')}</p>
+        <h1>{e(deck['archetype'])} {e(fmt['name'])} decklist</h1>
+        <p class="muted">{e(fmt['name'])} · <a href="{e(event_url(deck))}">{e(deck['event'])}</a> · {e(deck['place'] or '')} ·
+        <time datetime="{e(deck['date'])}">{e(deck['date'])}</time></p>
+        <p><strong>{e(player)}</strong> · {pip_html(deck.get('colors') or '')} {e(deck.get('combo') or '')}</p>
+        <p>Full {e(fmt['name'])} list for <a href="{e(archetype_url(deck))}">{e(deck['archetype'])}</a>
+        from {e(deck['event'])}. {('Standout cards include ' + e(star_txt) + '.') if stars else ''}</p>
         <div class="buy-row">
           <a class="buy-tcg" data-buy-deck href="{e(buy)}" target="_blank" rel="noopener nofollow sponsored">Buy list on TCGplayer</a>
           <button class="copy-sim" type="button" data-copy-deck>Copy list</button>
@@ -831,7 +1128,257 @@ def page_deck(deck: dict) -> str:
             {card_lines(deck.get('side'), "Sideboard")}
           </div>
         </div>
+        {related_html}
         <p class="site-disclaimer">Public tournament table transcribed for news and commentary. Card images identify the list and come from Scryfall. Not affiliated with Wizards of the Coast. Banner art on this site is original, not official card art.</p>
+      </article>
+    </main>
+""" + footer()
+
+
+def group_archetypes(decks: list[dict]) -> dict[tuple[str, str], list[dict]]:
+    groups = defaultdict(list)
+    for d in decks:
+        groups[(d["format"], archetype_slug(d))].append(d)
+    return groups
+
+
+def group_events(decks: list[dict]) -> dict[str, list[dict]]:
+    groups = defaultdict(list)
+    for d in decks:
+        groups[event_key(d)].append(d)
+    return groups
+
+
+def page_archetypes_index(decks: list[dict]) -> str:
+    blocks = []
+    for fmt in FORMATS:
+        fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
+        arche = Counter(d["archetype"] for d in fmt_decks)
+        if not arche:
+            continue
+        links = "".join(
+            f'<a class="item" href="/archetypes/{fmt["slug"]}/{slugify(name)}.html">'
+            f'<div><div>{e(name)}</div><div class="muted">{n} {e(fmt["name"])} lists</div></div>'
+            f'<div class="link">Open →</div></a>'
+            for name, n in arche.most_common(16)
+        )
+        blocks.append(
+            f'<div class="section-title"><h2>{e(fmt["name"])}</h2>'
+            f'<a href="/archetypes/{fmt["slug"]}/">All {e(fmt["name"])} archetypes</a></div>'
+            f'<div class="list">{links}</div>'
+        )
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(("/archetypes/", "Archetypes"))),
+            {"@type": "CollectionPage", "url": SITE + "/archetypes/", "name": "MTG archetypes"},
+        ],
+    })
+    return head(
+        "MTG archetypes by format | MTG Decklists",
+        f"Magic: The Gathering archetypes counted from {LISTS_WINDOW} tournament lists — Standard, Modern, Pioneer, Commander, Legacy, Vintage, and Pauper.",
+        f"{SITE}/archetypes/",
+        extra=extra,
+        keywords="MTG archetypes, Standard archetypes, Modern archetypes, Commander decks",
+    ) + header("archetypes") + f"""
+    <main class="single" id="main" role="main">
+      {crumb(("/archetypes/", "Archetypes"))}
+      <article class="card">
+        <h1>Magic: The Gathering archetypes</h1>
+        <p>Each archetype page groups every public {LISTS_WINDOW} list of that deck on this site. Start with a format, then open the archetype for pilots, events, and buy links.</p>
+        {''.join(blocks)}
+      </article>
+    </main>
+""" + footer()
+
+
+def page_format_archetypes(fmt: dict, decks: list[dict]) -> str:
+    fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
+    arche = Counter(d["archetype"] for d in fmt_decks)
+    items = "".join(
+        f'<a class="item" href="/archetypes/{fmt["slug"]}/{slugify(name)}.html">'
+        f'<div><div>{e(name)}</div><div class="muted">{n} lists from {LISTS_WINDOW}</div></div>'
+        f'<div class="link">Open →</div></a>'
+        for name, n in arche.most_common()
+    )
+    path = f"/archetypes/{fmt['slug']}/"
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(("/archetypes/", "Archetypes"), (path, fmt["name"]))),
+            item_list_ld(
+                f"{fmt['name']} archetypes",
+                path,
+                [(f"/archetypes/{fmt['slug']}/{slugify(name)}.html", name) for name, _ in arche.most_common()],
+            ),
+        ],
+    })
+    return head(
+        f"{fmt['name']} archetypes | MTG {fmt['name']} metagame",
+        f"{len(arche)} {fmt['name']} archetypes from {len(fmt_decks)} tournament lists in {LISTS_WINDOW}.",
+        SITE + path,
+        extra=extra,
+        keywords=f"{fmt['name']} archetypes, {fmt['name']} metagame, MTG {fmt['name']} decks",
+    ) + header("archetypes") + f"""
+    <main class="single" id="main" role="main">
+      {crumb(("/archetypes/", "Archetypes"), ("", fmt["name"]))}
+      <article class="card">
+        <h1>{e(fmt['name'])} archetypes</h1>
+        <p>Counted from {len(fmt_decks)} {e(fmt['name'])} lists on this site ({LISTS_WINDOW}). Open an archetype for every matching list, or return to the
+        <a href="/formats/{fmt['slug']}.html">{e(fmt['name'])} format hub</a>.</p>
+        <div class="list">{items or '<p class="muted">No archetypes yet.</p>'}</div>
+      </article>
+    </main>
+""" + footer()
+
+
+def page_archetype(fmt: dict, name: str, rows: list[dict]) -> str:
+    slug = slugify(name)
+    path = f"/archetypes/{fmt['slug']}/{slug}.html"
+    rows = sorted(rows, key=lambda d: d.get("date") or "", reverse=True)
+    items = "".join(recent_item(d) for d in rows)
+    combo = rows[0].get("combo") if rows else ""
+    stars = top_cards(rows[0], 5) if rows else []
+    star_txt = ", ".join(stars[:4]) if stars else name
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(
+                ("/formats/", "Formats"),
+                (f"/formats/{fmt['slug']}.html", fmt["name"]),
+                (f"/archetypes/{fmt['slug']}/", "Archetypes"),
+                (path, name),
+            )),
+            item_list_ld(
+                f"{name} {fmt['name']} decklists",
+                path,
+                [(deck_url(d), f"{d.get('player') or 'list'} — {d.get('event')}") for d in rows],
+            ),
+        ],
+    })
+    desc = (
+        f"{len(rows)} {fmt['name']} {name} decklists from {LISTS_WINDOW}. "
+        f"{('Typical cards: ' + star_txt + '. ') if stars else ''}"
+        f"{combo + ' ' if combo else ''}Tournament results with TCGPlayer buy links."
+    )
+    return head(
+        f"{name} {fmt['name']} Decklists ({len(rows)}) | MTG Decklists",
+        desc,
+        SITE + path,
+        extra=extra,
+        keywords=f"{name}, {fmt['name']} {name}, {name} decklist, MTG {fmt['name']}",
+        image=art_for(rows[0], "large")[0] if rows else "/img/mtg-banner-hero.jpg",
+        image_alt=f"{name} {fmt['name']} deck",
+    ) + header("archetypes") + f"""
+    <main class="single" id="main" role="main">
+      {crumb(("/formats/", "Formats"), (f"/formats/{fmt['slug']}.html", fmt["name"]), (f"/archetypes/{fmt['slug']}/", "Archetypes"), ("", name))}
+      <article class="card">
+        <h1>{e(name)} — {e(fmt['name'])} decklists</h1>
+        <p>{e(name)} is a {e(fmt['name'])} archetype with {len(rows)} public lists from {LISTS_WINDOW} on this site.
+        {('Frequent non-land cards include ' + e(star_txt) + '.') if stars else ''}</p>
+        <p class="muted"><a href="/formats/{fmt['slug']}.html">All {e(fmt['name'])} lists</a> ·
+        <a href="/archetypes/{fmt['slug']}/">All {e(fmt['name'])} archetypes</a></p>
+        <div class="recent-list">{items}</div>
+      </article>
+    </main>
+""" + footer()
+
+
+def page_tournaments_index(decks: list[dict]) -> str:
+    events = group_events(decks)
+    ranked = sorted(events.values(), key=lambda rows: rows[0].get("date") or "", reverse=True)
+    items = []
+    seen = set()
+    for rows in ranked:
+        key = event_key(rows[0])
+        if key in seen:
+            continue
+        seen.add(key)
+        d = rows[0]
+        fmt = FMT_BY[d["format"]]["name"]
+        items.append(
+            f'<a class="item" href="{event_url(d)}">'
+            f'<div><div>{e(d["event"])}</div>'
+            f'<div class="muted">{e(fmt)} · {e(d["date"])} · {len(rows)} lists</div></div>'
+            f'<div class="link">Open →</div></a>'
+        )
+        if len(items) >= 120:
+            break
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(("/tournaments/", "Tournaments"))),
+            {"@type": "CollectionPage", "url": SITE + "/tournaments/", "name": "MTG tournaments"},
+        ],
+    })
+    return head(
+        "MTG tournaments | Magic event decklists",
+        f"Public Magic: The Gathering tournaments from {LISTS_WINDOW} with every list we transcribed for each event.",
+        f"{SITE}/tournaments/",
+        extra=extra,
+        keywords="MTG tournaments, Magic Online Challenges, RCQ decklists",
+    ) + header("events") + f"""
+    <main class="single" id="main" role="main">
+      {crumb(("/tournaments/", "Tournaments"))}
+      <article class="card">
+        <h1>Tournaments</h1>
+        <p>Each event page groups the lists we have from that table. Official Wizards / Magic.gg calendars live on
+        <a href="/events.html">Events</a>.</p>
+        <div class="list">{''.join(items)}</div>
+      </article>
+    </main>
+""" + footer()
+
+
+def page_tournament(key: str, rows: list[dict]) -> str:
+    rows = sorted(rows, key=lambda d: (d.get("place") or "", d.get("archetype") or ""))
+    d0 = rows[0]
+    fmt = FMT_BY[d0["format"]]
+    path = event_url(d0)
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(
+                ("/tournaments/", "Tournaments"),
+                (f"/formats/{d0['format']}.html", fmt["name"]),
+                (path, d0["event"]),
+            )),
+            {
+                "@type": "Event",
+                "name": d0["event"],
+                "startDate": d0.get("date") or TODAY,
+                "url": SITE + path,
+                "description": f"{fmt['name']} Magic: The Gathering tournament decklists",
+                "organizer": {"@id": SITE + "/#org"},
+            },
+            item_list_ld(
+                f"{d0['event']} decklists",
+                path,
+                [(deck_url(d), f"{d.get('place') or ''} {d['archetype']} — {d.get('player') or 'list'}".strip()) for d in rows],
+            ),
+        ],
+    })
+    desc = (
+        f"{len(rows)} {fmt['name']} decklists from {d0['event']} on {d0['date']}. "
+        f"Archetypes, pilots, and TCGPlayer buy links."
+    )
+    return head(
+        f"{d0['event']} ({d0['date']}) {fmt['name']} decklists | MTG Decklists",
+        desc,
+        SITE + path,
+        extra=extra,
+        og_type="article",
+        published=d0.get("date") or TODAY,
+        keywords=f"{d0['event']}, {fmt['name']} tournament, MTG {fmt['name']} results",
+    ) + header("events") + f"""
+    <main class="single" id="main" role="main">
+      {crumb(("/tournaments/", "Tournaments"), (f"/formats/{d0['format']}.html", fmt["name"]), ("", d0["event"]))}
+      <article class="card">
+        <h1>{e(d0['event'])}</h1>
+        <p><time datetime="{e(d0['date'])}">{e(d0['date'])}</time> · {e(fmt['name'])} · {len(rows)} lists on this site.</p>
+        <p>Public tournament table transcribed for news and commentary.
+        <a href="/formats/{d0['format']}.html">All {e(fmt['name'])} lists</a>.</p>
+        <div class="recent-list">{''.join(recent_item(d) for d in rows)}</div>
       </article>
     </main>
 """ + footer()
@@ -868,10 +1415,10 @@ def page_shop(slug=None) -> str:
         for c in SHOP
     )
     return head(title, desc, SITE + path) + header("shop") + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       {crumbs}
       <article class="card">
-        <h2>{e(h)}</h2>
+        <h1>{e(h)}</h1>
         <p>{e(intro)}</p>
         {''.join(blocks)}
         <div class="section-title" style="margin-top:28px"><h3>Also in the shop</h3></div>
@@ -913,10 +1460,10 @@ def page_guides_index() -> str:
         for slug, name, blurb in GUIDES
     )
     return head("Magic: The Gathering guides | MTG Decklists", "Topic pages that point back to format lists on this site.", f"{SITE}/guides/") + header("guides") + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       {crumb(("/guides/", "Guides"))}
       <article class="card">
-        <h2>Magic: The Gathering guides</h2>
+        <h1>Magic: The Gathering guides</h1>
         <p>Topic pages for formats, events, colors, and how this site uses affiliates — the same idea as OPDB guides, rewritten for Magic.</p>
         <div class="art-strip">
           <img src="/img/art/art-flashback-mage.jpg" alt="Original flashback mage" />
@@ -934,11 +1481,11 @@ def page_guide(slug, name, blurb, decks) -> str:
     rec = "".join(recent_item(d) for d in related) if related else ""
     art = ARTS[hash(slug) % 3]
     return head(f"{name} | MTG Decklists", blurb, f"{SITE}/guides/{slug}.html") + header("guides") + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       {crumb(("/guides/", "Guides"), ("", name))}
       <article class="card">
         <img class="inline-art" src="{art[0]}" alt="{e(art[1])}" />
-        <h2>{e(name)}</h2>
+        <h1>{e(name)}</h1>
         <p>{e(blurb)}</p>
         <p>Lists live on the <a href="/formats/">format pages</a>. Shop gear uses the same Amazon short links as One Piece Deck Base. Card buy buttons use the same TCGplayer partner ID.</p>
         <p><a href="/format.html">Rules and banlist notes</a> · <a href="/events.html">Events</a> · <a href="/privacy.html">Privacy and disclaimer</a></p>
@@ -949,16 +1496,26 @@ def page_guide(slug, name, blurb, decks) -> str:
 
 
 def page_events() -> str:
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(("/events.html", "Events"))),
+            {"@type": "CollectionPage", "url": SITE + "/events.html", "name": "MTG events and schedules"},
+        ],
+    })
     return head(
-        "MTG events and schedules | MTG Decklists",
-        "Official Magic event calendar: RCQs, Regional Championships, Arena, and Spotlight weekends in 2026.",
+        "MTG events and schedules 2026 | RCQs, Regionals, Arena",
+        "Official Magic: The Gathering event calendar for 2026: store RCQs, Regional Championships, Arena Championship 13, and Spotlight weekends — plus this site's tournament decklist index.",
         f"{SITE}/events.html",
+        extra=extra,
+        keywords="MTG events, RCQ schedule, Regional Championships 2026, Arena Championship 13",
     ) + header("events") + f"""
-    <main class="single" role="main">
-      {crumb(("", "Events"))}
+    <main class="single" id="main" role="main">
+      {crumb(("/events.html", "Events"))}
       <article class="card">
-        <h2>Events and schedules</h2>
-        <p>These are official Wizards / Magic.gg links. We do not run events.</p>
+        <h1>Events and schedules</h1>
+        <p>These are official Wizards / Magic.gg links. We do not run events. Decklists transcribed from public tables are grouped on
+        <a href="/tournaments/">Tournaments</a>.</p>
         <div class="list">
           <a class="item" href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener"><div><div>Banned &amp; restricted — August 10, 2026</div><div class="muted">magic.wizards.com</div></div><div class="link">Official →</div></a>
           <a class="item" href="https://magic.gg/news/play-update-2026-27-round-2-regional-championship-promos-and-qualifiers" target="_blank" rel="noopener"><div><div>RCQs Aug 15–Nov 29, 2026</div><div class="muted">Store Standard or Limited · Magic.gg play update</div></div><div class="link">Official →</div></a>
@@ -984,15 +1541,52 @@ def page_events() -> str:
 
 
 def page_rules() -> str:
+    extra = json_ld({
+        "@context": "https://schema.org",
+        "@graph": [
+            breadcrumb_ld(crumb_parts(("/format.html", "Rules"))),
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "What are the three most popular Magic formats right now?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Commander, Standard, and Modern — those names sit on the second line of the MTG Decklists site banner.",
+                        },
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Where do the decklists come from?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Public Magic Online Challenge and League tables hosted on MTGGoldfish, plus official Magic.gg Metagame Mentor aggregates. Each list page links the source.",
+                        },
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Do buy links use affiliates?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Yes. Shop gear uses Amazon Associates short links. Every card and Buy list button uses the TCGplayer partner tag c/7670706/1780961/21018.",
+                        },
+                    },
+                ],
+            },
+        ],
+    })
     return head(
-        "MTG format rules and banlist | MTG Decklists",
+        "MTG format rules and banlist (August 10, 2026) | MTG Decklists",
         "How Standard, Modern, Pioneer, Commander, Legacy, Vintage, and Pauper work, plus the August 10, 2026 banned and restricted changes.",
         f"{SITE}/format.html",
+        extra=extra,
+        keywords="MTG banlist, Standard bans, Legacy Fantasticar, Vintage restricted, format rules",
     ) + header("rules") + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       {crumb(("", "Rules"))}
       <article class="card policy">
-        <h2>Formats and the banlist</h2>
+        <h1>Formats and the banlist</h1>
         <img class="inline-art" src="/img/art/art-crimson-bolt.jpg" alt="Original crimson bolt illustration" />
         <p>Lists on this site are public constructed tables from August and September 2026 unless a page says otherwise. Commander pages are Duel Commander leagues (still 100-card singleton). Pick a format first — lists are not mixed on the homepage.</p>
         <section>
@@ -1024,11 +1618,11 @@ def page_privacy() -> str:
         "Privacy policy for MTG Decklists: cookies, analytics, advertising, affiliates, fair use, and Wizards of the Coast disclaimer.",
         f"{SITE}/privacy.html",
     ) + header() + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       {crumb(("", "Privacy Policy"))}
       <article class="card policy">
-        <h2>Privacy Policy</h2>
-        <p>Last updated: September 7, 2026</p>
+        <h1>Privacy Policy</h1>
+        <p>Last updated: September 10, 2026</p>
         <p>MTG Decklists ("we," "us," or "this site") respects your privacy. This Privacy Policy explains what information we collect when you visit mtgdecklists.com, how we use it, and the choices you have.</p>
         <section>
           <h3>Information We Collect</h3>
@@ -1084,10 +1678,10 @@ def page_privacy() -> str:
 
 def page_search() -> str:
     return head("Search MTG decklists | MTG Decklists", "Search formats, colors, players, archetypes, and cards.", f"{SITE}/search.html") + header("search") + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       {crumb(("", "Search"))}
       <article class="card">
-        <h2>Search</h2>
+        <h1>Search MTG decklists</h1>
         <form class="site-search" method="get" action="/search.html" role="search">
           <label class="site-search-label" for="q">Search MTG decklists</label>
           <div class="site-search-row">
@@ -1110,19 +1704,19 @@ def page_tier(decks: list[dict]) -> str:
         if not arche:
             continue
         leaders = "".join(
-            f'<a class="tier-leader" href="/formats/{fmt["slug"]}.html"><img src="{ARTS[i % 3][0]}" alt="" /><div class="name">{e(name)}</div><div class="meta">{n} lists</div></a>'
+            f'<a class="tier-leader" href="/archetypes/{fmt["slug"]}/{slugify(name)}.html"><img src="{ARTS[i % 3][0]}" alt="" /><div class="name">{e(name)}</div><div class="meta">{n} lists</div></a>'
             for i, (name, n) in enumerate(arche.most_common(6))
         )
         rows.append(f'<div class="tier-row tier-s"><div class="tier-label">{e(fmt["name"][:1])}</div><div class="tier-leaders">{leaders}</div></div>')
     return head(
         "MTG tier list by format | MTG Decklists",
-        "August–September 2026 Magic metagame snapshots by format, counted from lists on this site.",
+        "August–September 2026 Magic metagame snapshots by format, counted from up to 400 lists per format on this site.",
         f"{SITE}/tier-list.html",
     ) + header("tier") + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       {crumb(("", "Tier List"))}
       <article class="card">
-        <h2>Tier list</h2>
+        <h1>MTG tier list by format</h1>
         <p>Not a single global ranking. Each row is a format. Pictures are original site art, not official cards. Counts are from public Aug–Sep 2026 tables on this site.</p>
         <div class="tier-board">{''.join(rows)}</div>
         <p class="muted" style="margin-top:16px">For Frank Karsten's official winner's-metagame numbers see
@@ -1135,9 +1729,9 @@ def page_tier(decks: list[dict]) -> str:
 
 def page_404() -> str:
     return head("Page not found | MTG Decklists", "That URL is not on MTG Decklists.", f"{SITE}/404.html") + header() + f"""
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       <article class="card">
-        <h2>Missing page</h2>
+        <h1>Page not found</h1>
         <p>Try <a href="/">home</a>, <a href="/formats/">formats</a>, or <a href="/search.html">search</a>.</p>
       </article>
     </main>
@@ -1203,8 +1797,25 @@ def _parse(blob: str) -> list[dict]:
     return out
 
 
+def prune_html(root: Path, keep: set) -> None:
+    if not root.exists():
+        return
+    for path in root.rglob("*.html"):
+        if path.resolve() not in keep:
+            path.unlink()
+
+
+def sitemap_entry(loc: str, lastmod: str = TODAY, changefreq: str = "", priority: str = "") -> str:
+    bits = [f"<loc>{e(loc)}</loc>", f"<lastmod>{e(lastmod)}</lastmod>"]
+    if changefreq:
+        bits.append(f"<changefreq>{e(changefreq)}</changefreq>")
+    if priority:
+        bits.append(f"<priority>{e(priority)}</priority>")
+    return "<url>" + "".join(bits) + "</url>"
+
+
 def main() -> None:
-    decks = cap_per_format(add_curated(load_decks()), 200)
+    decks = cap_per_format(add_curated(load_decks()), TARGET_PER_FORMAT)
     decks = [d for d in decks if d.get("format") in FMT_BY]
     assign_faces(decks)
     write(ROOT / "index.html", page_index(decks))
@@ -1214,22 +1825,50 @@ def main() -> None:
     keep_pages = set()
     for deck in decks:
         path = ROOT / "decklists" / deck["format"] / f"{deck['page_slug']}.html"
-        write(path, page_deck(deck))
+        write(path, page_deck(deck, decks))
         keep_pages.add(path.resolve())
     deck_root = ROOT / "decklists"
-    if deck_root.exists():
-        for path in deck_root.rglob("*.html"):
-            if path.resolve() not in keep_pages:
+    prune_html(deck_root, keep_pages)
+    limited = deck_root / "limited"
+    if limited.exists():
+        for path in limited.rglob("*"):
+            if path.is_file():
                 path.unlink()
-        limited = deck_root / "limited"
         if limited.exists():
-            for path in limited.rglob("*"):
-                if path.is_file():
-                    path.unlink()
             limited.rmdir()
     for stale in (ROOT / "formats" / "limited.html", ROOT / "guides" / "limited.html"):
         if stale.exists():
             stale.unlink()
+
+    arch_groups = group_archetypes(decks)
+    keep_arch = set()
+    write(ROOT / "archetypes" / "index.html", page_archetypes_index(decks))
+    keep_arch.add((ROOT / "archetypes" / "index.html").resolve())
+    for fmt in FORMATS:
+        path = ROOT / "archetypes" / fmt["slug"] / "index.html"
+        write(path, page_format_archetypes(fmt, decks))
+        keep_arch.add(path.resolve())
+    for (fmt_slug, slug), rows in arch_groups.items():
+        fmt = FMT_BY.get(fmt_slug)
+        if not fmt or not rows:
+            continue
+        path = ROOT / "archetypes" / fmt_slug / f"{slug}.html"
+        write(path, page_archetype(fmt, rows[0]["archetype"], rows))
+        keep_arch.add(path.resolve())
+    prune_html(ROOT / "archetypes", keep_arch)
+
+    event_groups = group_events(decks)
+    keep_events = set()
+    write(ROOT / "tournaments" / "index.html", page_tournaments_index(decks))
+    keep_events.add((ROOT / "tournaments" / "index.html").resolve())
+    for key, rows in event_groups.items():
+        if not rows:
+            continue
+        path = ROOT / "tournaments" / f"{key}.html"
+        write(path, page_tournament(key, rows))
+        keep_events.add(path.resolve())
+    prune_html(ROOT / "tournaments", keep_events)
+
     write(ROOT / "shop" / "index.html", page_shop())
     for slug, *_ in SHOP:
         write(ROOT / "shop" / f"{slug}.html", page_shop(slug))
@@ -1262,23 +1901,81 @@ def main() -> None:
             "url": f"/formats/{fmt['slug']}.html",
             "hay": f"{fmt['name']} {fmt['short']} {fmt['blurb']}".lower(),
         })
+        index.append({
+            "title": f"{fmt['name']} archetypes",
+            "meta": f"{fmt['name']} metagame",
+            "url": f"/archetypes/{fmt['slug']}/",
+            "hay": f"{fmt['name']} archetypes metagame decks".lower(),
+        })
+    for (fmt_slug, slug), rows in arch_groups.items():
+        name = rows[0]["archetype"]
+        fmt_name = FMT_BY[fmt_slug]["name"]
+        index.append({
+            "title": f"{name} ({fmt_name})",
+            "meta": f"{len(rows)} lists",
+            "url": f"/archetypes/{fmt_slug}/{slug}.html",
+            "hay": f"{name} {fmt_name} {fmt_slug} archetype".lower(),
+        })
     write(ROOT / "data" / "search.json", json.dumps(index))
 
-    urls = [
-        f"{SITE}/", f"{SITE}/formats/", f"{SITE}/shop/", f"{SITE}/guides/",
-        f"{SITE}/events.html", f"{SITE}/format.html", f"{SITE}/privacy.html",
-        f"{SITE}/search.html", f"{SITE}/tier-list.html",
+    sitemap = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        sitemap_entry(f"{SITE}/", TODAY, "daily", "1.0"),
+        sitemap_entry(f"{SITE}/formats/", TODAY, "daily", "0.9"),
+        sitemap_entry(f"{SITE}/archetypes/", TODAY, "daily", "0.9"),
+        sitemap_entry(f"{SITE}/tournaments/", TODAY, "daily", "0.8"),
+        sitemap_entry(f"{SITE}/shop/", TODAY, "weekly", "0.6"),
+        sitemap_entry(f"{SITE}/guides/", TODAY, "monthly", "0.6"),
+        sitemap_entry(f"{SITE}/events.html", TODAY, "weekly", "0.7"),
+        sitemap_entry(f"{SITE}/format.html", TODAY, "monthly", "0.6"),
+        sitemap_entry(f"{SITE}/privacy.html", TODAY, "yearly", "0.2"),
+        sitemap_entry(f"{SITE}/search.html", TODAY, "weekly", "0.5"),
+        sitemap_entry(f"{SITE}/tier-list.html", TODAY, "daily", "0.8"),
     ]
     for fmt in FORMATS:
-        urls.append(f"{SITE}/formats/{fmt['slug']}.html")
+        sitemap.append(sitemap_entry(f"{SITE}/formats/{fmt['slug']}.html", TODAY, "daily", "0.9"))
+        sitemap.append(sitemap_entry(f"{SITE}/archetypes/{fmt['slug']}/", TODAY, "daily", "0.8"))
+    for slug, *_ in SHOP:
+        sitemap.append(sitemap_entry(f"{SITE}/shop/{slug}.html", TODAY, "monthly", "0.4"))
+    for slug, *_rest in GUIDES:
+        sitemap.append(sitemap_entry(f"{SITE}/guides/{slug}.html", TODAY, "monthly", "0.5"))
+    for (fmt_slug, slug), rows in arch_groups.items():
+        last = max((d.get("date") or TODAY) for d in rows)
+        sitemap.append(sitemap_entry(f"{SITE}/archetypes/{fmt_slug}/{slug}.html", last, "weekly", "0.7"))
+    for key, rows in event_groups.items():
+        last = max((d.get("date") or TODAY) for d in rows)
+        sitemap.append(sitemap_entry(SITE + event_url(rows[0]), last, "weekly", "0.6"))
     for d in decks:
-        urls.append(SITE + deck_url(d))
-    sitemap = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for u in urls:
-        sitemap.append(f"<url><loc>{e(u)}</loc><lastmod>{TODAY}</lastmod></url>")
+        sitemap.append(sitemap_entry(SITE + deck_url(d), d.get("date") or TODAY, "weekly", "0.8"))
     sitemap.append("</urlset>")
     write(ROOT / "sitemap.xml", "\n".join(sitemap))
-    write(ROOT / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://mtgdecklists.com/sitemap.xml\n")
+    write(
+        ROOT / "robots.txt",
+        "User-agent: *\nAllow: /\nSitemap: https://mtgdecklists.com/sitemap.xml\n\n"
+        "User-agent: Googlebot\nAllow: /\n\n"
+        "User-agent: Bingbot\nAllow: /\n",
+    )
+    write(ROOT / "llms.txt", "\n".join([
+        "# MTG Decklists",
+        "> Public Magic: The Gathering tournament decklists by format, archetype, and event.",
+        "",
+        f"Site: {SITE}/",
+        f"Sitemap: {SITE}/sitemap.xml",
+        f"Coverage: up to {TARGET_PER_FORMAT} lists per format from {LISTS_WINDOW}.",
+        "",
+        "## Hubs",
+        f"- Formats: {SITE}/formats/",
+        f"- Archetypes: {SITE}/archetypes/",
+        f"- Tournaments: {SITE}/tournaments/",
+        f"- Tier list: {SITE}/tier-list.html",
+        f"- Rules / banlist: {SITE}/format.html",
+        f"- Search: {SITE}/search.html",
+        "",
+        "## Formats",
+        *[f"- {fmt['name']}: {SITE}/formats/{fmt['slug']}.html" for fmt in FORMATS],
+        "",
+    ]))
     write(ROOT / "site.webmanifest", json.dumps({
         "name": "MTG Decklists",
         "short_name": "MTG Lists",
@@ -1288,7 +1985,14 @@ def main() -> None:
         "theme_color": "#9c1c28",
         "icons": [{"src": "/img/mtg-logo-192.png", "sizes": "192x192", "type": "image/png"}],
     }, indent=2))
-    print(f"built {len(decks)} decks, {len(list((ROOT/'decklists').rglob('*.html')))} deck pages")
+    counts = Counter(d["format"] for d in decks)
+    print(
+        f"built {len(decks)} decks "
+        f"({dict(counts)}), "
+        f"{len(keep_pages)} deck pages, "
+        f"{len(arch_groups)} archetypes, "
+        f"{len(event_groups)} tournaments"
+    )
 
 
 if __name__ == "__main__":

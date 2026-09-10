@@ -1,0 +1,23 @@
+# MTG Decklists
+> Public Magic: The Gathering tournament decklists by format, archetype, and event.
+
+Site: https://mtgdecklists.com/
+Sitemap: https://mtgdecklists.com/sitemap.xml
+Coverage: up to 400 lists per format from August–September 2026.
+
+## Hubs
+- Formats: https://mtgdecklists.com/formats/
+- Archetypes: https://mtgdecklists.com/archetypes/
+- Tournaments: https://mtgdecklists.com/tournaments/
+- Tier list: https://mtgdecklists.com/tier-list.html
+- Rules / banlist: https://mtgdecklists.com/format.html
+- Search: https://mtgdecklists.com/search.html
+
+## Formats
+- Standard: https://mtgdecklists.com/formats/standard.html
+- Modern: https://mtgdecklists.com/formats/modern.html
+- Pioneer: https://mtgdecklists.com/formats/pioneer.html
+- Commander: https://mtgdecklists.com/formats/commander.html
+- Legacy: https://mtgdecklists.com/formats/legacy.html
+- Vintage: https://mtgdecklists.com/formats/vintage.html
+- Pauper: https://mtgdecklists.com/formats/pauper.html
