@@ -415,6 +415,9 @@ def head(
   <link rel="canonical" href="{e(canonical)}" />
   <link rel="preconnect" href="https://cards.scryfall.io" crossorigin />
   <link rel="dns-prefetch" href="https://cards.scryfall.io" />
+  <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
+  <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="author" content="MTG Decklists" />
@@ -1637,7 +1640,7 @@ def page_privacy() -> str:
         </section>
         <section>
           <h3>Advertising</h3>
-          <p>This site may display advertisements served by third-party providers, including Google AdSense. Google and its partners may use cookies to serve ads based on your prior visits. You can opt out of personalized advertising in Google's Ads Settings.</p>
+          <p>This site displays advertisements served by Google AdSense (publisher <code>ca-pub-1074015774205047</code>). Google and its partners may use cookies to serve ads based on your prior visits. You can opt out of personalized advertising in Google's Ads Settings.</p>
         </section>
         <section>
           <h3>Affiliate partnerships</h3>
@@ -1950,6 +1953,10 @@ def main() -> None:
         sitemap.append(sitemap_entry(SITE + deck_url(d), d.get("date") or TODAY, "weekly", "0.8"))
     sitemap.append("</urlset>")
     write(ROOT / "sitemap.xml", "\n".join(sitemap))
+    write(
+        ROOT / "ads.txt",
+        "google.com, pub-1074015774205047, DIRECT, f08c47fec0942fa0\n",
+    )
     write(
         ROOT / "robots.txt",
         "User-agent: *\nAllow: /\nSitemap: https://mtgdecklists.com/sitemap.xml\n\n"
