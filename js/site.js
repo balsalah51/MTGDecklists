@@ -69,7 +69,7 @@
       return;
     }
     if (status) status.textContent = items.length + " result" + (items.length === 1 ? "" : "s");
-    items.slice(0, 80).forEach(function (item) {
+    items.slice(0, 120).forEach(function (item) {
       var a = document.createElement("a");
       a.className = "item";
       a.href = item.url;
