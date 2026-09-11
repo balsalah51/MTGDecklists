@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pull Aug–Sep 2026 public lists from MTGGoldfish into data/decks.json."""
+"""Pull June–Sep 2026 public lists from MTGGoldfish into data/decks.json."""
 from __future__ import annotations
 
 import json
@@ -15,15 +15,16 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "decks.json"
 UA = "Mozilla/5.0 (compatible; MTGDecklistsBot/1.0; +https://mtgdecklists.com)"
 FORMATS = ("standard", "modern", "pioneer", "legacy", "vintage", "pauper", "commander")
-TARGET_PER_FORMAT = 400
-TARGET_COMMANDER = 414
-PER_EVENT = 24
-PER_EVENT_COMMANDER = 32
-MAX_PAGES = 20
-MAX_PAGES_COMMANDER = 28
-DATE_RANGE = "08/01/2026 - 09/30/2026"
-COMMANDER_DATE_RANGE = "06/01/2026 - 09/30/2026"
-COMMANDER_MONTHS = ("2026-06", "2026-07", "2026-08", "2026-09")
+TARGET_PER_FORMAT = 800
+TARGET_COMMANDER = 828
+PER_EVENT = 32
+PER_EVENT_COMMANDER = 40
+MAX_PAGES = 40
+MAX_PAGES_COMMANDER = 44
+DATE_RANGE = "06/01/2026 - 09/30/2026"
+COMMANDER_DATE_RANGE = "05/01/2026 - 09/30/2026"
+MONTHS = ("2026-06", "2026-07", "2026-08", "2026-09")
+COMMANDER_MONTHS = ("2026-05", "2026-06", "2026-07", "2026-08", "2026-09")
 SKIP_NAME = re.compile(r"\b(limited|draft|sealed|cube)\b", re.I)
 ROW_RE = re.compile(
     r"<tr>\s*<td>(\d{4}-\d{2}-\d{2})</td>\s*<td>\s*<a href=\"/tournament/(\d+)\">([^<]+)</a>",
@@ -112,7 +113,7 @@ def in_window(date: str, fmt: str | None = None) -> bool:
         return False
     if fmt == "commander":
         return date[:7] in COMMANDER_MONTHS
-    return date[:7] in ("2026-08", "2026-09")
+    return date[:7] in MONTHS
 
 
 def target_for(fmt: str) -> int:
@@ -146,7 +147,7 @@ def _spread(subset: list, k: int) -> list:
 
 
 def select_target(decks: list, n: int = TARGET_PER_FORMAT) -> list:
-    """Keep a cap of lists per format. Commander may include June–July to fill +100."""
+    """Keep a cap of lists per format, round-robin across events so one league cannot fill the cap."""
     by = defaultdict(list)
     seen = set()
     for d in decks:
@@ -158,27 +159,7 @@ def select_target(decks: list, n: int = TARGET_PER_FORMAT) -> list:
         by[fmt].append(d)
     out = []
     for fmt in FORMATS:
-        cap = target_for(fmt)
-        group = by.get(fmt, [])
-        months = ("2026-09", "2026-08", "2026-07", "2026-06") if fmt == "commander" else ("2026-09", "2026-08")
-        buckets = [[d for d in group if (d.get("date") or "").startswith(month)] for month in months]
-        chosen, leftover = [], []
-        remaining = cap
-        for i, bucket in enumerate(buckets):
-            if remaining <= 0:
-                leftover.extend(bucket)
-                continue
-            take = min(len(bucket), remaining) if fmt == "commander" else min(cap // 2 if i < 2 else remaining, len(bucket), remaining)
-            picked = _spread(bucket, take)
-            chosen.extend(picked)
-            leftover.extend([d for d in bucket if d not in picked])
-            remaining = cap - len(chosen)
-        leftover.sort(key=lambda x: x.get("date") or "", reverse=True)
-        for d in leftover:
-            if len(chosen) >= cap:
-                break
-            chosen.append(d)
-        out.extend(chosen[:cap])
+        out.extend(_spread(by.get(fmt, []), target_for(fmt)))
     out.sort(key=lambda x: (x.get("date") or "", str(x.get("id"))), reverse=True)
     return out
 
@@ -186,7 +167,7 @@ def select_target(decks: list, n: int = TARGET_PER_FORMAT) -> list:
 def discover(fmt: str):
     found = []
     seen = set()
-    queries = [(None, None, None)]
+    queries = [("", fmt, DATE_RANGE), (fmt, "", DATE_RANGE)]
     pages = MAX_PAGES_COMMANDER if fmt == "commander" else MAX_PAGES
     if fmt == "commander":
         queries = [
