@@ -16,9 +16,14 @@ OUT = ROOT / "data" / "decks.json"
 UA = "Mozilla/5.0 (compatible; MTGDecklistsBot/1.0; +https://mtgdecklists.com)"
 FORMATS = ("standard", "modern", "pioneer", "legacy", "vintage", "pauper", "commander")
 TARGET_PER_FORMAT = 400
+TARGET_COMMANDER = 414
 PER_EVENT = 24
+PER_EVENT_COMMANDER = 32
 MAX_PAGES = 20
+MAX_PAGES_COMMANDER = 28
 DATE_RANGE = "08/01/2026 - 09/30/2026"
+COMMANDER_DATE_RANGE = "06/01/2026 - 09/30/2026"
+COMMANDER_MONTHS = ("2026-06", "2026-07", "2026-08", "2026-09")
 SKIP_NAME = re.compile(r"\b(limited|draft|sealed|cube)\b", re.I)
 ROW_RE = re.compile(
     r"<tr>\s*<td>(\d{4}-\d{2}-\d{2})</td>\s*<td>\s*<a href=\"/tournament/(\d+)\">([^<]+)</a>",
@@ -61,7 +66,7 @@ def download_deck(deck_id: str):
     return main, side
 
 
-def parse_rows(html: str):
+def parse_rows(html: str, cap: int = PER_EVENT):
     rows = []
     for tr in re.findall(r"<tr[\s\S]*?</tr>", html, re.I):
         dids = re.findall(r'href="/deck/(\d+)', tr)
@@ -85,25 +90,33 @@ def parse_rows(html: str):
             continue
         seen.add(r[0])
         uniq.append(r)
-        if len(uniq) >= PER_EVENT:
+        if len(uniq) >= cap:
             break
     return uniq
 
 
-def search_url(fmt: str, page: int) -> str:
+def search_url(fmt: str, page: int, *, name: str | None = None, goldfish_format: str | None = None, date_range: str | None = None) -> str:
     params = {
         "utf8": "✓",
-        "tournament_search[name]": "duel commander" if fmt == "commander" else "",
-        "tournament_search[format]": "" if fmt == "commander" else fmt,
-        "tournament_search[date_range]": DATE_RANGE,
+        "tournament_search[name]": name if name is not None else ("duel commander" if fmt == "commander" else ""),
+        "tournament_search[format]": goldfish_format if goldfish_format is not None else ("" if fmt == "commander" else fmt),
+        "tournament_search[date_range]": date_range or (COMMANDER_DATE_RANGE if fmt == "commander" else DATE_RANGE),
         "commit": "Search",
         "page": str(page),
     }
     return "https://www.mtggoldfish.com/tournament_searches/create?" + urllib.parse.urlencode(params)
 
 
-def in_window(date: str) -> bool:
-    return bool(date) and date[:7] in ("2026-08", "2026-09")
+def in_window(date: str, fmt: str | None = None) -> bool:
+    if not date:
+        return False
+    if fmt == "commander":
+        return date[:7] in COMMANDER_MONTHS
+    return date[:7] in ("2026-08", "2026-09")
+
+
+def target_for(fmt: str) -> int:
+    return TARGET_COMMANDER if fmt == "commander" else TARGET_PER_FORMAT
 
 
 def _spread(subset: list, k: int) -> list:
@@ -133,31 +146,39 @@ def _spread(subset: list, k: int) -> list:
 
 
 def select_target(decks: list, n: int = TARGET_PER_FORMAT) -> list:
-    """Keep n lists per format from Aug–Sep 2026, split across both months."""
+    """Keep a cap of lists per format. Commander may include June–July to fill +100."""
     by = defaultdict(list)
     seen = set()
     for d in decks:
         did = str(d.get("id"))
         fmt = d.get("format")
-        if did in seen or fmt not in FORMATS or not in_window(d.get("date") or ""):
+        if did in seen or fmt not in FORMATS or not in_window(d.get("date") or "", fmt):
             continue
         seen.add(did)
         by[fmt].append(d)
     out = []
     for fmt in FORMATS:
+        cap = target_for(fmt)
         group = by.get(fmt, [])
-        sep = [d for d in group if (d.get("date") or "").startswith("2026-09")]
-        aug = [d for d in group if (d.get("date") or "").startswith("2026-08")]
-        take_sep = min(n // 2, len(sep), n)
-        take_aug = min(n - take_sep, len(aug))
-        chosen = _spread(sep, take_sep) + _spread(aug, take_aug)
-        leftover = [d for d in (sep + aug) if d not in chosen]
+        months = ("2026-09", "2026-08", "2026-07", "2026-06") if fmt == "commander" else ("2026-09", "2026-08")
+        buckets = [[d for d in group if (d.get("date") or "").startswith(month)] for month in months]
+        chosen, leftover = [], []
+        remaining = cap
+        for i, bucket in enumerate(buckets):
+            if remaining <= 0:
+                leftover.extend(bucket)
+                continue
+            take = min(len(bucket), remaining) if fmt == "commander" else min(cap // 2 if i < 2 else remaining, len(bucket), remaining)
+            picked = _spread(bucket, take)
+            chosen.extend(picked)
+            leftover.extend([d for d in bucket if d not in picked])
+            remaining = cap - len(chosen)
         leftover.sort(key=lambda x: x.get("date") or "", reverse=True)
         for d in leftover:
-            if len(chosen) >= n:
+            if len(chosen) >= cap:
                 break
             chosen.append(d)
-        out.extend(chosen[:n])
+        out.extend(chosen[:cap])
     out.sort(key=lambda x: (x.get("date") or "", str(x.get("id"))), reverse=True)
     return out
 
@@ -165,42 +186,51 @@ def select_target(decks: list, n: int = TARGET_PER_FORMAT) -> list:
 def discover(fmt: str):
     found = []
     seen = set()
-    for page in range(1, MAX_PAGES + 1):
-        url = search_url(fmt, page)
-        try:
-            html = fetch(url)
-        except Exception as e:
-            print("search fail", fmt, page, e, flush=True)
-            break
-        rows = ROW_RE.findall(html)
-        added = 0
-        for date, tid, name in rows:
-            name = re.sub(r"\s+", " ", name).strip()
-            if tid in seen:
-                continue
-            if SKIP_NAME.search(name):
-                continue
-            if fmt == "commander" and "commander" not in name.lower():
-                continue
-            seen.add(tid)
-            found.append(
-                (
-                    fmt,
-                    f"https://www.mtggoldfish.com/tournament/{tid}",
-                    name,
-                    date,
+    queries = [(None, None, None)]
+    pages = MAX_PAGES_COMMANDER if fmt == "commander" else MAX_PAGES
+    if fmt == "commander":
+        queries = [
+            ("duel commander", "", COMMANDER_DATE_RANGE),
+            ("commander", "", COMMANDER_DATE_RANGE),
+            ("", "commander", COMMANDER_DATE_RANGE),
+        ]
+    for name, goldfish_format, date_range in queries:
+        for page in range(1, pages + 1):
+            url = search_url(fmt, page, name=name, goldfish_format=goldfish_format, date_range=date_range)
+            try:
+                html = fetch(url)
+            except Exception as e:
+                print("search fail", fmt, page, e, flush=True)
+                break
+            rows = ROW_RE.findall(html)
+            added = 0
+            for date, tid, event_name in rows:
+                event_name = re.sub(r"\s+", " ", event_name).strip()
+                if tid in seen:
+                    continue
+                if SKIP_NAME.search(event_name):
+                    continue
+                if fmt == "commander" and "commander" not in event_name.lower() and "edh" not in event_name.lower():
+                    continue
+                seen.add(tid)
+                found.append(
+                    (
+                        fmt,
+                        f"https://www.mtggoldfish.com/tournament/{tid}",
+                        event_name,
+                        date,
+                    )
                 )
-            )
-            added += 1
-        print(f"  search {fmt} page {page}: {added} events", flush=True)
-        if added == 0 or f"page={page + 1}" not in html:
-            break
-        time.sleep(0.2)
+                added += 1
+            print(f"  search {fmt} {name or goldfish_format or fmt} page {page}: {added} events", flush=True)
+            if added == 0 or f"page={page + 1}" not in html:
+                break
+            time.sleep(0.2)
     return found
 
 
 def fmt_count(existing, fmt: str) -> int:
-    return sum(1 for d in existing if d.get("format") == fmt and in_window(d.get("date") or ""))
+    return sum(1 for d in existing if d.get("format") == fmt and in_window(d.get("date") or "", fmt))
 
 
 def main():
@@ -209,14 +239,16 @@ def main():
     added = 0
     for fmt in FORMATS:
         have_fmt = fmt_count(existing, fmt)
-        if have_fmt >= TARGET_PER_FORMAT:
+        need = target_for(fmt)
+        if have_fmt >= need:
             print(f"{fmt}: already {have_fmt}, skip scrape", flush=True)
             continue
-        print(f"{fmt}: discovering (have {have_fmt}, need {TARGET_PER_FORMAT})", flush=True)
+        print(f"{fmt}: discovering (have {have_fmt}, need {need})", flush=True)
         events = discover(fmt)
         print(f"{fmt}: {len(events)} events", flush=True)
+        cap_rows = PER_EVENT_COMMANDER if fmt == "commander" else PER_EVENT
         for fmt_name, url, event, date in events:
-            if fmt_count(existing, fmt) >= TARGET_PER_FORMAT:
+            if fmt_count(existing, fmt) >= need:
                 break
             try:
                 html = fetch(url)
@@ -228,12 +260,12 @@ def main():
             except Exception as e:
                 print("  fail", url, e, flush=True)
                 continue
-            rows = parse_rows(html)
+            rows = parse_rows(html, cap_rows)
             if not rows:
                 continue
             new_here = 0
             for deck_id, arche, player, place in rows:
-                if fmt_count(existing, fmt) >= TARGET_PER_FORMAT:
+                if fmt_count(existing, fmt) >= need:
                     break
                 if deck_id in have:
                     continue
@@ -266,7 +298,7 @@ def main():
             time.sleep(0.12)
         OUT.parent.mkdir(parents=True, exist_ok=True)
         json.dump(existing, OUT.open("w"), separators=(",", ":"))
-    trimmed = select_target(existing, TARGET_PER_FORMAT)
+    trimmed = select_target(existing)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     json.dump(trimmed, OUT.open("w"), separators=(",", ":"))
     counts = defaultdict(int)

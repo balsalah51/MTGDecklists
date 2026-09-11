@@ -1,1 +1,2 @@
+# Google AdSense (live). Add NitroPay / Media.net lines after approval.
 google.com, pub-1074015774205047, DIRECT, f08c47fec0942fa0

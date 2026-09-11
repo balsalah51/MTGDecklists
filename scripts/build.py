@@ -16,6 +16,7 @@ SITE = "https://mtgdecklists.com"
 TODAY = "2026-09-11"
 YEAR = "2026"
 TARGET_PER_FORMAT = 400
+TARGET_COMMANDER = 414
 
 FORMATS = [
     {
@@ -56,7 +57,7 @@ FORMATS = [
         "name": "Commander",
         "short": "100-card singleton, most-played format",
         "flavor": "One legend. Ninety-nine unique spells. A table of stories.",
-        "blurb": "Commander (EDH) is the most popular way to play Magic. Lists here are recent Duel Commander league tables from August–September 2026, plus the same 100-card singleton rules used at Commander night.",
+        "blurb": "Commander (EDH) is the most popular way to play Magic. Lists here are recent Duel Commander league tables from June–September 2026, plus the same 100-card singleton rules used at Commander night. Open a commander page to see every list for that legend.",
         "official": "https://magic.wizards.com/en/formats/commander",
         "popular": True,
         "art": "/img/art/lore-forest-cathedral.jpg",
@@ -256,6 +257,45 @@ SCRYFALL_CACHE = ROOT / "data" / "scryfall_cards.json"
 SCRYFALL_UA = "MTGDecklistsBot/1.0 (+https://mtgdecklists.com)"
 
 
+def json_ld(data) -> str:
+    return '<script type="application/ld+json">' + json.dumps(data, ensure_ascii=True) + "</script>"
+
+
+def breadcrumb_ld(parts: list[tuple[str, str]]) -> dict:
+    items = [{"@type": "ListItem", "position": 1, "name": "Home", "item": SITE + "/"}]
+    for i, (href, name) in enumerate(parts, start=2):
+        node = {"@type": "ListItem", "position": i, "name": name}
+        if href:
+            node["item"] = SITE + href if href.startswith("/") else href
+        items.append(node)
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": items}
+
+
+def website_ld() -> dict:
+    return {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "name": "MTG Decklists",
+                "url": SITE + "/",
+                "description": "Public Magic: The Gathering decklists by format, with Commander, Standard, and Modern first.",
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": SITE + "/search.html?q={search_term_string}",
+                    "query-input": "required name=search_term_string",
+                },
+            },
+            {
+                "@type": "Organization",
+                "name": "MTG Decklists",
+                "url": SITE + "/",
+                "logo": SITE + "/img/mtg-logo-192.png",
+            },
+        ],
+    }
+
+
 def e(text) -> str:
     return html.escape(str(text or ""), quote=True)
 
@@ -336,7 +376,7 @@ def partner_mass(cards) -> str:
     return "https://partner.tcgplayer.com/c/7670706/1780961/21018?u=" + quote(dest, safe="")
 
 
-def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg", extra="") -> str:
+def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg", extra="", og_type="website", image_alt="MTG Decklists original banner art") -> str:
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -357,7 +397,7 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-4" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-6" />
   <link rel="canonical" href="{e(canonical)}" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
@@ -368,11 +408,12 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <link rel="manifest" href="/site.webmanifest" />
   <meta property="og:site_name" content="MTG Decklists" />
   <meta property="og:locale" content="en_US" />
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="{e(og_type)}" />
   <meta property="og:title" content="{e(title)}" />
   <meta property="og:description" content="{e(desc)}" />
   <meta property="og:url" content="{e(canonical)}" />
   <meta property="og:image" content="{e(abs_url(image))}" />
+  <meta property="og:image:alt" content="{e(image_alt)}" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{e(title)}" />
   <meta name="twitter:description" content="{e(desc)}" />
@@ -397,7 +438,7 @@ def header(current="") -> str:
       <a class="brand" href="/">
         <img class="logo" src="/img/mtg-logo-192.png" width="56" height="56" alt="MTG Decklists" />
         <div>
-          <h1>MTG Decklists</h1>
+          <p class="site-name">MTG Decklists</p>
           <div class="subtitle">Commander · Standard · Modern — five colors, every format</div>
         </div>
       </a>
@@ -408,6 +449,7 @@ def header(current="") -> str:
       <nav aria-label="Primary">
         {nav("/tier-list.html", "Tier List", "tier")}
         {nav("/formats/", "Formats", "formats")}
+        {nav("/commanders/", "Commanders", "commanders")}
         {nav("/format.html", "Rules", "rules")}
         {nav("/events.html", "Events", "events")}
         {nav("/guides/", "Guides", "guides")}
@@ -426,8 +468,9 @@ def footer() -> str:
       © <span id="year">{YEAR}</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
       <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
+      <a href="/commanders/">Commanders</a> ·
       <a href="/format.html">Rules</a> · <a href="/search.html">Search</a> · <a href="/shop/">Shop</a> ·
-      <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
+      <a href="/guides/">Guides</a> · <a href="/guides/advertising.html">Ads</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
     </footer>
   </div>
   <script src="/js/site.js?v=mtg-3"></script>
@@ -667,12 +710,13 @@ def load_decks() -> list[dict]:
     return out
 
 
-def cap_per_format(decks: list[dict], n: int = TARGET_PER_FORMAT) -> list[dict]:
+def cap_per_format(decks: list[dict], n: int | None = None) -> list[dict]:
     by = defaultdict(list)
     for d in decks:
         by[d["format"]].append(d)
     out = []
     for fmt in FMT_BY:
+        cap = TARGET_COMMANDER if fmt == "commander" else TARGET_PER_FORMAT
         group = by.get(fmt, [])
         curated = [d for d in group if str(d.get("id") or "").startswith("mentor-")]
         rest = [d for d in group if not str(d.get("id") or "").startswith("mentor-")]
@@ -683,7 +727,7 @@ def cap_per_format(decks: list[dict], n: int = TARGET_PER_FORMAT) -> list[dict]:
                 continue
             seen.add(key)
             chosen.append(d)
-            if len(chosen) >= n:
+            if len(chosen) >= cap:
                 break
         out.extend(chosen)
     out.sort(key=lambda x: (x["date"], x.get("place") or ""), reverse=True)
@@ -719,12 +763,13 @@ def page_index(decks: list[dict]) -> str:
             <p>{e(c['line'])}</p>
           </div>
         </a>"""
-    extra = """<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MTG Decklists","url":"https://mtgdecklists.com/","potentialAction":{"@type":"SearchAction","target":"https://mtgdecklists.com/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>"""
+    extra = json_ld(website_ld())
     return head(
-        "MTG Decklists | Magic: The Gathering lists by format",
-        "Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page.",
+        "MTG Decklists | Magic: The Gathering Commander, Standard, and Modern lists",
+        "Public Magic: The Gathering decklists by format. Commander, Standard, and Modern first, then Pioneer, Legacy, Vintage, and Pauper. Color pie, guilds, and TCGplayer buy links on every list.",
         SITE + "/",
         extra=extra,
+        image_alt="Original five-color pentagon banner with a flashback mage and goblin scout",
     ) + header("home") + f"""
     <main class="single home" id="main" role="main">
       <section class="home-splash" aria-label="MTG Decklists">
@@ -738,10 +783,10 @@ def page_index(decks: list[dict]) -> str:
         <div class="home-splash-bar">
           <div>
             <p class="kicker">A fan spellbook of public tables</p>
-            <h2>Shuffle the colors. Read the lists.</h2>
+            <h1>Shuffle the colors. Read the lists.</h1>
             <p class="home-splash-formats">Commander · Standard · Modern</p>
           </div>
-          <p>Pick a format first. Each page opens on the color pie, then that format's August–September 2026 tournament lists.</p>
+          <p>Pick a format first. Commander legends have their own hub. Constructed pages open on the color pie, then that format's recent tables.</p>
         </div>
       </section>
 
@@ -755,20 +800,20 @@ def page_index(decks: list[dict]) -> str:
       </a>
 
       <nav class="home-big3" aria-label="Main sections">
-        <a class="home-big home-big-tier" href="/tier-list.html">
-          <span class="home-big-kicker">The metagame</span>
-          <span class="home-big-title">Tier List</span>
-          <span class="home-big-note">August–September 2026 metas by format</span>
+        <a class="home-big home-big-commanders" href="/commanders/">
+          <span class="home-big-kicker">100-card singleton</span>
+          <span class="home-big-title">Commanders</span>
+          <span class="home-big-note">One page per legend — {sum(1 for d in decks if d['format']=='commander')} Duel Commander lists</span>
         </a>
         <a class="home-big home-big-leaders" href="#formats">
           <span class="home-big-kicker">Choose a plane</span>
           <span class="home-big-title">Formats</span>
           <span class="home-big-note">Open a format, then see that format's lists</span>
         </a>
-        <a class="home-big home-big-shop" href="/shop/">
-          <span class="home-big-kicker">Table gear</span>
-          <span class="home-big-title">Shop</span>
-          <span class="home-big-note">Sleeves, dice, playmats, and deck boxes</span>
+        <a class="home-big home-big-tier" href="/tier-list.html">
+          <span class="home-big-kicker">The metagame</span>
+          <span class="home-big-title">Tier List</span>
+          <span class="home-big-note">August–September 2026 metas by format</span>
         </a>
         <div class="discord-placeholder" role="note">
           <span class="home-big-icon" aria-hidden="true">
@@ -784,7 +829,7 @@ def page_index(decks: list[dict]) -> str:
       <form class="site-search home-search" method="get" action="/search.html" role="search">
         <label class="site-search-label" for="home-q">Search the spellbook</label>
         <div class="site-search-row">
-          <input id="home-q" type="search" name="q" placeholder="Format, color, player, archetype, or card" aria-label="Search MTG decklists" />
+          <input id="home-q" type="search" name="q" placeholder="Brigid, Izzet, Landfall, Solitude…" aria-label="Search MTG decklists" />
           <button type="submit">Search</button>
         </div>
       </form>
@@ -807,7 +852,10 @@ def page_index(decks: list[dict]) -> str:
               <h3>Pick a format first</h3>
               <p>Commander, Standard, and Modern lead the banner. Pioneer, Legacy, Vintage, and Pauper sit beside them. Each page opens on colors, then that format's recent lists.</p>
             </div>
-            <a href="/formats/">All format pages →</a>
+            <div class="home-leaders-links">
+              <a href="/formats/">All format pages →</a>
+              <a href="/commanders/">Commander legends →</a>
+            </div>
           </div>
         </div>
         <div class="card home-panel">
@@ -838,7 +886,7 @@ def page_formats_index(decks: list[dict]) -> str:
     <main class="single" id="main" role="main">
       {crumb(("/formats/", "Formats"))}
       <article class="card">
-        <h2>Formats</h2>
+        <h1>Formats</h1>
         <p class="flavor">Each format is a different way to tell a story with sixty cards — or a hundred, if you sit down for Commander.</p>
         <p>Magic is organized by format. Commander, Standard, and Modern are the three most-played right now; Pioneer, Legacy, Vintage, and Pauper sit beside them. Open a format to see its color pie and lists.</p>
         <div class="leader-grid">{tiles}</div>
@@ -887,26 +935,44 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
     fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
     art = (fmt.get("art") or ARTS[0][0], fmt.get("art_alt") or "")
     items = "".join(recent_item(d) for d in fmt_decks)
+    window = "June–September 2026" if fmt["slug"] == "commander" else "August–September 2026"
+    commander_hub = ""
+    if fmt["slug"] == "commander":
+        commander_hub = """
+        <p><a href="/commanders/">Open the Commander spellbook</a> — one page per legend, with every public list we have for that commander.</p>
+        <p class="muted">100-card singleton. Color identity is law. Partner and background commanders are listed under both names when Goldfish reports them that way.</p>
+        """
+    extra = json_ld(breadcrumb_ld([("/formats/", "Formats"), (f"/formats/{fmt['slug']}.html", fmt["name"])])) + json_ld({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": f"{fmt['name']} decklists",
+        "url": f"{SITE}/formats/{fmt['slug']}.html",
+        "description": fmt["blurb"],
+        "numberOfItems": len(fmt_decks),
+    })
     return head(
-        f"{fmt['name']} decklists | MTG Decklists",
-        f"{fmt['name']} Magic: The Gathering lists from August and September 2026, with colors, popular color combos, and TCGPlayer buy links.",
+        f"{fmt['name']} decklists ({len(fmt_decks)}) | MTG Decklists",
+        f"{fmt['name']} Magic: The Gathering lists from {window}, with the color pie, popular color combos, and TCGplayer buy links.",
         f"{SITE}/formats/{fmt['slug']}.html",
         image=art[0],
+        extra=extra,
+        image_alt=art[1] or fmt["name"],
     ) + header("formats") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/formats/", "Formats"), ("", fmt["name"]))}
       <article class="card format-page format-{e(fmt['slug'])}">
         <img class="inline-art" src="{art[0]}" alt="{e(art[1])}" />
         <p class="kicker">{e(fmt['short'])}</p>
-        <h2>{e(fmt['name'])}</h2>
+        <h1>{e(fmt['name'])} decklists</h1>
         <p class="flavor">{e(fmt.get('flavor') or '')}</p>
         <p>{e(fmt['blurb'])}</p>
+        {commander_hub}
         <p class="muted"><a href="{e(fmt['official'])}" target="_blank" rel="noopener">Official {e(fmt['name'])} page</a> ·
         <a href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener">Aug 10, 2026 banned &amp; restricted</a></p>
         {color_section(fmt_decks, fmt['slug'])}
         <div class="section-title" style="margin-top:28px">
-          <h3>Recent lists</h3>
-          <span class="muted">{len(fmt_decks)} from Aug–Sep 2026</span>
+          <h2>Recent lists</h2>
+          <span class="muted">{len(fmt_decks)} from {e(window)}</span>
         </div>
         <div class="filter-bar" aria-label="Filter by color">
           <button type="button" data-color="all">All</button>
@@ -917,6 +983,139 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
           <button type="button" data-color="G">Green</button>
         </div>
         <div class="recent-list">{items or '<p class="muted">Lists for this format will land here as public tables post. Until then, use the official events links above.</p>'}</div>
+      </article>
+    </main>
+""" + footer()
+
+
+def commander_groups(decks: list[dict]) -> list[tuple[str, list[dict]]]:
+    cmd = [d for d in decks if d["format"] == "commander"]
+    by = defaultdict(list)
+    for d in cmd:
+        by[d["archetype"]].append(d)
+    ranked = sorted(by.items(), key=lambda kv: (-len(kv[1]), kv[0].lower()))
+    return ranked[:100]
+
+
+def commander_url(name: str) -> str:
+    return f"/commanders/{slugify(name)}.html"
+
+
+def page_commanders_index(decks: list[dict]) -> str:
+    groups = commander_groups(decks)
+    tiles = ""
+    for name, rows in groups:
+        sample = rows[0]
+        art = art_for(sample, "small")
+        colors = sample.get("colors") or ""
+        tiles += f"""<a class="leader-tile" href="{commander_url(name)}">
+          <img src="{e(art[0])}" alt="{e(art[1] if not art[0].startswith('/img/art/') else '')}" />
+          <div>
+            <div class="name">{e(name)}</div>
+            <p class="flavor">{e(sample.get('combo') or '')} · {pip_html(colors)}</p>
+            <div class="meta">{len(rows)} lists</div>
+          </div>
+        </a>"""
+    extra = json_ld(breadcrumb_ld([("/commanders/", "Commanders")])) + json_ld({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Commander legends",
+        "url": SITE + "/commanders/",
+        "numberOfItems": len(groups),
+        "mainEntity": {
+            "@type": "ItemList",
+            "numberOfItems": len(groups),
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": i + 1,
+                    "name": name,
+                    "url": SITE + commander_url(name),
+                }
+                for i, (name, _rows) in enumerate(groups)
+            ],
+        },
+    }) + json_ld({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is this EDH or Duel Commander?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "These lists are public Magic Online Duel Commander (1v1) league tables. The same 100-card singleton and color-identity rules apply at a four-player Commander night.",
+                },
+            },
+            {
+                "@type": "Question",
+                "name": "How does a commander get a page on this site?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Every unique legend that posted in the June–September 2026 tables we scraped gets a landing page with every list for that name.",
+                },
+            },
+        ],
+    })
+    return head(
+        "Commander decklists by legend | MTG Decklists",
+        f"{len(groups)} Commander (EDH / Duel Commander) legends with public lists from June–September 2026. Color identity, recent tables, and TCGplayer buy links.",
+        f"{SITE}/commanders/",
+        extra=extra,
+        image="/img/art/lore-forest-cathedral.jpg",
+        image_alt="Original forest cathedral illustration",
+    ) + header("commanders") + f"""
+    <main class="single" id="main" role="main">
+      {crumb(("/commanders/", "Commanders"))}
+      <article class="card">
+        <h1>Commanders</h1>
+        <p class="flavor">One legend. Ninety-nine unique spells. A table of stories.</p>
+        <p>Every page is a commander that posted in public Duel Commander tables on this site. Open a legend to see every list, color identity, and a buy link. Full format tables live on the <a href="/formats/commander.html">Commander format page</a>.</p>
+        <p class="muted">{len(groups)} legends · {sum(len(r) for _, r in groups)} lists</p>
+        <div class="leader-grid commander-grid">{tiles}</div>
+        <div class="faq" style="margin-top:28px">
+          <details open><summary>Is this EDH or Duel Commander?</summary><p>Public Magic Online Duel Commander (1v1) league tables. Color identity and the 100-card singleton rule are the same as a four-player Commander night; the lists themselves are the 1v1 dialect.</p></details>
+          <details><summary>How does a commander get a page?</summary><p>Every unique legend in the June–September 2026 tables on this site gets a landing page. Open a name to see every list, then buy the pile on TCGplayer.</p></details>
+        </div>
+      </article>
+    </main>
+""" + footer()
+
+
+def page_commander(name: str, rows: list[dict]) -> str:
+    sample = rows[0]
+    art = art_for(sample, "large")
+    colors = sample.get("colors") or ""
+    combo = sample.get("combo") or combo_label(colors)
+    items = "".join(recent_item(d) for d in rows)
+    extra = json_ld(breadcrumb_ld([("/commanders/", "Commanders"), (commander_url(name), name)])) + json_ld({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": f"{name} Commander decklists",
+        "url": SITE + commander_url(name),
+        "about": name,
+        "numberOfItems": len(rows),
+    })
+    return head(
+        f"{name} Commander decklists ({len(rows)}) | MTG Decklists",
+        f"{name} is a {combo} Commander. {len(rows)} public Duel Commander lists from June–September 2026, with color identity and TCGplayer buy links.",
+        SITE + commander_url(name),
+        image=art[0],
+        extra=extra,
+        og_type="article",
+        image_alt=art[1] or name,
+    ) + header("commanders") + f"""
+    <main class="single" id="main" role="main">
+      {crumb(("/commanders/", "Commanders"), ("", name))}
+      <article class="card">
+        <img class="inline-art card-face" src="{e(art[0])}" alt="{e(art[1])}" />
+        <p class="kicker">Commander · {e(combo)}</p>
+        <h1>{e(name)}</h1>
+        <p class="flavor">A 100-card singleton legend. Color identity {pip_html(colors)} {e(colors or 'C')}.</p>
+        <p>{e(name)} posted {len(rows)} time{'s' if len(rows) != 1 else ''} in the public Duel Commander tables on this site. The same 100-card singleton rules apply at a four-player Commander night — these lists are the 1v1 league dialect of that format.</p>
+        <p><a href="/formats/commander.html">All Commander lists</a> · <a href="/guides/commander.html">Commander guide</a></p>
+        <div class="section-title" style="margin-top:22px"><h2>Recent lists</h2><span class="muted">{len(rows)}</span></div>
+        <div class="recent-list">{items}</div>
       </article>
     </main>
 """ + footer()
@@ -944,20 +1143,38 @@ def page_deck(deck: dict) -> str:
     all_cards = (deck.get("main") or []) + (deck.get("side") or [])
     buy = partner_mass(all_cards)
     fmt = FMT_BY[deck["format"]]
+    extra = json_ld(breadcrumb_ld([
+        ("/formats/", "Formats"),
+        (f"/formats/{deck['format']}.html", fmt["name"]),
+        (deck_url(deck), deck["archetype"]),
+    ])) + json_ld({
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": f"{deck['archetype']} — {deck.get('player') or 'list'}",
+        "datePublished": deck.get("date") or TODAY,
+        "dateModified": TODAY,
+        "author": {"@type": "Person", "name": deck.get("player") or "Unknown"},
+        "about": deck["archetype"],
+        "isPartOf": {"@type": "WebSite", "name": "MTG Decklists", "url": SITE + "/"},
+    })
     return head(
-        f"{deck['archetype']} — {deck['player'] or 'list'} ({fmt['name']}) | MTG Decklists",
-        f"{fmt['name']} {deck['archetype']} by {deck['player'] or 'unknown'} from {deck['event']} on {deck['date']}.",
+        f"{deck['archetype']} decklist — {deck['player'] or 'list'} ({fmt['name']}) | MTG Decklists",
+        f"{fmt['name']} {deck['archetype']} by {deck['player'] or 'unknown'} from {deck['event']} on {deck['date']}. Full main deck and sideboard with TCGplayer buy links.",
         SITE + deck_url(deck),
         image=art[0],
+        extra=extra,
+        og_type="article",
+        image_alt=art[1] or deck["archetype"],
     ) + header("formats") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/formats/", "Formats"), (f"/formats/{deck['format']}.html", fmt["name"]), ("", deck["archetype"]))}
       <article class="card">
         <img class="{card_class}" src="{e(art[0])}" alt="{e(art[1])}" />
-        <h2>{e(deck['archetype'])}</h2>
+        <h1>{e(deck['archetype'])}</h1>
         <p class="flavor">{e(deck.get('combo') or 'A constructed list')} · {e(fmt['name'])}</p>
         <p class="muted">{e(fmt['name'])} · {e(deck['event'])} · {e(deck['place'] or '')} · {e(deck['date'])}</p>
         <p><strong>{e(deck['player'] or 'Unknown pilot')}</strong> · {pip_html(deck.get('colors') or '')} {e(deck.get('combo') or '')}</p>
+        {f'<p><a href="{commander_url(deck["archetype"])}">All {e(deck["archetype"])} Commander lists</a></p>' if deck["format"] == "commander" else ""}
         <div class="buy-row">
           <a class="buy-tcg" data-buy-deck href="{e(buy)}" target="_blank" rel="noopener nofollow sponsored">Buy list on TCGplayer</a>
           <button class="copy-sim" type="button" data-copy-deck>Copy list</button>
@@ -1010,7 +1227,7 @@ def page_shop(slug=None) -> str:
     <main class="single" id="main" role="main">
       {crumbs}
       <article class="card">
-        <h2>{e(h)}</h2>
+        <h1>{e(h)}</h1>
         <p>{e(intro)}</p>
         {''.join(blocks)}
         <div class="section-title" style="margin-top:28px"><h3>Also in the shop</h3></div>
@@ -1042,6 +1259,7 @@ GUIDES = [
     ("wizards-of-the-coast", "Wizards of the Coast", "Publisher of Magic. This fan site is not affiliated with WotC or Hasbro."),
     ("how-to-read-a-list", "How to read a decklist", "Main deck first, sideboard after the blank line. Buy links open TCGplayer with our affiliate tag."),
     ("affiliates", "Affiliate links", "Amazon Associates on shop gear. TCGplayer partner links on every card and Buy list button."),
+    ("advertising", "Ads and ad networks", "Google AdSense is live. Nitro, Media.net, Playwire, and TCG affiliates are the next networks this site can apply for."),
     ("fair-use", "Fair use and trademarks", "Tournament reporting and commentary. Original illustrations stand in for Snapcaster-like, Goblin Guide-like, and Lightning Bolt-like art."),
 ]
 
@@ -1055,7 +1273,7 @@ def page_guides_index() -> str:
     <main class="single" id="main" role="main">
       {crumb(("/guides/", "Guides"))}
       <article class="card">
-        <h2>Spellbook &amp; guides</h2>
+        <h1>Spellbook &amp; guides</h1>
         <p class="flavor">A short library of formats, colors, and table manners — rewritten for this fan site, not copied from a novel.</p>
         <p>Topic pages for formats, events, the color pie, and how this site uses affiliates.</p>
         <div class="art-strip">
@@ -1096,7 +1314,36 @@ def guide_extra(slug: str) -> str:
         return "<div class='combo-grid guild-lore'>" + "".join(bits) + "</div>"
     if slug in FMT_BY:
         fmt = FMT_BY[slug]
-        return f"<p class='flavor'>{e(fmt.get('flavor') or '')}</p><p>{e(fmt['blurb'])}</p>"
+        more = ""
+        if slug == "commander":
+            more = '<p><a href="/commanders/">Browse Commander lists by legend</a> — one SEO page per commander on this site.</p>'
+        return f"<p class='flavor'>{e(fmt.get('flavor') or '')}</p><p>{e(fmt['blurb'])}</p>{more}"
+    if slug == "advertising":
+        return """
+        <div class="section-title"><h2>What is live today</h2></div>
+        <ul>
+          <li><strong>Google AdSense</strong> (publisher <code>ca-pub-1074015774205047</code>) — Auto ads on every page. No traffic minimum. Already in <code>ads.txt</code>.</li>
+          <li><strong>Amazon Associates</strong> — Shop sleeves, dice, playmats, and boxes. Same short links as One Piece Deck Base.</li>
+          <li><strong>TCGplayer partner</strong> — Every card and “Buy list” button. Partner <code>c/7670706/1780961/21018</code>.</li>
+        </ul>
+        <div class="section-title" style="margin-top:22px"><h2>Display networks this site can apply for</h2></div>
+        <p>Do not paste a second display network over AdSense without that network’s approval. Most premium networks <em>replace</em> AdSense rather than stack with it.</p>
+        <div class="list">
+          <a class="item" href="https://nitropay.com/publishers/" target="_blank" rel="noopener"><div><div>Nitro (NitroPay)</div><div class="muted">Best TCG fit. Overwolf’s gaming network already serves Moxfield, Magicspoiler, and other tabletop fan sites. Apply when traffic is real; they handle gaming-safe ads and typically replace AdSense.</div></div><div class="link">Apply →</div></a>
+          <a class="item" href="https://www.media.net/publishers/" target="_blank" rel="noopener"><div><div>Media.net</div><div class="muted">Yahoo/Bing contextual ads. No official traffic minimum. English-language, text-heavy pages. Can run as an AdSense alternative, not a stacked overlay.</div></div><div class="link">Apply →</div></a>
+          <a class="item" href="https://www.playwire.com/publishers" target="_blank" rel="noopener"><div><div>Playwire</div><div class="muted">Gaming and entertainment header bidding. Strong for fan sites once sessions are steady. Replaces AdSense rather than stacking on top of it.</div></div><div class="link">Apply →</div></a>
+          <a class="item" href="https://www.ezoic.com/" target="_blank" rel="noopener"><div><div>Ezoic</div><div class="muted">Header bidding + layout tests. Use when the site has steady sessions. Typically replaces AdSense rather than sitting beside it.</div></div><div class="link">Apply →</div></a>
+          <a class="item" href="https://www.publift.com/" target="_blank" rel="noopener"><div><div>Publift / Setupad</div><div class="muted">Managed header bidding once pageviews grow. Higher RPM than raw AdSense; application required.</div></div><div class="link">Apply →</div></a>
+        </div>
+        <div class="section-title" style="margin-top:22px"><h2>TCG affiliates (no display ads)</h2></div>
+        <ul>
+          <li><a href="https://www.cardkingdom.com/affiliates" target="_blank" rel="noopener">Card Kingdom affiliates</a> — Paper singles. Complements TCGplayer.</li>
+          <li><a href="https://www.coolstuffinc.com/" target="_blank" rel="noopener">CoolStuffInc</a> — Paper singles and sealed product.</li>
+          <li><a href="https://partner.ebay.com/" target="_blank" rel="noopener">eBay Partner Network</a> — Singles and collections.</li>
+        </ul>
+        <p>After Nitro or Media.net approval, add their lines to <code>ads.txt</code> and a snippet in the site header. Until then, AdSense Auto ads plus the two affiliate programs are the stack.</p>
+        <p class="muted">Skip popunder / push networks (Monetag, Adsterra pop, HilltopAds) — they hurt a fan TCG site’s reputation and AdSense standing.</p>
+        """
     return ""
 
 
@@ -1117,7 +1364,7 @@ def page_guide(slug, name, blurb, decks) -> str:
       {crumb(("/guides/", "Guides"), ("", name))}
       <article class="card">
         <img class="inline-art" src="{art[0]}" alt="{e(art[1])}" />
-        <h2>{e(name)}</h2>
+        <h1>{e(name)}</h1>
         <p>{e(blurb)}</p>
         {extra}
         <p>Lists live on the <a href="/formats/">format pages</a>. Shop gear uses the same Amazon short links as One Piece Deck Base. Card buy buttons use the same TCGplayer partner ID.</p>
@@ -1137,7 +1384,7 @@ def page_events() -> str:
     <main class="single" id="main" role="main">
       {crumb(("", "Events"))}
       <article class="card">
-        <h2>Events and schedules</h2>
+        <h1>Events and schedules</h1>
         <p class="flavor">The competitive calendar is the other half of the spellbook — RCQs, Regional Championships, and Arena weekends.</p>
         <p>These are official Wizards / Magic.gg links. We do not run events.</p>
         <div class="list">
@@ -1173,7 +1420,7 @@ def page_rules() -> str:
     <main class="single" id="main" role="main">
       {crumb(("", "Rules"))}
       <article class="card policy">
-        <h2>Formats and the banlist</h2>
+        <h1>Formats and the banlist</h1>
         <img class="inline-art" src="/img/art/art-crimson-bolt.jpg" alt="Original crimson bolt illustration" />
         <p class="flavor">Every format is a different promise about which cards are legal — and which stories still get to be told.</p>
         <p>Lists on this site are public constructed tables from August and September 2026 unless a page says otherwise. Commander pages are Duel Commander leagues (still 100-card singleton). Pick a format first — lists are not mixed on the homepage.</p>
@@ -1209,7 +1456,7 @@ def page_privacy() -> str:
     <main class="single" id="main" role="main">
       {crumb(("", "Privacy Policy"))}
       <article class="card policy">
-        <h2>Privacy Policy</h2>
+        <h1>Privacy Policy</h1>
         <p>Last updated: September 7, 2026</p>
         <p>MTG Decklists ("we," "us," or "this site") respects your privacy. This Privacy Policy explains what information we collect when you visit mtgdecklists.com, how we use it, and the choices you have.</p>
         <section>
@@ -1226,6 +1473,7 @@ def page_privacy() -> str:
         <section>
           <h3>Advertising</h3>
           <p>This site displays advertisements served by Google AdSense (publisher <code>ca-pub-1074015774205047</code>). Google and its partners may use cookies to serve ads based on your prior visits. You can opt out of personalized advertising in Google's Ads Settings.</p>
+          <p>We may later add a gaming-safe display network such as NitroPay or Media.net. Those networks would appear in <code>ads.txt</code> and on the <a href="/guides/advertising.html">ads and ad networks</a> page if they go live. We will not stack a second display network over AdSense without that network’s approval.</p>
         </section>
         <section>
           <h3>Affiliate partnerships</h3>
@@ -1269,12 +1517,12 @@ def page_search() -> str:
     <main class="single" id="main" role="main">
       {crumb(("", "Search"))}
       <article class="card">
-        <h2>Search the spellbook</h2>
+        <h1>Search the spellbook</h1>
         <p class="flavor">Name a color, a player, a card, or a format — the index is built from the lists on this site.</p>
         <form class="site-search" method="get" action="/search.html" role="search">
           <label class="site-search-label" for="q">Search MTG decklists</label>
           <div class="site-search-row">
-            <input id="q" type="search" name="q" placeholder="Izzet, Landfall, Solitude, Baltimore…" />
+            <input id="q" type="search" name="q" placeholder="Brigid, Izzet, Landfall, Solitude…" />
             <button type="submit">Search</button>
           </div>
         </form>
@@ -1314,7 +1562,7 @@ def page_tier(decks: list[dict]) -> str:
     <main class="single" id="main" role="main">
       {crumb(("", "Tier List"))}
       <article class="card">
-        <h2>Tier list</h2>
+        <h1>Tier list</h1>
         <p class="flavor">Not a single global ranking — each row is a format, counted from the public tables on this site.</p>
         <p>Portraits are a 4-of (or face card) from a recent list of that archetype. Counts are from Aug–Sep 2026 tables on this site.</p>
         <div class="tier-board">{''.join(rows)}</div>
@@ -1330,9 +1578,9 @@ def page_404() -> str:
     return head("Page not found | MTG Decklists", "That URL is not on MTG Decklists.", f"{SITE}/404.html") + header() + f"""
     <main class="single" id="main" role="main">
       <article class="card">
-        <h2>Missing page</h2>
+        <h1>Missing page</h1>
         <p class="flavor">The spell fizzled. That URL is not in this spellbook.</p>
-        <p>Try <a href="/">home</a>, <a href="/formats/">formats</a>, or <a href="/search.html">search</a>.</p>
+        <p>Try <a href="/">home</a>, <a href="/commanders/">commanders</a>, <a href="/formats/">formats</a>, or <a href="/search.html">search</a>.</p>
       </article>
     </main>
 """ + footer()
@@ -1405,6 +1653,17 @@ def main() -> None:
     write(ROOT / "formats" / "index.html", page_formats_index(decks))
     for fmt in FORMATS:
         write(ROOT / "formats" / f"{fmt['slug']}.html", page_format(fmt, decks))
+    write(ROOT / "commanders" / "index.html", page_commanders_index(decks))
+    keep_cmd = set()
+    for name, rows in commander_groups(decks):
+        path = ROOT / "commanders" / f"{slugify(name)}.html"
+        write(path, page_commander(name, rows))
+        keep_cmd.add(path.resolve())
+    cmd_root = ROOT / "commanders"
+    if cmd_root.exists():
+        for path in cmd_root.glob("*.html"):
+            if path.name != "index.html" and path.resolve() not in keep_cmd:
+                path.unlink()
     keep_pages = set()
     for deck in decks:
         path = ROOT / "decklists" / deck["format"] / f"{deck['page_slug']}.html"
@@ -1456,24 +1715,51 @@ def main() -> None:
             "url": f"/formats/{fmt['slug']}.html",
             "hay": f"{fmt['name']} {fmt['short']} {fmt['blurb']}".lower(),
         })
+    for name, rows in commander_groups(decks):
+        index.append({
+            "title": f"{name} Commander",
+            "meta": f"Commander · {len(rows)} lists",
+            "url": commander_url(name),
+            "hay": f"{name} commander edh duel {rows[0].get('combo') or ''}".lower(),
+        })
+    index.append({
+        "title": "Commanders",
+        "meta": "Commander lists by legend",
+        "url": "/commanders/",
+        "hay": "commander edh duel commander legends",
+    })
+    for slug, name, blurb in GUIDES:
+        index.append({
+            "title": name,
+            "meta": "Guide",
+            "url": f"/guides/{slug}.html",
+            "hay": f"{name} {blurb}".lower(),
+        })
     write(ROOT / "data" / "search.json", json.dumps(index))
 
     urls = [
-        f"{SITE}/", f"{SITE}/formats/", f"{SITE}/shop/", f"{SITE}/guides/",
+        f"{SITE}/", f"{SITE}/formats/", f"{SITE}/commanders/", f"{SITE}/shop/", f"{SITE}/guides/",
         f"{SITE}/events.html", f"{SITE}/format.html", f"{SITE}/privacy.html",
         f"{SITE}/search.html", f"{SITE}/tier-list.html",
     ]
     for fmt in FORMATS:
         urls.append(f"{SITE}/formats/{fmt['slug']}.html")
+    for name, _rows in commander_groups(decks):
+        urls.append(SITE + commander_url(name))
+    for slug, *_ in SHOP:
+        urls.append(f"{SITE}/shop/{slug}.html")
+    for slug, *_ in GUIDES:
+        urls.append(f"{SITE}/guides/{slug}.html")
     for d in decks:
         urls.append(SITE + deck_url(d))
     sitemap = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for u in urls:
-        sitemap.append(f"<url><loc>{e(u)}</loc><lastmod>{TODAY}</lastmod></url>")
+    for i, u in enumerate(urls):
+        pri = "1.0" if u == SITE + "/" else ("0.9" if "/formats/" in u or "/commanders" in u else ("0.7" if "/guides/" in u else "0.6"))
+        sitemap.append(f"<url><loc>{e(u)}</loc><lastmod>{TODAY}</lastmod><changefreq>weekly</changefreq><priority>{pri}</priority></url>")
     sitemap.append("</urlset>")
     write(ROOT / "sitemap.xml", "\n".join(sitemap))
     write(ROOT / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://mtgdecklists.com/sitemap.xml\n")
-    write(ROOT / "ads.txt", "google.com, pub-1074015774205047, DIRECT, f08c47fec0942fa0\n")
+    write(ROOT / "ads.txt", "# Google AdSense (live). Add NitroPay / Media.net lines after approval.\ngoogle.com, pub-1074015774205047, DIRECT, f08c47fec0942fa0\n")
     write(ROOT / "site.webmanifest", json.dumps({
         "name": "MTG Decklists",
         "short_name": "MTG Lists",
