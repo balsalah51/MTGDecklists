@@ -34,6 +34,8 @@
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 
+  document.documentElement.classList.add("is-ready");
+
   var params = new URLSearchParams(location.search);
   var color = params.get("color");
   if (color) {

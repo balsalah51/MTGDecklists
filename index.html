@@ -15,7 +15,10 @@
   </script>
   <title>MTG Decklists | Magic: The Gathering lists by format</title>
   <meta name="description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-3" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-4" />
   <link rel="canonical" href="https://mtgdecklists.com/" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
@@ -38,13 +41,14 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MTG Decklists","url":"https://mtgdecklists.com/","potentialAction":{"@type":"SearchAction","target":"https://mtgdecklists.com/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to lists</a>
   <div class="wrap">
     <header>
       <a class="brand" href="/">
         <img class="logo" src="/img/mtg-logo-192.png" width="56" height="56" alt="MTG Decklists" />
         <div>
           <h1>MTG Decklists</h1>
-          <div class="subtitle">Commander · Standard · Modern</div>
+          <div class="subtitle">Commander · Standard · Modern — five colors, every format</div>
         </div>
       </a>
       <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
@@ -61,11 +65,13 @@
         <a href="/search.html">Search</a>
         <span class="muted" title="Discord coming soon">Discord</span>
       </nav>
+      <div class="header-mana" aria-hidden="true"><img src="/img/mana/mana-white.png" alt="" width="18" height="18" /><img src="/img/mana/mana-blue.png" alt="" width="18" height="18" /><img src="/img/mana/mana-black.png" alt="" width="18" height="18" /><img src="/img/mana/mana-red.png" alt="" width="18" height="18" /><img src="/img/mana/mana-green.png" alt="" width="18" height="18" /></div>
     </header>
 
-    <main class="single home" role="main">
+    <main class="single home" id="main" role="main">
       <section class="home-splash" aria-label="MTG Decklists">
-        <img class="home-splash-bg" src="/img/mtg-banner-hero.jpg" alt="Original MTG Decklists banner with a flashback mage, goblin scout, and crimson bolt" width="1400" height="636" fetchpriority="high" decoding="async">
+        <img class="home-splash-bg" src="/img/mtg-banner-hero.jpg" alt="Original MTG Decklists banner with a flashback mage, goblin scout, crimson bolt, and five-color pentagon" width="1400" height="636" fetchpriority="high" decoding="async">
+        <div class="home-splash-veil" aria-hidden="true"></div>
         <div class="home-splash-art" aria-hidden="true">
           <img src="/img/art/art-flashback-mage.jpg" alt="" />
           <img src="/img/art/art-goblin-scout.jpg" alt="" />
@@ -73,10 +79,11 @@
         </div>
         <div class="home-splash-bar">
           <div>
-            <h2>MTG Decklists</h2>
+            <p class="kicker">A fan spellbook of public tables</p>
+            <h2>Shuffle the colors. Read the lists.</h2>
             <p class="home-splash-formats">Commander · Standard · Modern</p>
           </div>
-          <p>Pick a format first. Colors, popular color combos, and that format's August–September 2026 lists live on the format page.</p>
+          <p>Pick a format first. Each page opens on the color pie, then that format's August–September 2026 tournament lists.</p>
         </div>
       </section>
 
@@ -91,14 +98,17 @@
 
       <nav class="home-big3" aria-label="Main sections">
         <a class="home-big home-big-tier" href="/tier-list.html">
+          <span class="home-big-kicker">The metagame</span>
           <span class="home-big-title">Tier List</span>
           <span class="home-big-note">August–September 2026 metas by format</span>
         </a>
         <a class="home-big home-big-leaders" href="#formats">
+          <span class="home-big-kicker">Choose a plane</span>
           <span class="home-big-title">Formats</span>
-          <span class="home-big-note">Click a format, then see that format's lists</span>
+          <span class="home-big-note">Open a format, then see that format's lists</span>
         </a>
         <a class="home-big home-big-shop" href="/shop/">
+          <span class="home-big-kicker">Table gear</span>
           <span class="home-big-title">Shop</span>
           <span class="home-big-note">Sleeves, dice, playmats, and deck boxes</span>
         </a>
@@ -114,53 +124,126 @@
       </nav>
 
       <form class="site-search home-search" method="get" action="/search.html" role="search">
-        <label class="site-search-label" for="home-q">Search MTG decklists</label>
+        <label class="site-search-label" for="home-q">Search the spellbook</label>
         <div class="site-search-row">
           <input id="home-q" type="search" name="q" placeholder="Format, color, player, archetype, or card" aria-label="Search MTG decklists" />
           <button type="submit">Search</button>
         </div>
       </form>
 
+      <section class="lore-pie" id="color-pie">
+        <div class="lore-intro">
+          <p class="home-leaders-kicker">The color pie</p>
+          <h3>Five colors. Infinite lists.</h3>
+          <p>White seeks peace. Blue seeks knowledge. Black seeks power. Red seeks freedom. Green seeks growth. Every list on this site is one of those philosophies, shuffled and sleeved.</p>
+          <p class="flavor">Original landscapes stand in for plains, islands, swamps, mountains, and forests — not official card art.</p>
+        </div>
+        <div class="pie-grid"><a class="pie-card pie-w" href="/guides/colors.html#white">
+          <img src="/img/art/lore-plains-citadel.jpg" alt="lore plains citadel" />
+          <div class="pie-copy">
+            <img class="pip" src="/img/mana/mana-white.png" alt="" />
+            <h4>White</h4>
+            <p>Peace, order, and the open plains.</p>
+          </div>
+        </a><a class="pie-card pie-u" href="/guides/colors.html#blue">
+          <img src="/img/art/lore-island-spires.jpg" alt="lore island spires" />
+          <div class="pie-copy">
+            <img class="pip" src="/img/mana/mana-blue.png" alt="" />
+            <h4>Blue</h4>
+            <p>Knowledge, patience, and the turning tide.</p>
+          </div>
+        </a><a class="pie-card pie-b" href="/guides/colors.html#black">
+          <img src="/img/art/lore-swamp-lantern.jpg" alt="lore swamp lantern" />
+          <div class="pie-copy">
+            <img class="pip" src="/img/mana/mana-black.png" alt="" />
+            <h4>Black</h4>
+            <p>Ambition, sacrifice, and the lantern in the fog.</p>
+          </div>
+        </a><a class="pie-card pie-r" href="/guides/colors.html#red">
+          <img src="/img/art/lore-mountain-forge.jpg" alt="lore mountain forge" />
+          <div class="pie-copy">
+            <img class="pip" src="/img/mana/mana-red.png" alt="" />
+            <h4>Red</h4>
+            <p>Freedom, impulse, and the mountain&#x27;s fire.</p>
+          </div>
+        </a><a class="pie-card pie-g" href="/guides/colors.html#green">
+          <img src="/img/art/lore-forest-cathedral.jpg" alt="lore forest cathedral" />
+          <div class="pie-copy">
+            <img class="pip" src="/img/mana/mana-green.png" alt="" />
+            <h4>Green</h4>
+            <p>Growth, instinct, and the forest&#x27;s strength.</p>
+          </div>
+        </a></div>
+      </section>
+
       <section class="home-leaders-flow" id="formats">
         <div class="home-leaders-intro">
           <p class="home-leaders-kicker">The formats</p>
           <div class="home-leaders-intro-row">
             <div>
-              <h3>Formats</h3>
-              <p>Pick a format first. Each format page opens on colors and popular color combos, then that format's recent lists.</p>
+              <h3>Pick a format first</h3>
+              <p>Commander, Standard, and Modern lead the banner. Pioneer, Legacy, Vintage, and Pauper sit beside them. Each page opens on colors, then that format's recent lists.</p>
             </div>
             <a href="/formats/">All format pages →</a>
           </div>
         </div>
         <div class="card home-panel">
-          <div class="format-grid"><a class="format-tile" href="/formats/standard.html">
-          <div class="name">Standard</div>
-          <div class="meta">Rotating 60-card constructed</div>
-          <div class="meta">200 recent lists</div>
-        </a><a class="format-tile" href="/formats/modern.html">
-          <div class="name">Modern</div>
-          <div class="meta">Non-rotating from Eighth Edition on</div>
-          <div class="meta">200 recent lists</div>
-        </a><a class="format-tile" href="/formats/pioneer.html">
-          <div class="name">Pioneer</div>
-          <div class="meta">Return to Ravnica forward</div>
-          <div class="meta">200 recent lists</div>
-        </a><a class="format-tile" href="/formats/commander.html">
-          <div class="name">Commander</div>
-          <div class="meta">100-card singleton, most-played format</div>
-          <div class="meta">200 recent lists</div>
-        </a><a class="format-tile" href="/formats/legacy.html">
-          <div class="name">Legacy</div>
-          <div class="meta">Vintage-adjacent, banned list not restricted list</div>
-          <div class="meta">200 recent lists</div>
-        </a><a class="format-tile" href="/formats/vintage.html">
-          <div class="name">Vintage</div>
-          <div class="meta">The original constructed format</div>
-          <div class="meta">200 recent lists</div>
-        </a><a class="format-tile" href="/formats/pauper.html">
-          <div class="name">Pauper</div>
-          <div class="meta">Commons only</div>
-          <div class="meta">200 recent lists</div>
+          <div class="format-grid"><a class="format-tile format-standard" href="/formats/standard.html">
+          <img class="format-tile-art" src="/img/art/lore-plains-citadel.jpg" alt="" />
+          <div class="format-tile-body">
+            <div class="name">Standard</div>
+            <p class="flavor">The living plane — today&#x27;s cards, this year&#x27;s story.</p>
+            <div class="meta">Rotating 60-card constructed</div>
+            <div class="meta">400 recent lists</div>
+          </div>
+        </a><a class="format-tile format-modern" href="/formats/modern.html">
+          <img class="format-tile-art" src="/img/art/art-flashback-mage.jpg" alt="" />
+          <div class="format-tile-body">
+            <div class="name">Modern</div>
+            <p class="flavor">A twenty-year library of staples, still being rewritten.</p>
+            <div class="meta">Non-rotating from Eighth Edition on</div>
+            <div class="meta">400 recent lists</div>
+          </div>
+        </a><a class="format-tile format-pioneer" href="/formats/pioneer.html">
+          <img class="format-tile-art" src="/img/art/lore-island-spires.jpg" alt="" />
+          <div class="format-tile-body">
+            <div class="name">Pioneer</div>
+            <p class="flavor">Where the guilds still remember their first war.</p>
+            <div class="meta">Return to Ravnica forward</div>
+            <div class="meta">400 recent lists</div>
+          </div>
+        </a><a class="format-tile format-commander" href="/formats/commander.html">
+          <img class="format-tile-art" src="/img/art/lore-forest-cathedral.jpg" alt="" />
+          <div class="format-tile-body">
+            <div class="name">Commander</div>
+            <p class="flavor">One legend. Ninety-nine unique spells. A table of stories.</p>
+            <div class="meta">100-card singleton, most-played format</div>
+            <div class="meta">314 recent lists</div>
+          </div>
+        </a><a class="format-tile format-legacy" href="/formats/legacy.html">
+          <img class="format-tile-art" src="/img/art/lore-swamp-lantern.jpg" alt="" />
+          <div class="format-tile-body">
+            <div class="name">Legacy</div>
+            <p class="flavor">The eternal battlefield, minus what the ban list forbids.</p>
+            <div class="meta">Vintage-adjacent, banned list not restricted list</div>
+            <div class="meta">400 recent lists</div>
+          </div>
+        </a><a class="format-tile format-vintage" href="/formats/vintage.html">
+          <img class="format-tile-art" src="/img/art/art-crimson-bolt.jpg" alt="" />
+          <div class="format-tile-body">
+            <div class="name">Vintage</div>
+            <p class="flavor">Power is restricted, never forgotten.</p>
+            <div class="meta">The original constructed format</div>
+            <div class="meta">400 recent lists</div>
+          </div>
+        </a><a class="format-tile format-pauper" href="/formats/pauper.html">
+          <img class="format-tile-art" src="/img/art/art-goblin-scout.jpg" alt="" />
+          <div class="format-tile-body">
+            <div class="name">Pauper</div>
+            <p class="flavor">The most democratic constructed format — commons only.</p>
+            <div class="meta">Commons only</div>
+            <div class="meta">400 recent lists</div>
+          </div>
         </a></div>
         </div>
       </section>
@@ -169,6 +252,7 @@
       <p class="amazon-disclosure-line">As an Amazon Associate I earn from qualifying purchases. TCGplayer links are affiliate links.</p>
     </main>
     <footer>
+      <span class="footer-flavor">A fan spellbook of public tables.</span>
       © <span id="year">2026</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
       <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
@@ -176,7 +260,7 @@
       <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-2"></script>
+  <script src="/js/site.js?v=mtg-3"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>
