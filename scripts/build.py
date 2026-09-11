@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://mtgdecklists.com"
 TODAY = "2026-09-11"
 YEAR = "2026"
+TARGET_PER_FORMAT = 400
 
 FORMATS = [
     {
@@ -22,77 +23,91 @@ FORMATS = [
         "name": "Standard",
         "short": "Rotating 60-card constructed",
         "kicker": "The living story",
-        "flavor": "Every rotation is a new chapter of the Multiverse.",
+        "flavor": "The living plane — today's cards, this year's story.",
         "lore": "Standard is Magic’s current novel — the sets still on shelves, rotating when the next world arrives. From Wilds of Eldraine through The Hobbit, the next tide is Nauctis: The Sunken Realm in early 2027.",
         "blurb": "Current Standard uses Wilds of Eldraine forward. There is no fall 2026 rotation; the next rotation is with Nauctis: The Sunken Realm in early 2027. Store RCQs through November 29 are Standard constructed.",
         "official": "https://magic.wizards.com/en/formats/standard",
         "popular": True,
+        "art": "/img/art/lore-plains-citadel.jpg",
+        "art_alt": "Original plains citadel illustration",
     },
     {
         "slug": "modern",
         "name": "Modern",
         "short": "Non-rotating from Eighth Edition on",
         "kicker": "Twenty years of thunder",
-        "flavor": "No Time Walk. Plenty of lightning.",
+        "flavor": "A twenty-year library of staples, still being rewritten.",
         "lore": "Modern is the great workshop of the last two decades: Eighth Edition forward, Modern Horizons included. It is the constructed format for the September–October 2026 Regional Championships.",
         "blurb": "Modern is the constructed format for the September–October 2026 Regional Championships that feed the first Pro Tour of 2027. Spotlight: The Hobbit in Dallas (Sept 4–6) was Modern.",
         "official": "https://magic.wizards.com/en/formats/modern",
         "popular": True,
+        "art": "/img/art/art-flashback-mage.jpg",
+        "art_alt": "Original flashback mage illustration",
     },
     {
         "slug": "pioneer",
         "name": "Pioneer",
         "short": "Return to Ravnica forward",
         "kicker": "Guilds still echo",
-        "flavor": "Between the new world and the old memory.",
+        "flavor": "Where the guilds still remember their first war.",
         "lore": "Pioneer begins where Return to Ravnica opened the guildgates. After the Cori-Steel Cutter ban, Izzet spell-slingers and green Cub piles split the August 2026 winner’s metagame.",
         "blurb": "Pioneer sits between Standard and Modern. After the Cori-Steel Cutter ban, Izzet spells shells and green Badgermole Cub piles split the winner's metagame in August 2026.",
         "official": "https://magic.wizards.com/en/formats/pioneer",
         "popular": False,
+        "art": "/img/art/lore-island-spires.jpg",
+        "art_alt": "Original island spires illustration",
     },
     {
         "slug": "commander",
         "name": "Commander",
         "short": "100-card singleton, most-played format",
         "kicker": "One legend, a hundred spells",
-        "flavor": "The most popular table in the Multiverse.",
+        "flavor": "One legend. Ninety-nine unique spells. A table of stories.",
         "lore": "A legendary creature leads a hundred unique cards. Lists here are recent Duel Commander leagues from August–September 2026 — the same singleton spirit as Friday-night Commander.",
         "blurb": "Commander (EDH) is the most popular way to play Magic. Lists here are recent Duel Commander league tables from August–September 2026, plus the same 100-card singleton rules used at Commander night.",
         "official": "https://magic.wizards.com/en/formats/commander",
         "popular": True,
+        "art": "/img/art/lore-forest-cathedral.jpg",
+        "art_alt": "Original forest cathedral illustration",
     },
     {
         "slug": "legacy",
         "name": "Legacy",
         "short": "Vintage-adjacent, banned list not restricted list",
         "kicker": "Eternal, with a graveyard",
-        "flavor": "Force of Will still answers the storm.",
+        "flavor": "The eternal battlefield, minus what the ban list forbids.",
         "lore": "Legacy is eternal constructed with a banned list instead of a museum of restrictions. The Fantasticar was banned on August 10, 2026 — one more name on a very old wall.",
         "blurb": "Legacy is eternal constructed with a banned list. The Fantasticar was banned in Legacy on August 10, 2026.",
         "official": "https://magic.wizards.com/en/formats/legacy",
         "popular": False,
+        "art": "/img/art/lore-swamp-lantern.jpg",
+        "art_alt": "Original swamp lantern illustration",
     },
     {
         "slug": "vintage",
         "name": "Vintage",
         "short": "The original constructed format",
         "kicker": "The first library",
-        "flavor": "Power nine, handled with care.",
+        "flavor": "Power is restricted, never forgotten.",
         "lore": "Vintage is Magic as it was dreamed in 1993: a restricted list, not a wide ban list. The Fantasticar was restricted on August 10, 2026. Museums that still duel.",
         "blurb": "Vintage uses a restricted list instead of a wide ban list. The Fantasticar was restricted in Vintage on August 10, 2026.",
         "official": "https://magic.wizards.com/en/formats/vintage",
         "popular": False,
+        "art": "/img/art/art-crimson-bolt.jpg",
+        "art_alt": "Original crimson bolt illustration",
     },
     {
         "slug": "pauper",
         "name": "Pauper",
         "short": "Commons only",
         "kicker": "The people’s Magic",
-        "flavor": "Every common is a potential champion.",
+        "flavor": "The most democratic constructed format — commons only.",
         "lore": "Pauper is constructed using only cards printed at common. It is clever, loud, and welcoming — Magic without the rare tax. Wizards clarified Secret Lair Zeta commons in September 2026.",
         "blurb": "Pauper is constructed using only cards printed at common. Wizards also clarified Secret Lair Zeta commons legality in September 2026.",
         "official": "https://magic.wizards.com/en/formats/pauper",
         "popular": False,
+        "art": "/img/art/art-goblin-scout.jpg",
+        "art_alt": "Original goblin scout illustration",
     },
 ]
 FMT_BY = {f["slug"]: f for f in FORMATS}
@@ -106,6 +121,78 @@ COLORS = [
 ]
 COLOR_NAME = {c: n for c, n, *_ in COLORS}
 
+COLOR_LORE = [
+    {
+        "code": "W", "name": "White", "pip": "mana-white.png",
+        "art": "/img/art/lore-plains-citadel.jpg",
+        "land": "Plains",
+        "line": "Peace, order, and the open plains.",
+        "body": "White magic builds communities, laws, and shining walls. It heals, protects, and asks a table to stand in the same light. On this site it shows up as soldiers, enchantments, and tidy mana bases.",
+    },
+    {
+        "code": "U", "name": "Blue", "pip": "mana-blue.png",
+        "art": "/img/art/lore-island-spires.jpg",
+        "land": "Islands",
+        "line": "Knowledge, patience, and the turning tide.",
+        "body": "Blue magic wants another draw, another counter, another turn to think. Island lists on this site are the control seats, the tempo mages, and the flashback spells that replay yesterday.",
+    },
+    {
+        "code": "B", "name": "Black", "pip": "mana-black.png",
+        "art": "/img/art/lore-swamp-lantern.jpg",
+        "land": "Swamps",
+        "line": "Ambition, sacrifice, and the lantern in the fog.",
+        "body": "Black magic pays life and cards for power. It is removal, tutors, and the quiet promise that someone else will lose first. Midrange and reanimator lists wear it well.",
+    },
+    {
+        "code": "R", "name": "Red", "pip": "mana-red.png",
+        "art": "/img/art/lore-mountain-forge.jpg",
+        "land": "Mountains",
+        "line": "Freedom, impulse, and the mountain's fire.",
+        "body": "Red magic does not wait. It is goblin scouts, prowess triggers, and the bolt that ends a game before the other player finishes shuffling. Charming, loud, and often 1-drop deep.",
+    },
+    {
+        "code": "G", "name": "Green", "pip": "mana-green.png",
+        "art": "/img/art/lore-forest-cathedral.jpg",
+        "land": "Forests",
+        "line": "Growth, instinct, and the forest's strength.",
+        "body": "Green magic wants more land, larger creatures, and a board that feels like a canopy. Landfall, elves, and ramp lists are its current dialect in Standard and beyond.",
+    },
+]
+
+GUILD_LORE = [
+    ("WU", "Azorius", "Law and structure. Azorius lists want the game to stay on script — counters, flyers, and a tidy end step."),
+    ("UB", "Dimir", "Secrecy and information. Dimir midrange mills, trades, and always has one more answer in hand."),
+    ("BR", "Rakdos", "Pleasure and pain. Rakdos wants to attack, discard, and turn life totals into a countdown."),
+    ("RG", "Gruul", "Instinct and riot. Gruul is stompy creatures, extra lands, and a race the control player did not schedule."),
+    ("GW", "Selesnya", "Community and growth. Selesnya tokens, enchantments, and go-wide boards that look like a festival."),
+    ("WB", "Orzhov", "Debt and devotion. Orzhov drains, taxes, and turns every trade into a better rate."),
+    ("UR", "Izzet", "Genius and impulse. Izzet spells, prowess, and the joy of a stacked trigger on turn three."),
+    ("BG", "Golgari", "Life and decay. Golgari midrange is the graveyard as a second hand."),
+    ("RW", "Boros", "Justice at a sprint. Boros energy, equipment, and the red-white wish to win this combat."),
+    ("GU", "Simic", "Adaptation. Simic grows, draws, and mutates the board until the math is unfair."),
+    ("WUB", "Esper", "The shard of control: white's law, blue's answers, black's cost."),
+    ("UBR", "Grixis", "The shard of ambition: card advantage with a cruel streak."),
+    ("BRG", "Jund", "The shard of survival: midrange that eats whatever is across the table."),
+    ("RGW", "Naya", "The shard of the wild: big creatures and honest combat."),
+    ("GWU", "Bant", "The shard of the citadel: value, blink, and a board that never quite dies."),
+    ("WBG", "Abzan", "Endurance. Abzan is attrition, greasefang engines, and outlasting the loud decks."),
+    ("URW", "Jeskai", "Cunning. Jeskai lessons, tempo, and the spell that is also a creature."),
+    ("BGU", "Sultai", "Cunning from the swamp: graveyards, value, and a long game."),
+    ("RWB", "Mardu", "Speed and sacrifice. Mardu wants the first strike and the last drain."),
+    ("GUR", "Temur", "Elemental tempo: card draw strapped to a large green threat."),
+]
+
+ARTS = [
+    ("/img/art/art-flashback-mage.jpg", "Original flashback mage illustration"),
+    ("/img/art/art-goblin-scout.jpg", "Original goblin scout illustration"),
+    ("/img/art/art-crimson-bolt.jpg", "Original crimson bolt illustration"),
+    ("/img/art/lore-plains-citadel.jpg", "Original plains citadel illustration"),
+    ("/img/art/lore-island-spires.jpg", "Original island spires illustration"),
+    ("/img/art/lore-swamp-lantern.jpg", "Original swamp lantern illustration"),
+    ("/img/art/lore-mountain-forge.jpg", "Original mountain forge illustration"),
+    ("/img/art/lore-forest-cathedral.jpg", "Original forest cathedral illustration"),
+]
+
 GUILD = {
     "WU": "Azorius", "UB": "Dimir", "BR": "Rakdos", "RG": "Gruul", "GW": "Selesnya",
     "WB": "Orzhov", "UR": "Izzet", "BG": "Golgari", "RW": "Boros", "GU": "Simic",
@@ -114,48 +201,6 @@ GUILD = {
     "W": "Mono-White", "U": "Mono-Blue", "B": "Mono-Black", "R": "Mono-Red", "G": "Mono-Green",
     "WUBR": "4-color", "WUBG": "4-color", "WURG": "4-color", "WBRG": "4-color", "UBRG": "4-color",
     "WUBRG": "Five-color",
-}
-COLOR_LORE = {
-    "W": ("White", "Peace", "Order, protection, and the open plains. White magic builds, heals, and holds the line."),
-    "U": ("Blue", "Knowledge", "Islands, libraries, and the long game. Blue magic draws, denies, and out-thinks."),
-    "B": ("Black", "Ambition", "Swamps and bargains. Black magic pays any price for power — including its own."),
-    "R": ("Red", "Freedom", "Mountains, impulse, and fire. Red magic acts now and lets the ashes sort themselves."),
-    "G": ("Green", "Growth", "Forests, instinct, and the wild. Green magic wants the world to become more of itself."),
-}
-GUILD_LORE = {
-    "WU": "Azorius — law and sky, the Senate of Ravnica.",
-    "UB": "Dimir — secrets under the city, information as a blade.",
-    "BR": "Rakdos — revel and ruin, a carnival with teeth.",
-    "RG": "Gruul — the wild reclaiming the stone.",
-    "GW": "Selesnya — chorus and grove, many voices as one.",
-    "WB": "Orzhov — contracts, cathedrals, and interest.",
-    "UR": "Izzet — genius with scorch marks.",
-    "BG": "Golgari — the cycle: rot feeding bloom.",
-    "RW": "Boros — the legion’s dawn patrol.",
-    "GU": "Simic — nature rewritten in the lab.",
-    "WUB": "Esper — artifice, control, and a measured mind.",
-    "UBR": "Grixis — undeath, storms, and a ruined coast.",
-    "BRG": "Jund — dragons, hunger, and the hunt.",
-    "RGW": "Naya — jungle giants and open sky.",
-    "GWU": "Bant — knights, sigils, and clustered cities.",
-    "WBG": "Abzan — endurance, ancestors, the house that holds.",
-    "URW": "Jeskai — discipline that still loves a trick.",
-    "BGU": "Sultai — river empires and patient venom.",
-    "RWB": "Mardu — the horde at sunrise.",
-    "GUR": "Temur — wilderness, rumble, and old magic.",
-    "W": "Mono-White — the plains, unshared.",
-    "U": "Mono-Blue — the island, uninterrupted.",
-    "B": "Mono-Black — the swamp, unapologetic.",
-    "R": "Mono-Red — the mountain, unfiltered.",
-    "G": "Mono-Green — the forest, unopposed.",
-    "WUBRG": "WUBRG — the whole color pie, all at once.",
-}
-FETCH_LANDS = {
-    "flooded strand", "polluted delta", "bloodstained mire", "wooded foothills",
-    "windswept heath", "marsh flats", "scalding tarn", "verdant catacombs",
-    "arid mesa", "misty rainforest", "prismatic vista", "fabled passage",
-    "evolving wilds", "terramorphic expanse", "escape tunnel", "ash barrens",
-    "fabled passage", "captivating cave",
 }
 
 ARCHETYPE_COLORS = [
@@ -185,6 +230,16 @@ LAND_PIPS = {
     "hushwood verge": "GW", "spirebluff canal": "UR", "concealed courtyard": "WB",
     "inspiring vantage": "RW", "botanical sanctum": "GU", "blooming marsh": "BG",
 }
+
+FETCH_LANDS = {
+    "flooded strand", "polluted delta", "bloodstained mire", "wooded foothills",
+    "windswept heath", "marsh flats", "scalding tarn", "verdant catacombs",
+    "arid mesa", "misty rainforest", "prismatic vista", "fabled passage",
+    "evolving wilds", "terramorphic expanse", "escape tunnel", "ash barrens",
+    "captivating cave",
+}
+
+GUILD_LORE_BY = {code: body for code, _name, body in GUILD_LORE}
 
 SHOP = [
     ("sleeves", "Sleeves", "Standard 63×88 mm Dragon Shield packs plus hard toploaders for singles.", [
@@ -216,11 +271,6 @@ SHOP = [
     ]),
 ]
 
-ARTS = [
-    ("/img/art/art-flashback-mage.jpg", "Original flashback mage illustration"),
-    ("/img/art/art-goblin-scout.jpg", "Original goblin scout illustration"),
-    ("/img/art/art-crimson-bolt.jpg", "Original crimson bolt illustration"),
-]
 BASICS = {
     "plains", "island", "swamp", "mountain", "forest", "wastes",
     "snow-covered plains", "snow-covered island", "snow-covered swamp",
@@ -334,13 +384,13 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <meta name="description" content="{e(desc)}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-4" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-5" />
   <link rel="canonical" href="{e(canonical)}" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="theme-color" content="#7a1f2b" />
+  <meta name="theme-color" content="#9c1c28" />
   <link rel="icon" href="/img/mtg-logo-192.png" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/img/mtg-logo-192.png" sizes="192x192" />
   <link rel="manifest" href="/site.webmanifest" />
@@ -364,15 +414,12 @@ def header(current="") -> str:
     def nav(href, label, key=""):
         cur = ' aria-current="page"' if current == key else ""
         return f'<a href="{href}"{cur}>{label}</a>'
+    pips = "".join(
+        f'<img src="/img/mana/{fn}" alt="" width="18" height="18" />'
+        for _, _, fn, _ in COLORS
+    )
     return f"""<body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <div class="mana-ribbon" aria-hidden="true">
-    <span class="pip pip-w"></span>
-    <span class="pip pip-u"></span>
-    <span class="pip pip-b"></span>
-    <span class="pip pip-r"></span>
-    <span class="pip pip-g"></span>
-  </div>
+  <a class="skip-link" href="#main">Skip to lists</a>
   <div class="wrap">
     <header>
       <a class="brand" href="/">
@@ -396,13 +443,14 @@ def header(current="") -> str:
         {nav("/search.html", "Search", "search")}
         <span class="muted" title="Discord coming soon">Discord</span>
       </nav>
+      <div class="header-mana" aria-hidden="true">{pips}</div>
     </header>
 """
 
 
 def footer() -> str:
     return f"""    <footer>
-      <p class="footer-flavor">The Multiverse is vast. These are only the lists we found.</p>
+      <span class="footer-flavor">A fan spellbook of public tables.</span>
       © <span id="year">{YEAR}</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
       <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
@@ -410,7 +458,7 @@ def footer() -> str:
       <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-3"></script>
+  <script src="/js/site.js?v=mtg-4"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>
@@ -647,7 +695,7 @@ def load_decks() -> list[dict]:
     return out
 
 
-def cap_per_format(decks: list[dict], n: int = 400) -> list[dict]:
+def cap_per_format(decks: list[dict], n: int = TARGET_PER_FORMAT) -> list[dict]:
     by = defaultdict(list)
     for d in decks:
         by[d["format"]].append(d)
@@ -680,33 +728,36 @@ def page_index(decks: list[dict]) -> str:
     counts = Counter(d["format"] for d in decks)
     for fmt in FORMATS:
         n = counts.get(fmt["slug"], 0)
-        format_tiles += f"""<a class="format-tile plane-{e(fmt['slug'])}" href="/formats/{fmt['slug']}.html">
-          <div class="format-kicker">{e(fmt['kicker'])}</div>
-          <div class="name">{e(fmt['name'])}</div>
-          <p class="format-lore">{e(fmt['lore'])}</p>
-          <p class="flavor">“{e(fmt['flavor'])}”</p>
-          <div class="meta">{n} recent lists</div>
+        format_tiles += f"""<a class="format-tile format-{e(fmt['slug'])}" href="/formats/{fmt['slug']}.html">
+          <img class="format-tile-art" src="{e(fmt['art'])}" alt="" />
+          <div class="format-tile-body">
+            <div class="name">{e(fmt['name'])}</div>
+            <p class="flavor">{e(fmt['flavor'])}</p>
+            <div class="meta">{e(fmt['short'])}</div>
+            <div class="meta">{n} recent lists</div>
+          </div>
         </a>"""
     pie = ""
-    for c, (name, virtue, line) in COLOR_LORE.items():
-        fn = next(fn for code, n, fn, _ in COLORS if code == c)
-        pie += f"""<a class="lore-chip lore-{c.lower()}" href="/guides/colors.html">
-          <img src="/img/mana/{fn}" alt="" width="36" height="36" />
-          <div>
-            <div class="lore-name">{e(name)} · {e(virtue)}</div>
-            <p>{e(line)}</p>
+    for c in COLOR_LORE:
+        pie += f"""<a class="pie-card pie-{e(c['code'].lower())}" href="/guides/colors.html#{e(c['name'].lower())}">
+          <img src="{e(c['art'])}" alt="{e(c['art'].split('/')[-1].replace('-', ' ').replace('.jpg', ''))}" />
+          <div class="pie-copy">
+            <img class="pip" src="/img/mana/{e(c['pip'])}" alt="" />
+            <h4>{e(c['name'])}</h4>
+            <p>{e(c['line'])}</p>
           </div>
         </a>"""
     extra = """<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MTG Decklists","url":"https://mtgdecklists.com/","potentialAction":{"@type":"SearchAction","target":"https://mtgdecklists.com/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>"""
     return head(
         "MTG Decklists | Magic: The Gathering lists by format",
-        "A charming planeswalker library of Magic: The Gathering decklists — Commander, Standard, Modern, and more — with color lore and recent tournament lists.",
+        "Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page.",
         SITE + "/",
         extra=extra,
     ) + header("home") + f"""
     <main class="single home" id="main" role="main">
       <section class="home-splash" aria-label="MTG Decklists">
-        <img class="home-splash-bg" src="/img/mtg-banner-hero.jpg" alt="Original MTG Decklists banner with a flashback mage, goblin scout, and crimson bolt" width="1400" height="636" fetchpriority="high" decoding="async">
+        <img class="home-splash-bg" src="/img/mtg-banner-hero.jpg" alt="Original MTG Decklists banner with a flashback mage, goblin scout, crimson bolt, and five-color pentagon" width="1400" height="636" fetchpriority="high" decoding="async">
+        <div class="home-splash-veil" aria-hidden="true"></div>
         <div class="home-splash-art" aria-hidden="true">
           <img src="/img/art/art-flashback-mage.jpg" alt="" />
           <img src="/img/art/art-goblin-scout.jpg" alt="" />
@@ -714,11 +765,11 @@ def page_index(decks: list[dict]) -> str:
         </div>
         <div class="home-splash-bar">
           <div>
-            <p class="home-splash-kicker">Welcome to the library</p>
-            <h2>MTG Decklists</h2>
+            <p class="kicker">A fan spellbook of public tables</p>
+            <h2>Shuffle the colors. Read the lists.</h2>
             <p class="home-splash-formats">Commander · Standard · Modern</p>
           </div>
-          <p class="home-splash-quote">Every list is a story. Every format is a world. Pick a format, then wander its colors.</p>
+          <p>Pick a format first. Each page opens on the color pie, then that format's August–September 2026 tournament lists.</p>
         </div>
       </section>
 
@@ -735,12 +786,12 @@ def page_index(decks: list[dict]) -> str:
         <a class="home-big home-big-tier" href="/tier-list.html">
           <span class="home-big-kicker">The metagame</span>
           <span class="home-big-title">Tier List</span>
-          <span class="home-big-note">August–September 2026 metas, counted from lists in this library</span>
+          <span class="home-big-note">August–September 2026 metas by format</span>
         </a>
         <a class="home-big home-big-leaders" href="#formats">
-          <span class="home-big-kicker">Seven worlds</span>
+          <span class="home-big-kicker">Choose a plane</span>
           <span class="home-big-title">Formats</span>
-          <span class="home-big-note">Open a format, then see its colors and lists</span>
+          <span class="home-big-note">Open a format, then see that format's lists</span>
         </a>
         <a class="home-big home-big-shop" href="/shop/">
           <span class="home-big-kicker">Table gear</span>
@@ -753,35 +804,36 @@ def page_index(decks: list[dict]) -> str:
           </span>
           <div>
             <div class="home-big-title">Discord</div>
-            <div class="home-big-note">A guild hall is being built — invite coming soon. No link yet.</div>
+            <div class="home-big-note">Placeholder — invite coming soon. No link yet.</div>
           </div>
         </div>
       </nav>
 
       <form class="site-search home-search" method="get" action="/search.html" role="search">
-        <label class="site-search-label" for="home-q">Search the library</label>
+        <label class="site-search-label" for="home-q">Search the spellbook</label>
         <div class="site-search-row">
           <input id="home-q" type="search" name="q" placeholder="Format, color, player, archetype, or card" aria-label="Search MTG decklists" />
           <button type="submit">Search</button>
         </div>
       </form>
 
-      <section class="color-pie" aria-labelledby="pie-title">
-        <div class="section-title">
-          <h3 id="pie-title">The five colors of Magic</h3>
-          <a href="/guides/colors.html">Color lore →</a>
+      <section class="lore-pie" id="color-pie">
+        <div class="lore-intro">
+          <p class="home-leaders-kicker">The color pie</p>
+          <h3>Five colors. Infinite lists.</h3>
+          <p>White seeks peace. Blue seeks knowledge. Black seeks power. Red seeks freedom. Green seeks growth. Every list on this site is one of those philosophies, shuffled and sleeved.</p>
+          <p class="flavor">Original landscapes stand in for plains, islands, swamps, mountains, and forests — not official card art.</p>
         </div>
-        <p class="muted">White, blue, black, red, and green — the color pie that holds the Multiverse together. Original mana marks on this site, not the official pentagon.</p>
-        <div class="lore-row">{pie}</div>
+        <div class="pie-grid">{pie}</div>
       </section>
 
       <section class="home-leaders-flow" id="formats">
         <div class="home-leaders-intro">
-          <p class="home-leaders-kicker">Seven formats, seven doors</p>
+          <p class="home-leaders-kicker">The formats</p>
           <div class="home-leaders-intro-row">
             <div>
-              <h3>Formats</h3>
-              <p>Each format is a different way to tell a Magic story. Open one to see its colors, guilds, and recent tournament lists.</p>
+              <h3>Pick a format first</h3>
+              <p>Commander, Standard, and Modern lead the banner. Pioneer, Legacy, Vintage, and Pauper sit beside them. Each page opens on colors, then that format's recent lists.</p>
             </div>
             <a href="/formats/">All format pages →</a>
           </div>
@@ -802,22 +854,22 @@ def page_formats_index(decks: list[dict]) -> str:
     tiles = ""
     for fmt in FORMATS:
         n = counts.get(fmt["slug"], 0)
-        tiles += f"""<a class="format-tile plane-{e(fmt['slug'])}" href="/formats/{fmt['slug']}.html">
-          <div class="format-kicker">{e(fmt['kicker'])}</div>
-          <div class="name">{e(fmt['name'])}</div>
-          <p class="format-lore">{e(fmt['lore'])}</p>
-          <p class="flavor">“{e(fmt['flavor'])}”</p>
-          <div class="meta">{e(fmt['short'])} · {n} lists</div>
+        tiles += f"""<a class="leader-tile format-{e(fmt['slug'])}" href="/formats/{fmt['slug']}.html">
+          <img src="{e(fmt['art'])}" alt="" />
+          <div>
+            <div class="name">{e(fmt['name'])}</div>
+            <p class="flavor">{e(fmt['flavor'])}</p>
+            <div class="meta">{e(fmt['short'])} · {n} lists</div>
+          </div>
         </a>"""
-    return head("MTG formats | MTG Decklists", "Seven Magic: The Gathering formats with lore, colors, and recent tournament lists.", f"{SITE}/formats/") + header("formats") + f"""
+    return head("MTG formats | MTG Decklists", "Iconic Magic: The Gathering formats with recent tournament lists, color pie notes, and lore.", f"{SITE}/formats/") + header("formats") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/formats/", "Formats"))}
-      <article class="card spellbook">
-        <p class="kicker gold">The Multiverse, by rules</p>
+      <article class="card">
         <h2>Formats</h2>
-        <p class="flavor">“Magic is many games wearing one back. Choose the world that fits your table.”</p>
-        <p>Commander, Standard, and Modern are the three most-played right now; Pioneer, Legacy, Vintage, and Pauper sit beside them. Open a format for its color pie, guilds, and lists.</p>
-        <div class="format-grid">{tiles}</div>
+        <p class="flavor">Each format is a different way to tell a story with sixty cards — or a hundred, if you sit down for Commander.</p>
+        <p>Magic is organized by format. Commander, Standard, and Modern are the three most-played right now; Pioneer, Legacy, Vintage, and Pauper sit beside them. Open a format to see its color pie and lists.</p>
+        <div class="leader-grid">{tiles}</div>
       </article>
     </main>
 """ + footer()
@@ -836,49 +888,49 @@ def color_section(fmt_decks: list[dict], slug: str) -> str:
     chips = []
     for c, name, fn, _ in COLORS:
         n = color_counts.get(c, 0)
-        virtue = COLOR_LORE[c][1]
-        chips.append(f"""<a class="mana-chip lore-{c.lower()}" href="/formats/{slug}.html?color={c}">
+        chips.append(f"""<a class="mana-chip" href="/formats/{slug}.html?color={c}" style="--tile:var(--accent)">
           <img src="/img/mana/{fn}" alt="{e(name)}" />
-          <span><strong>{e(name)}</strong> · {e(virtue)}</span>
+          <span>{e(name)}</span>
           <span class="muted">{n}</span>
         </a>""")
     combos = []
     for code, n in combo_counts.most_common(10):
-        lore = GUILD_LORE.get(code) or combo_label(code)
+        lore = GUILD_LORE_BY.get(code) or ""
         combos.append(f"""<a class="combo-card" href="/formats/{slug}.html?color={e(code)}">
           {pip_html(code)}
           <div style="font-weight:800">{e(combo_label(code))}</div>
           <div class="meta">{n} lists · {e(code or 'C')}</div>
-          <p class="combo-lore">{e(lore)}</p>
+          {f'<p class="combo-lore">{e(lore)}</p>' if lore else ''}
         </a>""")
     return f"""
-        <div class="section-title"><h3>Colors of this format</h3></div>
-        <p class="muted">White, blue, black, red, and green — filter the lists below. Marks here are original site art, not the official pentagon.</p>
+        <div class="section-title"><h3>The color pie</h3></div>
+        <p class="flavor">White, blue, black, red, and green — five philosophies, counted from the lists below.</p>
+        <p class="muted">Original mana marks for this site, not the official pentagon. Filter the tables by color.</p>
         <div class="mana-row">{''.join(chips)}</div>
-        <div class="section-title" style="margin-top:22px"><h3>Guilds, shards, and wedges</h3></div>
-        <p class="muted">Counted from August–September 2026 lists on this page. Names follow Ravnica’s guilds and Tarkir’s clans.</p>
+        <div class="section-title" style="margin-top:22px"><h3>Most popular color combos</h3></div>
+        <p class="muted">Guilds, shards, and wedges counted from August–September 2026 lists on this page.</p>
         <div class="combo-grid">{''.join(combos) or '<p class="muted">No constructed lists in this slice yet.</p>'}</div>
     """
 
 
 def page_format(fmt: dict, decks: list[dict]) -> str:
     fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
-    art = ARTS[hash(fmt["slug"]) % 3]
+    art = (fmt.get("art") or ARTS[0][0], fmt.get("art_alt") or "")
     items = "".join(recent_item(d) for d in fmt_decks)
     return head(
         f"{fmt['name']} decklists | MTG Decklists",
-        f"{fmt['name']} Magic: The Gathering lists from August and September 2026, with color lore, guilds, and TCGPlayer buy links.",
+        f"{fmt['name']} Magic: The Gathering lists from August and September 2026, with colors, popular color combos, and TCGPlayer buy links.",
         f"{SITE}/formats/{fmt['slug']}.html",
         image=art[0],
     ) + header("formats") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/formats/", "Formats"), ("", fmt["name"]))}
-      <article class="card spellbook plane-{e(fmt['slug'])}">
+      <article class="card format-page format-{e(fmt['slug'])}">
         <img class="inline-art" src="{art[0]}" alt="{e(art[1])}" />
-        <p class="kicker gold">{e(fmt['kicker'])}</p>
+        <p class="kicker">{e(fmt.get('kicker') or fmt['short'])}</p>
         <h2>{e(fmt['name'])}</h2>
-        <p class="flavor">“{e(fmt['flavor'])}”</p>
-        <p>{e(fmt['lore'])}</p>
+        <p class="flavor">{e(fmt.get('flavor') or '')}</p>
+        {f'<p>{e(fmt["lore"])}</p>' if fmt.get("lore") else ""}
         <p>{e(fmt['blurb'])}</p>
         <p class="muted"><a href="{e(fmt['official'])}" target="_blank" rel="noopener">Official {e(fmt['name'])} page</a> ·
         <a href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener">Aug 10, 2026 banned &amp; restricted</a></p>
@@ -924,14 +976,7 @@ def page_deck(deck: dict) -> str:
     buy = partner_mass(all_cards)
     fmt = FMT_BY[deck["format"]]
     colors = deck.get("colors") or ""
-    lore_bits = []
-    if colors in GUILD_LORE:
-        lore_bits.append(GUILD_LORE[colors])
-    elif colors:
-        for c in colors:
-            if c in COLOR_LORE:
-                lore_bits.append(f"{COLOR_LORE[c][0]} ({COLOR_LORE[c][1]})")
-    lore_line = " · ".join(lore_bits)
+    lore_line = GUILD_LORE_BY.get(colors) or ""
     return head(
         f"{deck['archetype']} — {deck['player'] or 'list'} ({fmt['name']}) | MTG Decklists",
         f"{fmt['name']} {deck['archetype']} by {deck['player'] or 'unknown'} from {deck['event']} on {deck['date']}.",
@@ -940,12 +985,12 @@ def page_deck(deck: dict) -> str:
     ) + header("formats") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/formats/", "Formats"), (f"/formats/{deck['format']}.html", fmt["name"]), ("", deck["archetype"]))}
-      <article class="card spellbook deck-card">
+      <article class="card">
         <img class="{card_class}" src="{e(art[0])}" alt="{e(art[1])}" />
-        <p class="kicker gold">{e(fmt['kicker'])} · {e(fmt['name'])}</p>
         <h2>{e(deck['archetype'])}</h2>
+        <p class="flavor">{e(deck.get('combo') or 'A constructed list')} · {e(fmt['name'])}</p>
         <p class="muted">{e(fmt['name'])} · {e(deck['event'])} · {e(deck['place'] or '')} · {e(deck['date'])}</p>
-        <p><strong>{e(deck['player'] or 'Unknown pilot')}</strong> · {pip_html(colors)} {e(deck.get('combo') or '')}</p>
+        <p><strong>{e(deck['player'] or 'Unknown pilot')}</strong> · {pip_html(deck.get('colors') or '')} {e(deck.get('combo') or '')}</p>
         {f'<p class="flavor-inline">{e(lore_line)}</p>' if lore_line else ''}
         <div class="buy-row">
           <a class="buy-tcg" data-buy-deck href="{e(buy)}" target="_blank" rel="noopener nofollow sponsored">Buy list on TCGplayer</a>
@@ -971,7 +1016,7 @@ def page_shop(slug=None) -> str:
         title = "Shop | Sleeves, dice, playmats, deck boxes | MTG Decklists"
         desc = "The same Amazon shop listings as One Piece Deck Base, with the same affiliate links, for sleeves, dice, playmats, and deck boxes."
         h = "Shop"
-        intro = "Sleeves, dice, playmats, deck boxes, and a table extra. Same products and affiliate short links as One Piece Deck Base. Open Amazon for live price and stock."
+        intro = "Gear for the table — sleeves, dice, playmats, and boxes in the five colors. Same Amazon listings as One Piece Deck Base. Open Amazon for live price and stock."
         crumbs = crumb(("/shop/", "Shop"))
         path = "/shop/"
     else:
@@ -998,8 +1043,7 @@ def page_shop(slug=None) -> str:
     return head(title, desc, SITE + path) + header("shop") + f"""
     <main class="single" id="main" role="main">
       {crumbs}
-      <article class="card spellbook">
-        <p class="kicker gold">For the table</p>
+      <article class="card">
         <h2>{e(h)}</h2>
         <p>{e(intro)}</p>
         {''.join(blocks)}
@@ -1014,7 +1058,7 @@ def page_shop(slug=None) -> str:
 
 
 GUIDES = [
-    ("magic-the-gathering", "Magic: The Gathering", "The trading-card game of the Multiverse, published by Wizards of the Coast. This library tracks public constructed lists by format."),
+    ("magic-the-gathering", "Magic: The Gathering", "The trading-card game published by Wizards of the Coast. This site tracks public constructed lists by format."),
     ("standard", "Standard", "Rotating 60-card constructed. Current pool is Wilds of Eldraine forward; next rotation is with Nauctis in early 2027."),
     ("modern", "Modern", "Non-rotating constructed from Eighth Edition and Modern Horizons sets. Regional Championships starting September 11, 2026 are Modern."),
     ("pioneer", "Pioneer", "Constructed from Return to Ravnica forward. Izzet spells and green Cub decks led Pioneer after the August 2026 bans."),
@@ -1022,8 +1066,8 @@ GUIDES = [
     ("legacy", "Legacy", "Eternal constructed with a banned list. The Fantasticar was banned on August 10, 2026."),
     ("vintage", "Vintage", "Eternal constructed with a restricted list. The Fantasticar was restricted on August 10, 2026."),
     ("pauper", "Pauper", "Commons-only constructed. Watch Secret Lair common legality notes from Wizards."),
-    ("colors", "Colors and mana", "White, blue, black, red, and green — peace, knowledge, ambition, freedom, and growth."),
-    ("color-pairs", "Color pairs", "The ten Ravnica guilds, plus shards, wedges, and five-color piles that actually post."),
+    ("colors", "Colors and mana", "White, blue, black, red, and green — five philosophies of Magic. This site uses original mana marks, not the official pentagon."),
+    ("color-pairs", "Color pairs", "The ten two-color guilds plus shards and wedges. Format pages rank the combos that are actually posting."),
     ("rcq", "Regional Championship Qualifiers", "Store RCQs run August 15–November 29, 2026 in Standard or Limited. Destination RCQs may use other constructed formats."),
     ("regional-championships", "Regional Championships", "Modern constructed, starting September 11, 2026. Top finishers earn Pro Tour 2027 invites."),
     ("pro-tour", "Pro Tour", "Pro Tour Nauctis is February 26–28, 2027 at MagicCon Denver (Nauctis Draft + Modern)."),
@@ -1035,89 +1079,24 @@ GUIDES = [
     ("fair-use", "Fair use and trademarks", "Tournament reporting and commentary. Original illustrations stand in for Snapcaster-like, Goblin Guide-like, and Lightning Bolt-like art."),
 ]
 
-GUIDE_BODIES = {
-    "magic-the-gathering": """
-        <p class="flavor">“There is no one Magic. There are as many Magics as there are tables.”</p>
-        <p>Magic: The Gathering is a trading-card game of five colors, a thousand worlds, and a handful of ways to play. Players are planeswalkers. Cards are spells, creatures, and lands. A game is a story you tell with sixty cards — or a hundred, if you sit down for Commander.</p>
-        <p>This fan site is a library of public constructed lists: Standard’s current novel, Modern’s long workshop, Pioneer’s guild echo, Commander’s legends, Legacy and Vintage’s eternal halls, and Pauper’s commons-only charm. We are not Wizards of the Coast. We just keep the shelves dusted.</p>
-    """,
-    "colors": """
-        <p class="flavor">“The pentagon is a promise: five philosophies, always in tension.”</p>
-        <p>Every Magic card belongs to one or more of five colors. Together they are the color pie — the game’s moral compass, its mechanical engine, and the lore that lets a plains and a swamp feel like different countries.</p>
-        <ul class="lore-list">
-          <li><strong>White (peace).</strong> Order, protection, and the open plains. White builds, heals, and holds the line.</li>
-          <li><strong>Blue (knowledge).</strong> Islands, libraries, and the long game. Blue draws, denies, and out-thinks.</li>
-          <li><strong>Black (ambition).</strong> Swamps and bargains. Black pays any price for power — including its own.</li>
-          <li><strong>Red (freedom).</strong> Mountains, impulse, and fire. Red acts now and lets the ashes sort themselves.</li>
-          <li><strong>Green (growth).</strong> Forests, instinct, and the wild. Green wants the world to become more of itself.</li>
-        </ul>
-        <p>Mana marks on this site are original art. They are not the official Wizards pentagon. Format pages count which colors are actually posting.</p>
-    """,
-    "color-pairs": """
-        <p class="flavor">“Two colors is a friendship. Three is a court. Five is a riot.”</p>
-        <p>The ten two-color pairs are named for Ravnica’s guilds. Shards take three allied colors; wedges take three colors around an enemy pair. Tarkir named the wedges as clans. Format pages rank the combinations that actually show up in August–September 2026 lists.</p>
-        <ul class="lore-list">
-          <li><strong>Azorius (WU)</strong> — law and sky.</li>
-          <li><strong>Dimir (UB)</strong> — secrets as a blade.</li>
-          <li><strong>Rakdos (BR)</strong> — revel and ruin.</li>
-          <li><strong>Gruul (RG)</strong> — the wild reclaiming stone.</li>
-          <li><strong>Selesnya (GW)</strong> — many voices as one.</li>
-          <li><strong>Orzhov (WB)</strong> — contracts and cathedrals.</li>
-          <li><strong>Izzet (UR)</strong> — genius with scorch marks.</li>
-          <li><strong>Golgari (BG)</strong> — rot feeding bloom.</li>
-          <li><strong>Boros (RW)</strong> — the legion at dawn.</li>
-          <li><strong>Simic (GU)</strong> — nature rewritten in the lab.</li>
-        </ul>
-    """,
-    "commander": """
-        <p class="flavor">“One legend to lead them. A hundred unique spells. Four friends, if you are lucky.”</p>
-        <p>Commander (EDH) is Magic’s most-played format: a legendary creature in the command zone, a 100-card singleton deck in that legend’s colors, and a table that is as much a conversation as a duel. Lists on this site are Duel Commander leagues — still 100 cards, still a legend — because those tables publish.</p>
-        <p>If you are new: pick a commander you like, not a commander you fear. The format is charming when it is generous.</p>
-    """,
-    "standard": """
-        <p class="flavor">“The world that is in print is the world that is legal.”</p>
-        <p>Standard is rotating 60-card constructed. Right now that means Wilds of Eldraine forward. There is no fall 2026 rotation; the next one arrives with Nauctis: The Sunken Realm in early 2027. Store RCQs through November 29 are Standard constructed.</p>
-    """,
-    "modern": """
-        <p class="flavor">“No Time Walk. Plenty of lightning.”</p>
-        <p>Modern is non-rotating constructed from Eighth Edition onward, including Modern Horizons. It is the constructed format for the September–October 2026 Regional Championships that feed Pro Tour 2027.</p>
-    """,
-    "pioneer": """
-        <p class="flavor">“The guildgates never really closed.”</p>
-        <p>Pioneer starts at Return to Ravnica. After the Cori-Steel Cutter ban, Izzet spell shells and green Cub piles split the August 2026 winner’s metagame. It sits between Standard’s churn and Modern’s memory.</p>
-    """,
-    "legacy": """
-        <p class="flavor">“Force of Will still answers the storm.”</p>
-        <p>Legacy is eternal constructed with a banned list. The Fantasticar was banned on August 10, 2026. Brainstorm, dungeons of dual lands, and a very old argument about fair Magic.</p>
-    """,
-    "vintage": """
-        <p class="flavor">“Power nine, handled with care.”</p>
-        <p>Vintage is the original constructed format: a restricted list, not a wide ban list. The Fantasticar was restricted on August 10, 2026. Museums that still duel.</p>
-    """,
-    "pauper": """
-        <p class="flavor">“Every common is a potential champion.”</p>
-        <p>Pauper is constructed using only cards printed at common. It is clever, loud, and welcoming. Watch Secret Lair common-legality notes from Wizards.</p>
-    """,
-}
-
 
 def page_guides_index() -> str:
     items = "".join(
         f'<a class="item" href="/guides/{slug}.html"><div><div>{e(name)}</div><div class="muted">{e(blurb)}</div></div><div class="link">Open →</div></a>'
         for slug, name, blurb in GUIDES
     )
-    return head("Magic: The Gathering guides | MTG Decklists", "Lore, formats, colors, events, and how this library uses affiliates.", f"{SITE}/guides/") + header("guides") + f"""
+    return head("Magic: The Gathering guides | MTG Decklists", "Lore, formats, colors, events, and how this site uses affiliates.", f"{SITE}/guides/") + header("guides") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/guides/", "Guides"))}
-      <article class="card spellbook">
-        <p class="kicker gold">A planeswalker’s handbook</p>
-        <h2>Magic: The Gathering guides</h2>
-        <p class="flavor">“Read the color pie first. The rest of Magic is commentary.”</p>
-        <p>Topic pages for formats, the five colors, guilds, events, and how this site uses affiliates. Charming on purpose — Magic is for every table.</p>
+      <article class="card">
+        <h2>Spellbook &amp; guides</h2>
+        <p class="flavor">A short library of formats, colors, and table manners — rewritten for this fan site, not copied from a novel.</p>
+        <p>Topic pages for formats, events, the color pie, and how this site uses affiliates.</p>
         <div class="art-strip">
           <img src="/img/art/art-flashback-mage.jpg" alt="Original flashback mage" />
           <img src="/img/art/art-goblin-scout.jpg" alt="Original goblin scout" />
           <img src="/img/art/art-crimson-bolt.jpg" alt="Original crimson bolt" />
+          <img src="/img/art/lore-forest-cathedral.jpg" alt="Original forest cathedral" />
         </div>
         <div class="list">{items}</div>
       </article>
@@ -1125,15 +1104,52 @@ def page_guides_index() -> str:
 """ + footer()
 
 
+def guide_extra(slug: str) -> str:
+    if slug == "colors":
+        cards = []
+        for c in COLOR_LORE:
+            cards.append(f"""<article class="lore-block" id="{e(c['name'].lower())}">
+              <img src="{e(c['art'])}" alt="" />
+              <div>
+                <p class="kicker">{e(c['land'])}</p>
+                <h3><img class="pip" src="/img/mana/{e(c['pip'])}" alt="" /> {e(c['name'])}</h3>
+                <p class="flavor">{e(c['line'])}</p>
+                <p>{e(c['body'])}</p>
+              </div>
+            </article>""")
+        return "<div class='lore-stack'>" + "".join(cards) + "</div>"
+    if slug == "color-pairs":
+        bits = []
+        for code, name, body in GUILD_LORE:
+            bits.append(f"""<article class="combo-card lore-guild">
+              {pip_html(code)}
+              <div style="font-weight:800">{e(name)}</div>
+              <div class="meta">{e(code)}</div>
+              <p>{e(body)}</p>
+            </article>""")
+        return "<div class='combo-grid guild-lore'>" + "".join(bits) + "</div>"
+    if slug in FMT_BY:
+        fmt = FMT_BY[slug]
+        return f"<p class='flavor'>{e(fmt.get('flavor') or '')}</p><p>{e(fmt['blurb'])}</p>"
+    return ""
+
+
 def page_guide(slug, name, blurb, decks) -> str:
     related = [d for d in decks if slug in (d["format"], slugify(d["archetype"]))][:8]
     rec = "".join(recent_item(d) for d in related) if related else ""
-    art = ARTS[hash(slug) % 3]
-    extra = GUIDE_BODIES.get(slug, "")
-    return head(f"{name} | MTG Decklists", blurb, f"{SITE}/guides/{slug}.html") + header("guides") + f"""
+    if slug in FMT_BY:
+        art = (FMT_BY[slug]["art"], FMT_BY[slug].get("art_alt") or "")
+    elif slug == "colors":
+        art = ("/img/art/lore-plains-citadel.jpg", "Original plains citadel illustration")
+    elif slug == "color-pairs":
+        art = ("/img/art/lore-island-spires.jpg", "Original island spires illustration")
+    else:
+        art = ARTS[hash(slug) % len(ARTS)]
+    extra = guide_extra(slug)
+    return head(f"{name} | MTG Decklists", blurb, f"{SITE}/guides/{slug}.html", image=art[0]) + header("guides") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/guides/", "Guides"), ("", name))}
-      <article class="card spellbook">
+      <article class="card">
         <img class="inline-art" src="{art[0]}" alt="{e(art[1])}" />
         <h2>{e(name)}</h2>
         <p>{e(blurb)}</p>
@@ -1154,11 +1170,10 @@ def page_events() -> str:
     ) + header("events") + f"""
     <main class="single" id="main" role="main">
       {crumb(("", "Events"))}
-      <article class="card spellbook">
-        <p class="kicker gold">The official calendar</p>
+      <article class="card">
         <h2>Events and schedules</h2>
-        <p class="flavor">“Show up. The Multiverse is friendlier in person.”</p>
-        <p>These are official Wizards / Magic.gg links. We do not run events — we just keep the doors labeled.</p>
+        <p class="flavor">The competitive calendar is the other half of the spellbook — RCQs, Regional Championships, and Arena weekends.</p>
+        <p>These are official Wizards / Magic.gg links. We do not run events.</p>
         <div class="list">
           <a class="item" href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener"><div><div>Banned &amp; restricted — August 10, 2026</div><div class="muted">magic.wizards.com</div></div><div class="link">Official →</div></a>
           <a class="item" href="https://magic.gg/news/play-update-2026-27-round-2-regional-championship-promos-and-qualifiers" target="_blank" rel="noopener"><div><div>RCQs Aug 15–Nov 29, 2026</div><div class="muted">Store Standard or Limited · Magic.gg play update</div></div><div class="link">Official →</div></a>
@@ -1191,11 +1206,10 @@ def page_rules() -> str:
     ) + header("rules") + f"""
     <main class="single" id="main" role="main">
       {crumb(("", "Rules"))}
-      <article class="card policy spellbook">
-        <p class="kicker gold">How the worlds are kept fair</p>
+      <article class="card policy">
         <h2>Formats and the banlist</h2>
         <img class="inline-art" src="/img/art/art-crimson-bolt.jpg" alt="Original crimson bolt illustration" />
-        <p class="flavor">“A banned card is a story the format decided not to tell this season.”</p>
+        <p class="flavor">Every format is a different promise about which cards are legal — and which stories still get to be told.</p>
         <p>Lists on this site are public constructed tables from August and September 2026 unless a page says otherwise. Commander pages are Duel Commander leagues (still 100-card singleton). Pick a format first — lists are not mixed on the homepage.</p>
         <section>
           <h3>August 10, 2026 changes</h3>
@@ -1228,7 +1242,7 @@ def page_privacy() -> str:
     ) + header() + f"""
     <main class="single" id="main" role="main">
       {crumb(("", "Privacy Policy"))}
-      <article class="card policy spellbook">
+      <article class="card policy">
         <h2>Privacy Policy</h2>
         <p>Last updated: September 7, 2026</p>
         <p>MTG Decklists ("we," "us," or "this site") respects your privacy. This Privacy Policy explains what information we collect when you visit mtgdecklists.com, how we use it, and the choices you have.</p>
@@ -1288,10 +1302,9 @@ def page_search() -> str:
     return head("Search MTG decklists | MTG Decklists", "Search formats, colors, players, archetypes, and cards.", f"{SITE}/search.html") + header("search") + f"""
     <main class="single" id="main" role="main">
       {crumb(("", "Search"))}
-      <article class="card spellbook">
-        <p class="kicker gold">Ask the library</p>
-        <h2>Search</h2>
-        <p class="flavor">“Name a guild, a player, a card, or a city. The shelves will answer.”</p>
+      <article class="card">
+        <h2>Search the spellbook</h2>
+        <p class="flavor">Name a color, a player, a card, or a format — the index is built from the lists on this site.</p>
         <form class="site-search" method="get" action="/search.html" role="search">
           <label class="site-search-label" for="q">Search MTG decklists</label>
           <div class="site-search-row">
@@ -1313,11 +1326,20 @@ def page_tier(decks: list[dict]) -> str:
         arche = Counter(d["archetype"] for d in fmt_decks)
         if not arche:
             continue
-        leaders = "".join(
-            f'<a class="tier-leader" href="/formats/{fmt["slug"]}.html"><img src="{ARTS[i % 3][0]}" alt="" /><div class="name">{e(name)}</div><div class="meta">{n} lists</div></a>'
-            for i, (name, n) in enumerate(arche.most_common(6))
+        sample_by = {}
+        for d in fmt_decks:
+            sample_by.setdefault(d["archetype"], d)
+        leaders = []
+        for name, n in arche.most_common(6):
+            sample = sample_by.get(name) or fmt_decks[0]
+            art = art_for(sample, "small")
+            alt = art[1] if not art[0].startswith("/img/art/") else ""
+            leaders.append(
+                f'<a class="tier-leader" href="/formats/{fmt["slug"]}.html"><img src="{e(art[0])}" alt="{e(alt)}" /><div class="name">{e(name)}</div><div class="meta">{n} lists</div></a>'
+            )
+        rows.append(
+            f'<div class="tier-row tier-s format-{e(fmt["slug"])}"><div class="tier-label" title="{e(fmt["name"])}">{e(fmt["name"][:1])}</div><div class="tier-leaders">{"".join(leaders)}</div></div>'
         )
-        rows.append(f'<div class="tier-row tier-s"><div class="tier-label">{e(fmt["name"][:1])}</div><div class="tier-leaders">{leaders}</div></div>')
     return head(
         "MTG tier list by format | MTG Decklists",
         "August–September 2026 Magic metagame snapshots by format, counted from lists on this site.",
@@ -1325,11 +1347,10 @@ def page_tier(decks: list[dict]) -> str:
     ) + header("tier") + f"""
     <main class="single" id="main" role="main">
       {crumb(("", "Tier List"))}
-      <article class="card spellbook">
-        <p class="kicker gold">What the tables are saying</p>
+      <article class="card">
         <h2>Tier list</h2>
-        <p class="flavor">“A tier is a snapshot, not a throne.”</p>
-        <p>Not a single global ranking. Each row is a format. Pictures are original site art, not official cards. Counts are from public Aug–Sep 2026 tables on this site.</p>
+        <p class="flavor">Not a single global ranking — each row is a format, counted from the public tables on this site.</p>
+        <p>Portraits are a 4-of (or face card) from a recent list of that archetype. Counts are from Aug–Sep 2026 tables on this site.</p>
         <div class="tier-board">{''.join(rows)}</div>
         <p class="muted" style="margin-top:16px">For Frank Karsten's official winner's-metagame numbers see
         <a href="https://magic.gg/news/metagame-mentor-the-top-standard-decks-for-september-2026s-rcqs" target="_blank" rel="noopener">Standard RCQ Mentor</a> and
@@ -1342,10 +1363,9 @@ def page_tier(decks: list[dict]) -> str:
 def page_404() -> str:
     return head("Page not found | MTG Decklists", "That URL is not on MTG Decklists.", f"{SITE}/404.html") + header() + f"""
     <main class="single" id="main" role="main">
-      <article class="card spellbook">
-        <p class="kicker gold">Counterspell</p>
-        <h2>This spell fizzled</h2>
-        <p class="flavor">“The library does not have that card. Yet.”</p>
+      <article class="card">
+        <h2>Missing page</h2>
+        <p class="flavor">The spell fizzled. That URL is not in this spellbook.</p>
         <p>Try <a href="/">home</a>, <a href="/formats/">formats</a>, or <a href="/search.html">search</a>.</p>
       </article>
     </main>
@@ -1396,7 +1416,7 @@ def add_curated(decks: list[dict]) -> list[dict]:
         },
     ]
     for d in curated:
-        d["colors"] = identity_from_cards(d["main"]) or identity_from_archetype(d["archetype"])
+        d["colors"] = identity_from_archetype(d["archetype"]) or identity_from_cards(d["main"])
         d["combo"] = combo_label(d["colors"])
         d["page_slug"] = f"{slugify(d['archetype'])}-{d['id']}"
         decks.append(d)
@@ -1412,7 +1432,7 @@ def _parse(blob: str) -> list[dict]:
 
 
 def main() -> None:
-    decks = cap_per_format(add_curated(load_decks()), 400)
+    decks = cap_per_format(add_curated(load_decks()), TARGET_PER_FORMAT)
     decks = [d for d in decks if d.get("format") in FMT_BY]
     assign_faces(decks)
     write(ROOT / "index.html", page_index(decks))
@@ -1493,8 +1513,8 @@ def main() -> None:
         "short_name": "MTG Lists",
         "start_url": "/",
         "display": "standalone",
-        "background_color": "#f4efe4",
-        "theme_color": "#7a1f2b",
+        "background_color": "#f3e6d2",
+        "theme_color": "#9c1c28",
         "icons": [{"src": "/img/mtg-logo-192.png", "sizes": "192x192", "type": "image/png"}],
     }, indent=2))
     print(f"built {len(decks)} decks, {len(list((ROOT/'decklists').rglob('*.html')))} deck pages")

@@ -21,7 +21,7 @@
       btn.setAttribute("aria-label", dark ? "Switch to daylight" : "Switch to night library");
     }
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", theme === "dark" ? "#120e10" : "#7a1f2b");
+    if (meta) meta.setAttribute("content", theme === "dark" ? "#161213" : "#9c1c28");
   }
 
   applyTheme(readTheme());
@@ -34,6 +34,8 @@
 
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
+
+  document.documentElement.classList.add("is-ready");
 
   function colorMatch(colors, needle) {
     if (!needle || needle === "all") return true;
