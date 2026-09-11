@@ -59,6 +59,54 @@
     });
   });
 
+  (function setupListPager() {
+    var list = document.querySelector(".recent-list[data-page-size]");
+    if (!list) return;
+    var size = parseInt(list.getAttribute("data-page-size") || "80", 10) || 80;
+    var more = document.querySelector(".list-more");
+    var listStatus = document.getElementById("list-status");
+    var filter = document.getElementById("list-filter");
+    var shown = size;
+    function apply() {
+      var q = ((filter && filter.value) || "").trim().toLowerCase();
+      var rows = Array.prototype.slice.call(list.querySelectorAll(".recent-item"));
+      var match = [];
+      rows.forEach(function (row) {
+        var hay = ((row.getAttribute("data-archetype") || "") + " " + (row.textContent || "")).toLowerCase();
+        var ok = !q || hay.indexOf(q) >= 0;
+        row.classList.toggle("filter-hide", !ok);
+        if (ok && !row.classList.contains("hidden-row")) match.push(row);
+      });
+      match.forEach(function (row, i) {
+        row.classList.toggle("page-hide", i >= shown);
+      });
+      rows.forEach(function (row) {
+        if (row.classList.contains("filter-hide") || row.classList.contains("hidden-row")) {
+          row.classList.add("page-hide");
+        }
+      });
+      if (more) more.hidden = match.length <= shown;
+      if (listStatus) {
+        listStatus.textContent = match.length
+          ? "Showing " + Math.min(shown, match.length) + " of " + match.length
+          : (q ? "No lists matched that filter." : "");
+      }
+    }
+    if (more) {
+      more.addEventListener("click", function () {
+        shown += size;
+        apply();
+      });
+    }
+    if (filter) {
+      filter.addEventListener("input", function () {
+        shown = size;
+        apply();
+      });
+    }
+    apply();
+  })();
+
   var q = document.getElementById("q") || document.getElementById("home-q");
   var status = document.getElementById("search-status");
   var results = document.getElementById("search-results");
