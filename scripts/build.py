@@ -399,7 +399,7 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-7" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-8" />
   <link rel="canonical" href="{e(canonical)}" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
@@ -895,9 +895,9 @@ def page_index(decks: list[dict]) -> str:
           <span class="home-big-note">Metagame snapshot, then every list in that format</span>
         </a>
         <a class="home-big home-big-tier" href="/tier-list.html">
-          <span class="home-big-kicker">The metagame</span>
+          <span class="home-big-kicker">One format at a time</span>
           <span class="home-big-title">Tier List</span>
-          <span class="home-big-note">{DATE_WINDOW} metas by format</span>
+          <span class="home-big-note">Pick a format, then see that format’s S–D tiers</span>
         </a>
         <div class="discord-placeholder" role="note">
           <span class="home-big-icon" aria-hidden="true">
@@ -1702,42 +1702,143 @@ def page_search() -> str:
 """ + footer()
 
 
-def page_tier(decks: list[dict]) -> str:
-    rows = []
+def tier_url(fmt: str | None = None) -> str:
+    if not fmt:
+        return "/tier-list.html"
+    return f"/tier-list/{fmt}.html"
+
+
+def tier_format_nav(current: str = "") -> str:
+    bits = []
     for fmt in FORMATS:
-        fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
-        arche = Counter(d["archetype"] for d in fmt_decks)
-        if not arche:
-            continue
-        sample_by = {}
-        for d in fmt_decks:
-            sample_by.setdefault(d["archetype"], d)
+        cur = ' aria-current="page"' if current == fmt["slug"] else ""
+        bits.append(f'<a href="{tier_url(fmt["slug"])}"{cur}>{e(fmt["name"])}</a>')
+    return f'<nav class="tier-formats" aria-label="Choose a format">{"".join(bits)}</nav>'
+
+
+def format_tiers(fmt_decks: list[dict]) -> list[tuple[str, list[tuple[str, int, dict]]]]:
+    """S–D buckets for one format. Never mix formats."""
+    total = len(fmt_decks) or 1
+    sample_by = {}
+    counts: Counter[str] = Counter()
+    for d in fmt_decks:
+        name = unescape(d.get("archetype") or "Unknown")
+        counts[name] += 1
+        sample_by.setdefault(name, d)
+    ranked = [(name, n, sample_by[name]) for name, n in counts.most_common() if n >= 3]
+    buckets = {"S": [], "A": [], "B": [], "C": [], "D": []}
+    for name, n, sample in ranked:
+        share = n / total
+        if share >= 0.10:
+            key = "S"
+        elif share >= 0.06:
+            key = "A"
+        elif share >= 0.035:
+            key = "B"
+        elif share >= 0.02:
+            key = "C"
+        else:
+            key = "D"
+        buckets[key].append((name, n, sample, share))
+    if not buckets["S"] and ranked:
+        name, n, sample = ranked[0]
+        share = n / total
+        for key in buckets:
+            buckets[key] = [row for row in buckets[key] if row[0] != name]
+        buckets["S"].append((name, n, sample, share))
+    return [(label, buckets[label]) for label in ("S", "A", "B", "C", "D") if buckets[label]]
+
+
+def page_tier_index(decks: list[dict]) -> str:
+    tiles = ""
+    counts = Counter(d["format"] for d in decks)
+    for fmt in FORMATS:
+        n = counts.get(fmt["slug"], 0)
+        tiles += f"""<a class="format-tile format-{e(fmt['slug'])}" href="{tier_url(fmt['slug'])}">
+          <img class="format-tile-art" src="{e(fmt['art'])}" alt="" />
+          <div class="format-tile-body">
+            <div class="name">{e(fmt['name'])} tier list</div>
+            <p class="flavor">{e(fmt.get('flavor') or '')}</p>
+            <div class="meta">{n} lists in this sample</div>
+          </div>
+        </a>"""
+    extra = json_ld(breadcrumb_ld([("/tier-list.html", "Tier List")])) + json_ld({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "MTG tier lists",
+        "url": SITE + "/tier-list.html",
+        "description": "One format at a time. Pick Standard, Modern, Commander, or another format for that format’s S–D tiers.",
+    })
+    return head(
+        "MTG tier list — pick a format | MTG Decklists",
+        "A tier list is one format. Choose Commander, Standard, Modern, Pioneer, Legacy, Vintage, or Pauper.",
+        SITE + "/tier-list.html",
+        extra=extra,
+    ) + header("tier") + f"""
+    <main class="single" id="main" role="main">
+      {crumb(("/tier-list.html", "Tier List"))}
+      <article class="card">
+        <p class="kicker">One format at a time</p>
+        <h1>Tier list</h1>
+        <p>Do not mix formats. Standard Izzet is not Modern Izzet. Pick a format, then that format’s S–D tiers, counted from the public tables on this site — not an official winner’s-metagame report.</p>
+        {tier_format_nav()}
+        <div class="format-grid" style="margin-top:18px">{tiles}</div>
+      </article>
+    </main>
+""" + footer()
+
+
+def page_tier(fmt: dict, decks: list[dict]) -> str:
+    fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
+    total = len(fmt_decks)
+    rows = []
+    for label, group in format_tiers(fmt_decks):
         leaders = []
-        for name, n in arche.most_common(6):
-            sample = sample_by.get(name) or fmt_decks[0]
+        for name, n, sample, share in group:
             art = art_for(sample, "small")
             alt = art[1] if not art[0].startswith("/img/art/") else ""
             leaders.append(
-                f'<a class="tier-leader" href="{archetype_url(fmt["slug"], unescape(name))}"><img src="{e(art[0])}" alt="{e(alt)}" /><div class="name">{e(unescape(name))}</div><div class="meta">{n} lists</div></a>'
+                f'<a class="tier-leader" href="{archetype_url(fmt["slug"], name)}">'
+                f'<img src="{e(art[0])}" alt="{e(alt)}" />'
+                f'<div class="name">{e(name)}</div>'
+                f'<div class="meta">{n} · {share * 100:.1f}%</div></a>'
             )
         rows.append(
-            f'<div class="tier-row tier-s format-{e(fmt["slug"])}"><div class="tier-label" title="{e(fmt["name"])}">{e(fmt["name"][:1])}</div><div class="tier-leaders">{"".join(leaders)}</div></div>'
+            f'<div class="tier-row tier-{e(label.lower())}">'
+            f'<div class="tier-label" title="Tier {e(label)}">{e(label)}</div>'
+            f'<div class="tier-leaders">{"".join(leaders)}</div></div>'
         )
+    extra = json_ld(breadcrumb_ld([
+        ("/tier-list.html", "Tier List"),
+        (tier_url(fmt["slug"]), fmt["name"]),
+    ])) + json_ld({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": f"{fmt['name']} tier list",
+        "url": SITE + tier_url(fmt["slug"]),
+        "about": fmt["name"],
+        "numberOfItems": total,
+    })
     return head(
-        "MTG tier list by format | MTG Decklists",
-        f"{DATE_WINDOW} Magic metagame snapshots by format, counted from lists on this site.",
-        f"{SITE}/tier-list.html",
+        f"{fmt['name']} tier list | MTG Decklists",
+        f"{fmt['name']} S–D tiers from {total} public lists on this site ({date_window(fmt['slug'])}). One format only.",
+        SITE + tier_url(fmt["slug"]),
+        image=fmt.get("art") or "/img/mtg-banner-hero.jpg",
+        extra=extra,
+        image_alt=fmt.get("art_alt") or fmt["name"],
     ) + header("tier") + f"""
     <main class="single" id="main" role="main">
-      {crumb(("", "Tier List"))}
-      <article class="card">
-        <h1>Tier list</h1>
-        <p>Each row is a format. Counts are the public tables on this site, not an official winner’s-metagame report. Open an archetype for every list of that name.</p>
-        <p class="muted">Portraits are a 4-of (or face card) from a recent list. Sample window: {DATE_WINDOW} (Commander May–September).</p>
-        <div class="tier-board">{''.join(rows)}</div>
-        <p class="muted" style="margin-top:16px">For Frank Karsten's official winner's-metagame numbers see
-        <a href="https://magic.gg/news/metagame-mentor-the-top-standard-decks-for-september-2026s-rcqs" target="_blank" rel="noopener">Standard RCQ Mentor</a> and
-        <a href="https://magic.gg/news/metagame-mentor-modern-with-the-hobbit" target="_blank" rel="noopener">Modern Mentor</a>.</p>
+      {crumb(("/tier-list.html", "Tier List"), ("", fmt["name"]))}
+      <article class="card format-page format-{e(fmt['slug'])}">
+        <p class="kicker">One format · {e(date_window(fmt['slug']))}</p>
+        <h1>{e(fmt['name'])} tier list</h1>
+        <p>This page is <strong>only {e(fmt['name'])}</strong>. Tiers are S, A, B, C, and D from the {total} public {e(fmt['name'])} lists on this site — not an official Wizards report. Open an archetype for every list of that name.</p>
+        {tier_format_nav(fmt["slug"])}
+        {stats_bar(fmt_decks)}
+        <div class="tier-board">{''.join(rows) or '<p class="muted">No lists in this format yet.</p>'}</div>
+        <p class="muted" style="margin-top:16px">S ≥ 10% of this format’s sample · A ≥ 6% · B ≥ 3.5% · C ≥ 2% · D is everything else with at least three lists.
+        <a href="/formats/{e(fmt['slug'])}.html">All {e(fmt['name'])} lists</a> ·
+        <a href="/guides/methodology.html">How we count</a>.</p>
       </article>
     </main>
 """ + footer()
@@ -1876,7 +1977,17 @@ def main() -> None:
     write(ROOT / "format.html", page_rules())
     write(ROOT / "privacy.html", page_privacy())
     write(ROOT / "search.html", page_search())
-    write(ROOT / "tier-list.html", page_tier(decks))
+    write(ROOT / "tier-list.html", page_tier_index(decks))
+    keep_tier = set()
+    for fmt in FORMATS:
+        path = ROOT / "tier-list" / f"{fmt['slug']}.html"
+        write(path, page_tier(fmt, decks))
+        keep_tier.add(path.resolve())
+    tier_root = ROOT / "tier-list"
+    if tier_root.exists():
+        for path in tier_root.glob("*.html"):
+            if path.resolve() not in keep_tier:
+                path.unlink()
     write(ROOT / "404.html", page_404())
 
     index = []
@@ -1927,6 +2038,19 @@ def main() -> None:
             "url": f"/guides/{slug}.html",
             "hay": f"{name} {blurb}".lower(),
         })
+    index.append({
+        "title": "Tier list",
+        "meta": "Pick a format first",
+        "url": "/tier-list.html",
+        "hay": "tier list metagame s a b c d",
+    })
+    for fmt in FORMATS:
+        index.append({
+            "title": f"{fmt['name']} tier list",
+            "meta": "One format",
+            "url": tier_url(fmt["slug"]),
+            "hay": f"{fmt['name']} {fmt['slug']} tier list metagame",
+        })
     write(ROOT / "data" / "search.json", json.dumps(index))
 
     urls = [
@@ -1934,6 +2058,8 @@ def main() -> None:
         f"{SITE}/events.html", f"{SITE}/format.html", f"{SITE}/privacy.html",
         f"{SITE}/search.html", f"{SITE}/tier-list.html",
     ]
+    for fmt in FORMATS:
+        urls.append(SITE + tier_url(fmt["slug"]))
     for fmt in FORMATS:
         urls.append(f"{SITE}/formats/{fmt['slug']}.html")
         fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
