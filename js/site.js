@@ -17,7 +17,7 @@
     if (btn) {
       var dark = theme === "dark";
       btn.setAttribute("aria-pressed", dark ? "true" : "false");
-      btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+      btn.setAttribute("aria-label", dark ? "Switch to daylight" : "Switch to night library");
     }
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", theme === "dark" ? "#161213" : "#9c1c28");
@@ -36,28 +36,27 @@
 
   document.documentElement.classList.add("is-ready");
 
+  function colorMatch(colors, needle) {
+    if (!needle || needle === "all") return true;
+    colors = colors || "";
+    if (needle.length === 1) return colors.indexOf(needle) >= 0;
+    return colors === needle;
+  }
+
   var params = new URLSearchParams(location.search);
-  var color = params.get("color");
-  if (color) {
+
+  function applyColorFilter(color) {
     Array.prototype.forEach.call(document.querySelectorAll("[data-colors]"), function (row) {
-      var has = (row.getAttribute("data-colors") || "").indexOf(color) >= 0;
-      if (!has) row.classList.add("hidden-row");
+      var has = colorMatch(row.getAttribute("data-colors") || "", color);
+      row.classList.toggle("hidden-row", !has);
     });
     Array.prototype.forEach.call(document.querySelectorAll(".filter-bar [data-color]"), function (btn) {
-      if (btn.getAttribute("data-color") === color) btn.classList.add("is-on");
+      var key = btn.getAttribute("data-color") || "";
+      btn.classList.toggle("is-on", color ? key === color : key === "all");
     });
   }
 
-  Array.prototype.forEach.call(document.querySelectorAll(".filter-bar [data-color]"), function (btn) {
-    btn.addEventListener("click", function () {
-      var next = btn.getAttribute("data-color") || "";
-      if (next === "all") {
-        location.search = "";
-        return;
-      }
-      location.search = "?color=" + encodeURIComponent(next);
-    });
-  });
+  var pagerApply = function () {};
 
   (function setupListPager() {
     var list = document.querySelector(".recent-list[data-page-size]");
@@ -92,6 +91,10 @@
           : (q ? "No lists matched that filter." : "");
       }
     }
+    pagerApply = function resetAndApply() {
+      shown = size;
+      apply();
+    };
     if (more) {
       more.addEventListener("click", function () {
         shown += size;
@@ -104,8 +107,25 @@
         apply();
       });
     }
-    apply();
   })();
+
+  applyColorFilter(params.get("color"));
+  pagerApply();
+
+  Array.prototype.forEach.call(document.querySelectorAll(".filter-bar [data-color]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var next = btn.getAttribute("data-color") || "";
+      if (next === "all") {
+        history.replaceState(null, "", location.pathname);
+        applyColorFilter("");
+        pagerApply();
+        return;
+      }
+      history.replaceState(null, "", location.pathname + "?color=" + encodeURIComponent(next));
+      applyColorFilter(next);
+      pagerApply();
+    });
+  });
 
   var q = document.getElementById("q") || document.getElementById("home-q");
   var status = document.getElementById("search-status");

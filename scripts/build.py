@@ -25,7 +25,9 @@ FORMATS = [
         "slug": "standard",
         "name": "Standard",
         "short": "Rotating 60-card constructed",
+        "kicker": "The living story",
         "flavor": "The living plane — today's cards, this year's story.",
+        "lore": "Standard is Magic’s current novel — the sets still on shelves, rotating when the next world arrives. From Wilds of Eldraine through The Hobbit, the next tide is Nauctis: The Sunken Realm in early 2027.",
         "blurb": "Standard is rotating 60-card constructed. The current pool is Wilds of Eldraine forward; there is no fall 2026 rotation. Store RCQs through November 29, 2026 are Standard. Lists on this site are public Challenge and league tables from June–September 2026.",
         "official": "https://magic.wizards.com/en/formats/standard",
         "popular": True,
@@ -36,7 +38,9 @@ FORMATS = [
         "slug": "modern",
         "name": "Modern",
         "short": "Non-rotating from Eighth Edition on",
+        "kicker": "Twenty years of thunder",
         "flavor": "A twenty-year library of staples, still being rewritten.",
+        "lore": "Modern is the great workshop of the last two decades: Eighth Edition forward, Modern Horizons included. It is the constructed format for the September–October 2026 Regional Championships.",
         "blurb": "Modern is non-rotating constructed from Eighth Edition and Modern Horizons. It is the constructed format for the September–October 2026 Regional Championships. Lists here are public Challenge and league tables from June–September 2026.",
         "official": "https://magic.wizards.com/en/formats/modern",
         "popular": True,
@@ -47,7 +51,9 @@ FORMATS = [
         "slug": "pioneer",
         "name": "Pioneer",
         "short": "Return to Ravnica forward",
+        "kicker": "Guilds still echo",
         "flavor": "Where the guilds still remember their first war.",
+        "lore": "Pioneer begins where Return to Ravnica opened the guildgates. After the Cori-Steel Cutter ban, Izzet spell-slingers and green Cub piles split the August 2026 winner’s metagame.",
         "blurb": "Pioneer sits between Standard and Modern (Return to Ravnica forward). After the Cori-Steel Cutter ban, Izzet spells shells and green Badgermole Cub piles split the winner's metagame in August 2026. Lists here are public tables from June–September 2026.",
         "official": "https://magic.wizards.com/en/formats/pioneer",
         "popular": False,
@@ -58,7 +64,9 @@ FORMATS = [
         "slug": "commander",
         "name": "Commander",
         "short": "100-card singleton, most-played format",
+        "kicker": "One legend, a hundred spells",
         "flavor": "One legend. Ninety-nine unique spells. A table of stories.",
+        "lore": "A legendary creature leads a hundred unique cards. Lists here are recent Duel Commander leagues from May–September 2026 — the same singleton spirit as Friday-night Commander.",
         "blurb": "Commander is 100-card singleton led by a legendary creature. Tables here are public Duel Commander (1v1) leagues from May–September 2026. Color identity is the same rule used at a four-player Commander night. Open a commander page for every list of that legend.",
         "official": "https://magic.wizards.com/en/formats/commander",
         "popular": True,
@@ -69,7 +77,9 @@ FORMATS = [
         "slug": "legacy",
         "name": "Legacy",
         "short": "Vintage-adjacent, banned list not restricted list",
+        "kicker": "Eternal, with a graveyard",
         "flavor": "The eternal battlefield, minus what the ban list forbids.",
+        "lore": "Legacy is eternal constructed with a banned list instead of a museum of restrictions. The Fantasticar was banned on August 10, 2026 — one more name on a very old wall.",
         "blurb": "Legacy is eternal constructed with a banned list. The Fantasticar was banned in Legacy on August 10, 2026.",
         "official": "https://magic.wizards.com/en/formats/legacy",
         "popular": False,
@@ -80,7 +90,9 @@ FORMATS = [
         "slug": "vintage",
         "name": "Vintage",
         "short": "The original constructed format",
+        "kicker": "The first library",
         "flavor": "Power is restricted, never forgotten.",
+        "lore": "Vintage is Magic as it was dreamed in 1993: a restricted list, not a wide ban list. The Fantasticar was restricted on August 10, 2026. Museums that still duel.",
         "blurb": "Vintage uses a restricted list instead of a wide ban list. The Fantasticar was restricted in Vintage on August 10, 2026.",
         "official": "https://magic.wizards.com/en/formats/vintage",
         "popular": False,
@@ -91,7 +103,9 @@ FORMATS = [
         "slug": "pauper",
         "name": "Pauper",
         "short": "Commons only",
+        "kicker": "The people’s Magic",
         "flavor": "The most democratic constructed format — commons only.",
+        "lore": "Pauper is constructed using only cards printed at common. It is clever, loud, and welcoming — Magic without the rare tax. Wizards clarified Secret Lair Zeta commons in September 2026.",
         "blurb": "Pauper is constructed using only cards printed at common. Wizards also clarified Secret Lair Zeta commons legality in September 2026.",
         "official": "https://magic.wizards.com/en/formats/pauper",
         "popular": False,
@@ -220,6 +234,16 @@ LAND_PIPS = {
     "inspiring vantage": "RW", "botanical sanctum": "GU", "blooming marsh": "BG",
 }
 
+FETCH_LANDS = {
+    "flooded strand", "polluted delta", "bloodstained mire", "wooded foothills",
+    "windswept heath", "marsh flats", "scalding tarn", "verdant catacombs",
+    "arid mesa", "misty rainforest", "prismatic vista", "fabled passage",
+    "evolving wilds", "terramorphic expanse", "escape tunnel", "ash barrens",
+    "captivating cave",
+}
+
+GUILD_LORE_BY = {code: body for code, _name, body in GUILD_LORE}
+
 SHOP = [
     ("sleeves", "Sleeves", "Standard 63×88 mm Dragon Shield packs plus hard toploaders for singles.", [
         ("Dragon Shield Matte Jet", "100 standard-size sleeves (63×88 mm). Black matte finish. Fits a sleeved 60-card MTG deck plus extras.", "https://amzn.to/4qFzNrw", "sleeve-jet.jpg"),
@@ -316,10 +340,14 @@ def identity_from_cards(cards) -> str:
     pips = set()
     for row in cards or []:
         name = unescape(row.get("name", "")).lower()
+        if name in FETCH_LANDS:
+            continue
         if name in LAND_PIPS:
             pips.update(LAND_PIPS[name])
             continue
         for land, code in LAND_PIPS.items():
+            if land in FETCH_LANDS:
+                continue
             if name.endswith(land) or land in name:
                 pips.update(code)
     order = "WUBRG"
@@ -399,7 +427,7 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-7" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-8" />
   <link rel="canonical" href="{e(canonical)}" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
@@ -441,12 +469,12 @@ def header(current="") -> str:
         <img class="logo" src="/img/mtg-logo-192.png" width="56" height="56" alt="MTG Decklists" />
         <div>
           <p class="site-name">MTG Decklists</p>
-          <div class="subtitle">Public constructed results · Commander · Standard · Modern</div>
+          <div class="subtitle">A planeswalker’s library · Commander · Standard · Modern</div>
         </div>
       </a>
-      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
-        <span data-theme-when="light">Dark mode</span>
-        <span data-theme-when="dark">Light mode</span>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to night library">
+        <span data-theme-when="light">Night library</span>
+        <span data-theme-when="dark">Daylight</span>
       </button>
       <nav aria-label="Primary">
         {nav("/tier-list.html", "Tier List", "tier")}
@@ -477,7 +505,7 @@ def footer() -> str:
       <a href="/guides/advertising.html">Ads</a> · <a href="/privacy.html">Privacy</a>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-5"></script>
+  <script src="/js/site.js?v=mtg-6"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>
@@ -778,7 +806,7 @@ def load_decks() -> list[dict]:
             row["name"] = unescape(row.get("name") or "")
         for row in d.get("side") or []:
             row["name"] = unescape(row.get("name") or "")
-        colors = identity_from_cards(d.get("main")) or identity_from_archetype(d["archetype"])
+        colors = identity_from_archetype(d["archetype"]) or identity_from_cards(d.get("main"))
         d["colors"] = colors
         d["combo"] = combo_label(colors)
         slug = f"{slugify(d['archetype'])}-{d['id']}"
@@ -998,10 +1026,12 @@ def color_section(fmt_decks: list[dict], slug: str) -> str:
         </a>""")
     combos = []
     for code, n in combo_counts.most_common(10):
-        combos.append(f"""<a class="combo-card" href="/formats/{slug}.html?color={code[0] if code and code[0] in 'WUBRG' else 'all'}">
+        lore = GUILD_LORE_BY.get(code) or ""
+        combos.append(f"""<a class="combo-card" href="/formats/{slug}.html?color={e(code)}">
           {pip_html(code)}
           <div style="font-weight:800">{e(combo_label(code))}</div>
           <div class="meta">{n} lists · {e(code or 'C')}</div>
+          {f'<p class="combo-lore">{e(lore)}</p>' if lore else ''}
         </a>""")
     return f"""
         <div class="section-title"><h3>The color pie</h3></div>
@@ -1047,8 +1077,10 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
         <div class="format-masthead">
           <img src="{art[0]}" alt="{e(art[1])}" />
           <div>
-            <p class="kicker">{e(fmt['short'])}</p>
+            <p class="kicker">{e(fmt.get('kicker') or fmt['short'])}</p>
             <h1>{e(fmt['name'])}</h1>
+            <p class="flavor">{e(fmt.get('flavor') or '')}</p>
+            {f'<p>{e(fmt["lore"])}</p>' if fmt.get("lore") else ""}
             <p class="lede">{e(fmt['blurb'])}</p>
           </div>
         </div>
@@ -1281,6 +1313,8 @@ def page_deck(deck: dict, related: list[dict] | None = None) -> str:
     all_cards = (deck.get("main") or []) + (deck.get("side") or [])
     buy = partner_mass(all_cards)
     fmt = FMT_BY[deck["format"]]
+    colors = deck.get("colors") or ""
+    lore_line = GUILD_LORE_BY.get(colors) or ""
     arche = unescape(deck["archetype"])
     sibs = [d for d in (related or []) if d.get("id") != deck.get("id")][:6]
     related_html = ""
@@ -1325,6 +1359,7 @@ def page_deck(deck: dict, related: list[dict] | None = None) -> str:
         <h1>{e(arche)}</h1>
         <p>{e(fmt['name'])} · {e(deck['event'])} · {e(deck.get('place') or '')} · {e(deck['date'])}</p>
         <p><strong>{e(deck['player'] or 'Unknown pilot')}</strong> · {pip_html(deck.get('colors') or '')} {e(deck.get('combo') or '')}</p>
+        {f'<p class="flavor-inline">{e(lore_line)}</p>' if lore_line else ''}
         {arch_link}
         <div class="buy-row">
           <a class="buy-tcg" data-buy-deck href="{e(buy)}" target="_blank" rel="noopener nofollow sponsored">Buy list on TCGplayer</a>
@@ -1606,7 +1641,7 @@ def page_rules() -> str:
         <section>
           <h3>Format FAQ</h3>
           <div class="faq">
-            <details open><summary>What are the three most popular formats right now?</summary><p>Commander, Standard, and Modern — those names sit on the second line of the site banner.</p></details>
+            <details open><summary>What are the three most popular formats right now?</summary><p>Commander, Standard, and Modern — those names sit on the second line of the site banner. Commander is the kitchen-table favorite; Standard is the living story; Modern is the competitive workshop.</p></details>
             <details><summary>Where do the decklists come from?</summary><p>Public Magic Online Challenge/League tables hosted on MTGGoldfish, plus official Magic.gg Metagame Mentor aggregates. Each list page links the source.</p></details>
             <details><summary>Do buy links use affiliates?</summary><p>Yes. Shop gear uses the same Amazon Associates short links as One Piece Deck Base. Every card and “Buy list” button uses TCGplayer partner <code>c/7670706/1780961/21018</code>.</p></details>
           </div>
@@ -1798,7 +1833,7 @@ def add_curated(decks: list[dict]) -> list[dict]:
         },
     ]
     for d in curated:
-        d["colors"] = identity_from_cards(d["main"]) or identity_from_archetype(d["archetype"])
+        d["colors"] = identity_from_archetype(d["archetype"]) or identity_from_cards(d["main"])
         d["combo"] = combo_label(d["colors"])
         d["page_slug"] = f"{slugify(d['archetype'])}-{d['id']}"
         decks.append(d)

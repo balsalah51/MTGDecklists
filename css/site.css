@@ -868,6 +868,16 @@ html[data-theme="dark"] a.pie-card{
 }
 html[data-theme="dark"] .format-tile-art{background:#120a0a}
 html[data-theme="dark"] .home-splash-bar .kicker{color:var(--gold-bright)}
+.page-hidden{display:none !important}
+.show-more{
+  display:block;width:100%;margin:12px 0 0;padding:12px 16px;border-radius:12px;
+  border:1px solid var(--gold-soft, rgba(176,141,58,0.28));background:var(--panel);color:var(--accent);
+  font:inherit;font-weight:800;cursor:pointer
+}
+.show-more:hover{border-color:var(--gold, #b08d3a)}
+.combo-lore{margin:4px 0 0;font-size:12.5px;line-height:1.4;color:var(--muted);font-style:italic}
+.flavor-inline{margin:8px 0 0;font-style:italic;color:var(--muted);font-size:15px}
+html[data-theme="dark"] .show-more{background:var(--panel);border-color:var(--border);color:inherit}
 
 .format-masthead{
   display:grid;grid-template-columns:148px minmax(0,1fr);gap:18px;align-items:start;margin-bottom:16px
