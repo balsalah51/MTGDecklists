@@ -107,6 +107,52 @@
     apply();
   })();
 
+  (function setupCommanderHub() {
+    var hub = document.getElementById("commander-hub");
+    if (!hub) return;
+    var input = document.getElementById("commander-filter");
+    var status = document.getElementById("commander-status");
+    var tiles = Array.prototype.slice.call(hub.querySelectorAll(".leader-tile"));
+    var sections = Array.prototype.slice.call(hub.querySelectorAll(".commander-section"));
+    var color = "all";
+    function apply() {
+      var q = ((input && input.value) || "").trim().toLowerCase();
+      var shown = 0;
+      tiles.forEach(function (tile) {
+        var name = (tile.getAttribute("data-name") || "").toLowerCase();
+        var colors = tile.getAttribute("data-colors") || "";
+        var okQ = !q || name.indexOf(q) >= 0;
+        var okC = true;
+        if (color === "C") okC = !colors || colors === "C";
+        else if (color === "M") okC = colors.length >= 2;
+        else if (color && color !== "all") okC = colors.indexOf(color) >= 0;
+        var ok = okQ && okC;
+        tile.classList.toggle("filter-hide", !ok);
+        if (ok) shown += 1;
+      });
+      sections.forEach(function (sec) {
+        var any = sec.querySelector(".leader-tile:not(.filter-hide)");
+        sec.classList.toggle("filter-hide", !any);
+      });
+      if (status) {
+        status.textContent = shown
+          ? shown + " commander" + (shown === 1 ? "" : "s")
+          : (q ? "No commanders matched “" + q + "”." : "No commanders in that color.");
+      }
+    }
+    if (input) input.addEventListener("input", apply);
+    Array.prototype.forEach.call(hub.querySelectorAll("[data-cmd-color]"), function (btn) {
+      btn.addEventListener("click", function () {
+        color = btn.getAttribute("data-cmd-color") || "all";
+        Array.prototype.forEach.call(hub.querySelectorAll("[data-cmd-color]"), function (b) {
+          b.classList.toggle("is-on", b === btn);
+        });
+        apply();
+      });
+    });
+    apply();
+  })();
+
   var q = document.getElementById("q") || document.getElementById("home-q");
   var status = document.getElementById("search-status");
   var results = document.getElementById("search-results");
