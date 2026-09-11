@@ -1,7 +1,6 @@
 (function () {
   var THEME_COOKIE = "mtg-theme";
   var THEME_MAX_AGE = 365 * 24 * 60 * 60;
-  var PAGE_SIZE = 48;
 
   function readTheme() {
     var match = document.cookie.match(/(?:^|; )mtg-theme=(dark|light)/);
@@ -44,52 +43,7 @@
     return colors === needle;
   }
 
-  function setupPager(list) {
-    if (!list) return function () {};
-    var shown = PAGE_SIZE;
-    var btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "show-more";
-    btn.hidden = true;
-    list.after(btn);
-
-    function visibleItems() {
-      return Array.prototype.filter.call(list.querySelectorAll(".recent-item"), function (el) {
-        return !el.classList.contains("hidden-row");
-      });
-    }
-
-    function apply() {
-      var vis = visibleItems();
-      vis.forEach(function (el, i) {
-        if (i >= shown) el.classList.add("page-hidden");
-        else el.classList.remove("page-hidden");
-      });
-      Array.prototype.forEach.call(list.querySelectorAll(".recent-item.hidden-row"), function (el) {
-        el.classList.remove("page-hidden");
-      });
-      var more = vis.length - shown;
-      if (more > 0) {
-        btn.hidden = false;
-        btn.textContent = "Show " + Math.min(PAGE_SIZE, more) + " more · " + vis.length + " lists in this hall";
-      } else {
-        btn.hidden = true;
-      }
-    }
-
-    btn.addEventListener("click", function () {
-      shown += PAGE_SIZE;
-      apply();
-    });
-
-    return function resetAndApply() {
-      shown = PAGE_SIZE;
-      apply();
-    };
-  }
-
-  var list = document.querySelector(".recent-list");
-  var paginate = setupPager(list);
+  var params = new URLSearchParams(location.search);
 
   function applyColorFilter(color) {
     Array.prototype.forEach.call(document.querySelectorAll("[data-colors]"), function (row) {
@@ -100,12 +54,63 @@
       var key = btn.getAttribute("data-color") || "";
       btn.classList.toggle("is-on", color ? key === color : key === "all");
     });
-    paginate();
   }
 
-  var params = new URLSearchParams(location.search);
-  var color = params.get("color");
-  applyColorFilter(color);
+  var pagerApply = function () {};
+
+  (function setupListPager() {
+    var list = document.querySelector(".recent-list[data-page-size]");
+    if (!list) return;
+    var size = parseInt(list.getAttribute("data-page-size") || "80", 10) || 80;
+    var more = document.querySelector(".list-more");
+    var listStatus = document.getElementById("list-status");
+    var filter = document.getElementById("list-filter");
+    var shown = size;
+    function apply() {
+      var q = ((filter && filter.value) || "").trim().toLowerCase();
+      var rows = Array.prototype.slice.call(list.querySelectorAll(".recent-item"));
+      var match = [];
+      rows.forEach(function (row) {
+        var hay = ((row.getAttribute("data-archetype") || "") + " " + (row.textContent || "")).toLowerCase();
+        var ok = !q || hay.indexOf(q) >= 0;
+        row.classList.toggle("filter-hide", !ok);
+        if (ok && !row.classList.contains("hidden-row")) match.push(row);
+      });
+      match.forEach(function (row, i) {
+        row.classList.toggle("page-hide", i >= shown);
+      });
+      rows.forEach(function (row) {
+        if (row.classList.contains("filter-hide") || row.classList.contains("hidden-row")) {
+          row.classList.add("page-hide");
+        }
+      });
+      if (more) more.hidden = match.length <= shown;
+      if (listStatus) {
+        listStatus.textContent = match.length
+          ? "Showing " + Math.min(shown, match.length) + " of " + match.length
+          : (q ? "No lists matched that filter." : "");
+      }
+    }
+    pagerApply = function resetAndApply() {
+      shown = size;
+      apply();
+    };
+    if (more) {
+      more.addEventListener("click", function () {
+        shown += size;
+        apply();
+      });
+    }
+    if (filter) {
+      filter.addEventListener("input", function () {
+        shown = size;
+        apply();
+      });
+    }
+  })();
+
+  applyColorFilter(params.get("color"));
+  pagerApply();
 
   Array.prototype.forEach.call(document.querySelectorAll(".filter-bar [data-color]"), function (btn) {
     btn.addEventListener("click", function () {
@@ -113,10 +118,12 @@
       if (next === "all") {
         history.replaceState(null, "", location.pathname);
         applyColorFilter("");
+        pagerApply();
         return;
       }
       history.replaceState(null, "", location.pathname + "?color=" + encodeURIComponent(next));
       applyColorFilter(next);
+      pagerApply();
     });
   });
 
@@ -151,6 +158,15 @@
       }
       var hits = index.filter(function (item) {
         return (item.hay || "").indexOf(query) >= 0;
+      });
+      hits.sort(function (a, b) {
+        function rank(item) {
+          var u = item.url || "";
+          if (u.indexOf("/decklists/") === 0) return 2;
+          if (u.indexOf("/archetypes/") === 0 || u.indexOf("/commanders/") === 0) return 1;
+          return 0;
+        }
+        return rank(a) - rank(b);
       });
       render(hits, query);
     }

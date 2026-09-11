@@ -13,12 +13,12 @@
       } catch (err) {}
     })();
   </script>
-  <title>MTG Decklists | Magic: The Gathering lists by format</title>
-  <meta name="description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <title>MTG Decklists | Magic: The Gathering Commander, Standard, and Modern lists</title>
+  <meta name="description" content="Public Magic: The Gathering decklists by format. Commander, Standard, and Modern first, then Pioneer, Legacy, Vintage, and Pauper. Color pie, guilds, and TCGplayer buy links on every list." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-5" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-8" />
   <link rel="canonical" href="https://mtgdecklists.com/" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
@@ -30,15 +30,16 @@
   <meta property="og:site_name" content="MTG Decklists" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="MTG Decklists | Magic: The Gathering lists by format" />
-  <meta property="og:description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <meta property="og:title" content="MTG Decklists | Magic: The Gathering Commander, Standard, and Modern lists" />
+  <meta property="og:description" content="Public Magic: The Gathering decklists by format. Commander, Standard, and Modern first, then Pioneer, Legacy, Vintage, and Pauper. Color pie, guilds, and TCGplayer buy links on every list." />
   <meta property="og:url" content="https://mtgdecklists.com/" />
   <meta property="og:image" content="https://mtgdecklists.com/img/mtg-banner-hero.jpg" />
+  <meta property="og:image:alt" content="Original five-color pentagon banner with a flashback mage and goblin scout" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MTG Decklists | Magic: The Gathering lists by format" />
-  <meta name="twitter:description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <meta name="twitter:title" content="MTG Decklists | Magic: The Gathering Commander, Standard, and Modern lists" />
+  <meta name="twitter:description" content="Public Magic: The Gathering decklists by format. Commander, Standard, and Modern first, then Pioneer, Legacy, Vintage, and Pauper. Color pie, guilds, and TCGplayer buy links on every list." />
   <meta name="twitter:image" content="https://mtgdecklists.com/img/mtg-banner-hero.jpg" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MTG Decklists","url":"https://mtgdecklists.com/","potentialAction":{"@type":"SearchAction","target":"https://mtgdecklists.com/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "name": "MTG Decklists", "url": "https://mtgdecklists.com/", "description": "Public Magic: The Gathering decklists by format, with Commander, Standard, and Modern first.", "potentialAction": {"@type": "SearchAction", "target": "https://mtgdecklists.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "Organization", "name": "MTG Decklists", "url": "https://mtgdecklists.com/", "logo": "https://mtgdecklists.com/img/mtg-logo-192.png"}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to lists</a>
@@ -47,17 +48,18 @@
       <a class="brand" href="/">
         <img class="logo" src="/img/mtg-logo-192.png" width="56" height="56" alt="MTG Decklists" />
         <div>
-          <h1>MTG Decklists</h1>
+          <p class="site-name">MTG Decklists</p>
           <div class="subtitle">A planeswalker’s library · Commander · Standard · Modern</div>
         </div>
       </a>
-      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to night library">
         <span data-theme-when="light">Night library</span>
         <span data-theme-when="dark">Daylight</span>
       </button>
       <nav aria-label="Primary">
         <a href="/tier-list.html">Tier List</a>
         <a href="/formats/">Formats</a>
+        <a href="/commanders/">Commanders</a>
         <a href="/format.html">Rules</a>
         <a href="/events.html">Events</a>
         <a href="/guides/">Guides</a>
@@ -79,11 +81,11 @@
         </div>
         <div class="home-splash-bar">
           <div>
-            <p class="kicker">A fan spellbook of public tables</p>
-            <h2>Shuffle the colors. Read the lists.</h2>
+            <p class="kicker">Public tables · sourced lists</p>
+            <h1>Public Magic decklists, by format</h1>
             <p class="home-splash-formats">Commander · Standard · Modern</p>
           </div>
-          <p>Pick a format first. Each page opens on the color pie, then that format's August–September 2026 tournament lists.</p>
+          <p>Every list is a sourced public table. Open a format for the metagame, then the lists.</p>
         </div>
       </section>
 
@@ -97,20 +99,20 @@
       </a>
 
       <nav class="home-big3" aria-label="Main sections">
+        <a class="home-big home-big-commanders" href="/commanders/">
+          <span class="home-big-kicker">100-card singleton</span>
+          <span class="home-big-title">Commanders</span>
+          <span class="home-big-note">One page per legend — 828 Duel Commander lists</span>
+        </a>
+        <a class="home-big home-big-leaders" href="#formats">
+          <span class="home-big-kicker">Choose a format</span>
+          <span class="home-big-title">Formats</span>
+          <span class="home-big-note">Metagame snapshot, then every list in that format</span>
+        </a>
         <a class="home-big home-big-tier" href="/tier-list.html">
           <span class="home-big-kicker">The metagame</span>
           <span class="home-big-title">Tier List</span>
-          <span class="home-big-note">August–September 2026 metas by format</span>
-        </a>
-        <a class="home-big home-big-leaders" href="#formats">
-          <span class="home-big-kicker">Choose a plane</span>
-          <span class="home-big-title">Formats</span>
-          <span class="home-big-note">Open a format, then see that format's lists</span>
-        </a>
-        <a class="home-big home-big-shop" href="/shop/">
-          <span class="home-big-kicker">Table gear</span>
-          <span class="home-big-title">Shop</span>
-          <span class="home-big-note">Sleeves, dice, playmats, and deck boxes</span>
+          <span class="home-big-note">June–September 2026 metas by format</span>
         </a>
         <div class="discord-placeholder" role="note">
           <span class="home-big-icon" aria-hidden="true">
@@ -124,9 +126,9 @@
       </nav>
 
       <form class="site-search home-search" method="get" action="/search.html" role="search">
-        <label class="site-search-label" for="home-q">Search the spellbook</label>
+        <label class="site-search-label" for="home-q">Search lists</label>
         <div class="site-search-row">
-          <input id="home-q" type="search" name="q" placeholder="Format, color, player, archetype, or card" aria-label="Search MTG decklists" />
+          <input id="home-q" type="search" name="q" placeholder="Brigid, Izzet, Landfall, Solitude…" aria-label="Search MTG decklists" />
           <button type="submit">Search</button>
         </div>
       </form>
@@ -178,13 +180,16 @@
 
       <section class="home-leaders-flow" id="formats">
         <div class="home-leaders-intro">
-          <p class="home-leaders-kicker">The formats</p>
+          <p class="home-leaders-kicker">Formats</p>
           <div class="home-leaders-intro-row">
             <div>
               <h3>Pick a format first</h3>
-              <p>Commander, Standard, and Modern lead the banner. Pioneer, Legacy, Vintage, and Pauper sit beside them. Each page opens on colors, then that format's recent lists.</p>
+              <p>Commander, Standard, and Modern lead. Pioneer, Legacy, Vintage, and Pauper sit beside them. Each page opens on a counted metagame, then that format’s lists.</p>
             </div>
-            <a href="/formats/">All format pages →</a>
+            <div class="home-leaders-links">
+              <a href="/formats/">All format pages →</a>
+              <a href="/commanders/">Commander legends →</a>
+            </div>
           </div>
         </div>
         <div class="card home-panel">
@@ -194,7 +199,7 @@
             <div class="name">Standard</div>
             <p class="flavor">The living plane — today&#x27;s cards, this year&#x27;s story.</p>
             <div class="meta">Rotating 60-card constructed</div>
-            <div class="meta">400 recent lists</div>
+            <div class="meta">800 recent lists</div>
           </div>
         </a><a class="format-tile format-modern" href="/formats/modern.html">
           <img class="format-tile-art" src="/img/art/art-flashback-mage.jpg" alt="" />
@@ -202,7 +207,7 @@
             <div class="name">Modern</div>
             <p class="flavor">A twenty-year library of staples, still being rewritten.</p>
             <div class="meta">Non-rotating from Eighth Edition on</div>
-            <div class="meta">400 recent lists</div>
+            <div class="meta">800 recent lists</div>
           </div>
         </a><a class="format-tile format-pioneer" href="/formats/pioneer.html">
           <img class="format-tile-art" src="/img/art/lore-island-spires.jpg" alt="" />
@@ -210,7 +215,7 @@
             <div class="name">Pioneer</div>
             <p class="flavor">Where the guilds still remember their first war.</p>
             <div class="meta">Return to Ravnica forward</div>
-            <div class="meta">400 recent lists</div>
+            <div class="meta">800 recent lists</div>
           </div>
         </a><a class="format-tile format-commander" href="/formats/commander.html">
           <img class="format-tile-art" src="/img/art/lore-forest-cathedral.jpg" alt="" />
@@ -218,7 +223,7 @@
             <div class="name">Commander</div>
             <p class="flavor">One legend. Ninety-nine unique spells. A table of stories.</p>
             <div class="meta">100-card singleton, most-played format</div>
-            <div class="meta">314 recent lists</div>
+            <div class="meta">828 recent lists</div>
           </div>
         </a><a class="format-tile format-legacy" href="/formats/legacy.html">
           <img class="format-tile-art" src="/img/art/lore-swamp-lantern.jpg" alt="" />
@@ -226,7 +231,7 @@
             <div class="name">Legacy</div>
             <p class="flavor">The eternal battlefield, minus what the ban list forbids.</p>
             <div class="meta">Vintage-adjacent, banned list not restricted list</div>
-            <div class="meta">400 recent lists</div>
+            <div class="meta">800 recent lists</div>
           </div>
         </a><a class="format-tile format-vintage" href="/formats/vintage.html">
           <img class="format-tile-art" src="/img/art/art-crimson-bolt.jpg" alt="" />
@@ -234,7 +239,7 @@
             <div class="name">Vintage</div>
             <p class="flavor">Power is restricted, never forgotten.</p>
             <div class="meta">The original constructed format</div>
-            <div class="meta">400 recent lists</div>
+            <div class="meta">800 recent lists</div>
           </div>
         </a><a class="format-tile format-pauper" href="/formats/pauper.html">
           <img class="format-tile-art" src="/img/art/art-goblin-scout.jpg" alt="" />
@@ -242,7 +247,7 @@
             <div class="name">Pauper</div>
             <p class="flavor">The most democratic constructed format — commons only.</p>
             <div class="meta">Commons only</div>
-            <div class="meta">400 recent lists</div>
+            <div class="meta">800 recent lists</div>
           </div>
         </a></div>
         </div>
@@ -252,15 +257,18 @@
       <p class="amazon-disclosure-line">As an Amazon Associate I earn from qualifying purchases. TCGplayer links are affiliate links.</p>
     </main>
     <footer>
-      <span class="footer-flavor">A fan spellbook of public tables.</span>
+      <span class="footer-flavor">Public tournament tables, organized by format.</span>
       © <span id="year">2026</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
+      Sources: MTGGoldfish public tables · Magic.gg Metagame Mentor.
       <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
+      <a href="/commanders/">Commanders</a> ·
       <a href="/format.html">Rules</a> · <a href="/search.html">Search</a> · <a href="/shop/">Shop</a> ·
-      <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
+      <a href="/guides/">Guides</a> · <a href="/guides/methodology.html">Methodology</a> ·
+      <a href="/guides/advertising.html">Ads</a> · <a href="/privacy.html">Privacy</a>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-4"></script>
+  <script src="/js/site.js?v=mtg-6"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>
