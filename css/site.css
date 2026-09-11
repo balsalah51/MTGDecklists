@@ -71,7 +71,8 @@ header::after{
 h1,h2,h3,h4,.home-big-title,.home-splash-bar h2,.home-leaders-intro h3,.lore-intro h3{
   font-family:var(--font-display);letter-spacing:.02em
 }
-h2{margin:0 0 8px;font-size:30px;line-height:1.15;color:var(--ink)}
+h2{margin:0 0 8px;font-size:22px;line-height:1.2;color:var(--ink)}
+.section-title h2,.section-title h3{margin:0;font-size:18px}
 .flavor{
   font-style:italic;color:var(--muted);line-height:1.55;margin:6px 0 12px;font-weight:600
 }
@@ -100,7 +101,9 @@ header > nav[aria-label="Primary"] a:first-of-type{color:var(--accent);font-weig
   object-fit:cover;display:block;flex-shrink:0;
   background:#8a121c;box-shadow:0 0 0 3px var(--gold), var(--shadow)
 }
-h1{margin:0;font-size:22px;letter-spacing:.04em}
+h1{margin:0 0 8px;font-size:30px;line-height:1.15;color:var(--ink);letter-spacing:.02em}
+.brand .site-name{margin:0;font-size:22px;letter-spacing:.04em;font-family:var(--font-display);font-weight:700}
+.home-splash-bar h1{margin:0;font-size:22px;letter-spacing:.03em;color:#fff}
 .subtitle{color:var(--muted);font-size:13px;margin-top:4px}
 nav a{color:var(--muted);text-decoration:none;margin-left:14px;font-weight:600}
 nav a:hover,nav a[aria-current="page"]{color:var(--accent)}
@@ -199,6 +202,11 @@ main.single{grid-template-columns:1fr}
   box-shadow:0 10px 22px rgba(156,28,40,.2)
 }
 .home-big-leaders:hover{filter:brightness(1.06)}
+.home-big-commanders{
+  background:linear-gradient(180deg,#1f4a32,#0f2418);color:#d8edc8;
+  border:2px solid #6b9e6a;box-shadow:0 10px 22px rgba(47,110,62,.22)
+}
+.home-big-commanders:hover{filter:brightness(1.08)}
 .home-big-discord{
   background:#fff;color:#4f46c8;border:2px solid rgba(79,70,200,.28);
   grid-column:1/-1;min-height:88px;flex-direction:row;align-items:center;gap:12px
@@ -238,6 +246,7 @@ main.single{grid-template-columns:1fr}
   color:#fff;font-weight:800;text-decoration:none;white-space:nowrap;
   border-bottom:2px solid rgba(255,255,255,.4)
 }
+.home-leaders-links{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .home-leaders-intro a:hover{border-bottom-color:#fff}
 .home-leaders-grid{border-radius:0 0 16px 16px}
 .home-leaders-grid .home-cards{margin-top:0}
@@ -765,6 +774,7 @@ html[data-theme="dark"] .copy-sim{color:var(--accent)}
 html[data-theme="dark"] .site-search button{background:var(--accent);color:#fff}
 html[data-theme="dark"] footer{color:var(--muted)}
 html[data-theme="dark"] .home-big-tier{color:#f5d76e}
+html[data-theme="dark"] .home-big-commanders{color:#d8edc8;border-color:#6b9e6a}
 html[data-theme="dark"] .qty{color:#fff}
 
 .home-splash-veil{
@@ -825,9 +835,7 @@ a.pie-card:hover{border-color:var(--gold);box-shadow:var(--shadow)}
 .guild-lore{margin-top:16px}
 .lore-guild p{margin:8px 0 0;font-size:13px;line-height:1.45;color:var(--text);font-weight:600}
 .leader-tile .flavor{margin:4px 0;font-size:13px}
-.footer-flavor{
-  display:block;font-style:italic;font-weight:700;color:var(--gold);margin-bottom:6px
-}
+.commander-grid{margin-top:16px}
 .format-standard{--tile:#c4a35a}
 .format-modern{--tile:#4d8ec9}
 .format-pioneer{--tile:#6a1b9a}

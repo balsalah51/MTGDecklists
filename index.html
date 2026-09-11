@@ -13,12 +13,12 @@
       } catch (err) {}
     })();
   </script>
-  <title>MTG Decklists | Magic: The Gathering lists by format</title>
-  <meta name="description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <title>MTG Decklists | Magic: The Gathering Commander, Standard, and Modern lists</title>
+  <meta name="description" content="Public Magic: The Gathering decklists by format. Commander, Standard, and Modern first, then Pioneer, Legacy, Vintage, and Pauper. Color pie, guilds, and TCGplayer buy links on every list." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-4" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-6" />
   <link rel="canonical" href="https://mtgdecklists.com/" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
@@ -30,15 +30,16 @@
   <meta property="og:site_name" content="MTG Decklists" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="MTG Decklists | Magic: The Gathering lists by format" />
-  <meta property="og:description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <meta property="og:title" content="MTG Decklists | Magic: The Gathering Commander, Standard, and Modern lists" />
+  <meta property="og:description" content="Public Magic: The Gathering decklists by format. Commander, Standard, and Modern first, then Pioneer, Legacy, Vintage, and Pauper. Color pie, guilds, and TCGplayer buy links on every list." />
   <meta property="og:url" content="https://mtgdecklists.com/" />
   <meta property="og:image" content="https://mtgdecklists.com/img/mtg-banner-hero.jpg" />
+  <meta property="og:image:alt" content="Original five-color pentagon banner with a flashback mage and goblin scout" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MTG Decklists | Magic: The Gathering lists by format" />
-  <meta name="twitter:description" content="Magic: The Gathering decklists organized by format. Commander, Standard, and Modern on the banner; colors and recent tournament lists on every format page." />
+  <meta name="twitter:title" content="MTG Decklists | Magic: The Gathering Commander, Standard, and Modern lists" />
+  <meta name="twitter:description" content="Public Magic: The Gathering decklists by format. Commander, Standard, and Modern first, then Pioneer, Legacy, Vintage, and Pauper. Color pie, guilds, and TCGplayer buy links on every list." />
   <meta name="twitter:image" content="https://mtgdecklists.com/img/mtg-banner-hero.jpg" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MTG Decklists","url":"https://mtgdecklists.com/","potentialAction":{"@type":"SearchAction","target":"https://mtgdecklists.com/search.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "name": "MTG Decklists", "url": "https://mtgdecklists.com/", "description": "Public Magic: The Gathering decklists by format, with Commander, Standard, and Modern first.", "potentialAction": {"@type": "SearchAction", "target": "https://mtgdecklists.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "Organization", "name": "MTG Decklists", "url": "https://mtgdecklists.com/", "logo": "https://mtgdecklists.com/img/mtg-logo-192.png"}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to lists</a>
@@ -47,7 +48,7 @@
       <a class="brand" href="/">
         <img class="logo" src="/img/mtg-logo-192.png" width="56" height="56" alt="MTG Decklists" />
         <div>
-          <h1>MTG Decklists</h1>
+          <p class="site-name">MTG Decklists</p>
           <div class="subtitle">Commander · Standard · Modern — five colors, every format</div>
         </div>
       </a>
@@ -58,6 +59,7 @@
       <nav aria-label="Primary">
         <a href="/tier-list.html">Tier List</a>
         <a href="/formats/">Formats</a>
+        <a href="/commanders/">Commanders</a>
         <a href="/format.html">Rules</a>
         <a href="/events.html">Events</a>
         <a href="/guides/">Guides</a>
@@ -80,10 +82,10 @@
         <div class="home-splash-bar">
           <div>
             <p class="kicker">A fan spellbook of public tables</p>
-            <h2>Shuffle the colors. Read the lists.</h2>
+            <h1>Shuffle the colors. Read the lists.</h1>
             <p class="home-splash-formats">Commander · Standard · Modern</p>
           </div>
-          <p>Pick a format first. Each page opens on the color pie, then that format's August–September 2026 tournament lists.</p>
+          <p>Pick a format first. Commander legends have their own hub. Constructed pages open on the color pie, then that format's recent tables.</p>
         </div>
       </section>
 
@@ -97,20 +99,20 @@
       </a>
 
       <nav class="home-big3" aria-label="Main sections">
-        <a class="home-big home-big-tier" href="/tier-list.html">
-          <span class="home-big-kicker">The metagame</span>
-          <span class="home-big-title">Tier List</span>
-          <span class="home-big-note">August–September 2026 metas by format</span>
+        <a class="home-big home-big-commanders" href="/commanders/">
+          <span class="home-big-kicker">100-card singleton</span>
+          <span class="home-big-title">Commanders</span>
+          <span class="home-big-note">One page per legend — 414 Duel Commander lists</span>
         </a>
         <a class="home-big home-big-leaders" href="#formats">
           <span class="home-big-kicker">Choose a plane</span>
           <span class="home-big-title">Formats</span>
           <span class="home-big-note">Open a format, then see that format's lists</span>
         </a>
-        <a class="home-big home-big-shop" href="/shop/">
-          <span class="home-big-kicker">Table gear</span>
-          <span class="home-big-title">Shop</span>
-          <span class="home-big-note">Sleeves, dice, playmats, and deck boxes</span>
+        <a class="home-big home-big-tier" href="/tier-list.html">
+          <span class="home-big-kicker">The metagame</span>
+          <span class="home-big-title">Tier List</span>
+          <span class="home-big-note">August–September 2026 metas by format</span>
         </a>
         <div class="discord-placeholder" role="note">
           <span class="home-big-icon" aria-hidden="true">
@@ -126,7 +128,7 @@
       <form class="site-search home-search" method="get" action="/search.html" role="search">
         <label class="site-search-label" for="home-q">Search the spellbook</label>
         <div class="site-search-row">
-          <input id="home-q" type="search" name="q" placeholder="Format, color, player, archetype, or card" aria-label="Search MTG decklists" />
+          <input id="home-q" type="search" name="q" placeholder="Brigid, Izzet, Landfall, Solitude…" aria-label="Search MTG decklists" />
           <button type="submit">Search</button>
         </div>
       </form>
@@ -184,7 +186,10 @@
               <h3>Pick a format first</h3>
               <p>Commander, Standard, and Modern lead the banner. Pioneer, Legacy, Vintage, and Pauper sit beside them. Each page opens on colors, then that format's recent lists.</p>
             </div>
-            <a href="/formats/">All format pages →</a>
+            <div class="home-leaders-links">
+              <a href="/formats/">All format pages →</a>
+              <a href="/commanders/">Commander legends →</a>
+            </div>
           </div>
         </div>
         <div class="card home-panel">
@@ -218,7 +223,7 @@
             <div class="name">Commander</div>
             <p class="flavor">One legend. Ninety-nine unique spells. A table of stories.</p>
             <div class="meta">100-card singleton, most-played format</div>
-            <div class="meta">314 recent lists</div>
+            <div class="meta">414 recent lists</div>
           </div>
         </a><a class="format-tile format-legacy" href="/formats/legacy.html">
           <img class="format-tile-art" src="/img/art/lore-swamp-lantern.jpg" alt="" />
@@ -256,8 +261,9 @@
       © <span id="year">2026</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
       <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
+      <a href="/commanders/">Commanders</a> ·
       <a href="/format.html">Rules</a> · <a href="/search.html">Search</a> · <a href="/shop/">Shop</a> ·
-      <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
+      <a href="/guides/">Guides</a> · <a href="/guides/advertising.html">Ads</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
     </footer>
   </div>
   <script src="/js/site.js?v=mtg-3"></script>
