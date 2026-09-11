@@ -14,13 +14,16 @@
     })();
   </script>
   <title>MTG formats | MTG Decklists</title>
-  <meta name="description" content="Iconic Magic: The Gathering formats with recent tournament lists." />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-3" />
+  <meta name="description" content="Seven Magic: The Gathering formats with lore, colors, and recent tournament lists." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-4" />
   <link rel="canonical" href="https://mtgdecklists.com/formats/" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="theme-color" content="#9c1c28" />
+  <meta name="theme-color" content="#7a1f2b" />
   <link rel="icon" href="/img/mtg-logo-192.png" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/img/mtg-logo-192.png" sizes="192x192" />
   <link rel="manifest" href="/site.webmanifest" />
@@ -28,28 +31,36 @@
   <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="MTG formats | MTG Decklists" />
-  <meta property="og:description" content="Iconic Magic: The Gathering formats with recent tournament lists." />
+  <meta property="og:description" content="Seven Magic: The Gathering formats with lore, colors, and recent tournament lists." />
   <meta property="og:url" content="https://mtgdecklists.com/formats/" />
   <meta property="og:image" content="https://mtgdecklists.com/img/mtg-banner-hero.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="MTG formats | MTG Decklists" />
-  <meta name="twitter:description" content="Iconic Magic: The Gathering formats with recent tournament lists." />
+  <meta name="twitter:description" content="Seven Magic: The Gathering formats with lore, colors, and recent tournament lists." />
   <meta name="twitter:image" content="https://mtgdecklists.com/img/mtg-banner-hero.jpg" />
   
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="mana-ribbon" aria-hidden="true">
+    <span class="pip pip-w"></span>
+    <span class="pip pip-u"></span>
+    <span class="pip pip-b"></span>
+    <span class="pip pip-r"></span>
+    <span class="pip pip-g"></span>
+  </div>
   <div class="wrap">
     <header>
       <a class="brand" href="/">
         <img class="logo" src="/img/mtg-logo-192.png" width="56" height="56" alt="MTG Decklists" />
         <div>
           <h1>MTG Decklists</h1>
-          <div class="subtitle">Commander · Standard · Modern</div>
+          <div class="subtitle">A planeswalker’s library · Commander · Standard · Modern</div>
         </div>
       </a>
       <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode">
-        <span data-theme-when="light">Dark mode</span>
-        <span data-theme-when="dark">Light mode</span>
+        <span data-theme-when="light">Night library</span>
+        <span data-theme-when="dark">Daylight</span>
       </button>
       <nav aria-label="Primary">
         <a href="/tier-list.html">Tier List</a>
@@ -63,36 +74,60 @@
       </nav>
     </header>
 
-    <main class="single" role="main">
+    <main class="single" id="main" role="main">
       <div class="crumb"><a href="/">Home</a> / <a href="/formats/">Formats</a></div>
-      <article class="card">
+      <article class="card spellbook">
+        <p class="kicker gold">The Multiverse, by rules</p>
         <h2>Formats</h2>
-        <p>Magic is organized by format. Commander, Standard, and Modern are the three most-played right now; Pioneer, Legacy, Vintage, and Pauper sit beside them. Open a format to see its lists.</p>
-        <div class="leader-grid"><a class="leader-tile" href="/formats/standard.html">
-          <img src="/img/art/art-crimson-bolt.jpg" alt="" />
-          <div><div class="name">Standard</div><div class="meta">Rotating 60-card constructed · 200 lists</div></div>
-        </a><a class="leader-tile" href="/formats/modern.html">
-          <img src="/img/art/art-crimson-bolt.jpg" alt="" />
-          <div><div class="name">Modern</div><div class="meta">Non-rotating from Eighth Edition on · 200 lists</div></div>
-        </a><a class="leader-tile" href="/formats/pioneer.html">
-          <img src="/img/art/art-flashback-mage.jpg" alt="" />
-          <div><div class="name">Pioneer</div><div class="meta">Return to Ravnica forward · 200 lists</div></div>
-        </a><a class="leader-tile" href="/formats/commander.html">
-          <img src="/img/art/art-crimson-bolt.jpg" alt="" />
-          <div><div class="name">Commander</div><div class="meta">100-card singleton, most-played format · 200 lists</div></div>
-        </a><a class="leader-tile" href="/formats/legacy.html">
-          <img src="/img/art/art-flashback-mage.jpg" alt="" />
-          <div><div class="name">Legacy</div><div class="meta">Vintage-adjacent, banned list not restricted list · 200 lists</div></div>
-        </a><a class="leader-tile" href="/formats/vintage.html">
-          <img src="/img/art/art-goblin-scout.jpg" alt="" />
-          <div><div class="name">Vintage</div><div class="meta">The original constructed format · 200 lists</div></div>
-        </a><a class="leader-tile" href="/formats/pauper.html">
-          <img src="/img/art/art-crimson-bolt.jpg" alt="" />
-          <div><div class="name">Pauper</div><div class="meta">Commons only · 200 lists</div></div>
+        <p class="flavor">“Magic is many games wearing one back. Choose the world that fits your table.”</p>
+        <p>Commander, Standard, and Modern are the three most-played right now; Pioneer, Legacy, Vintage, and Pauper sit beside them. Open a format for its color pie, guilds, and lists.</p>
+        <div class="format-grid"><a class="format-tile plane-standard" href="/formats/standard.html">
+          <div class="format-kicker">The living story</div>
+          <div class="name">Standard</div>
+          <p class="format-lore">Standard is Magic’s current novel — the sets still on shelves, rotating when the next world arrives. From Wilds of Eldraine through The Hobbit, the next tide is Nauctis: The Sunken Realm in early 2027.</p>
+          <p class="flavor">“Every rotation is a new chapter of the Multiverse.”</p>
+          <div class="meta">Rotating 60-card constructed · 400 lists</div>
+        </a><a class="format-tile plane-modern" href="/formats/modern.html">
+          <div class="format-kicker">Twenty years of thunder</div>
+          <div class="name">Modern</div>
+          <p class="format-lore">Modern is the great workshop of the last two decades: Eighth Edition forward, Modern Horizons included. It is the constructed format for the September–October 2026 Regional Championships.</p>
+          <p class="flavor">“No Time Walk. Plenty of lightning.”</p>
+          <div class="meta">Non-rotating from Eighth Edition on · 400 lists</div>
+        </a><a class="format-tile plane-pioneer" href="/formats/pioneer.html">
+          <div class="format-kicker">Guilds still echo</div>
+          <div class="name">Pioneer</div>
+          <p class="format-lore">Pioneer begins where Return to Ravnica opened the guildgates. After the Cori-Steel Cutter ban, Izzet spell-slingers and green Cub piles split the August 2026 winner’s metagame.</p>
+          <p class="flavor">“Between the new world and the old memory.”</p>
+          <div class="meta">Return to Ravnica forward · 400 lists</div>
+        </a><a class="format-tile plane-commander" href="/formats/commander.html">
+          <div class="format-kicker">One legend, a hundred spells</div>
+          <div class="name">Commander</div>
+          <p class="format-lore">A legendary creature leads a hundred unique cards. Lists here are recent Duel Commander leagues from August–September 2026 — the same singleton spirit as Friday-night Commander.</p>
+          <p class="flavor">“The most popular table in the Multiverse.”</p>
+          <div class="meta">100-card singleton, most-played format · 314 lists</div>
+        </a><a class="format-tile plane-legacy" href="/formats/legacy.html">
+          <div class="format-kicker">Eternal, with a graveyard</div>
+          <div class="name">Legacy</div>
+          <p class="format-lore">Legacy is eternal constructed with a banned list instead of a museum of restrictions. The Fantasticar was banned on August 10, 2026 — one more name on a very old wall.</p>
+          <p class="flavor">“Force of Will still answers the storm.”</p>
+          <div class="meta">Vintage-adjacent, banned list not restricted list · 400 lists</div>
+        </a><a class="format-tile plane-vintage" href="/formats/vintage.html">
+          <div class="format-kicker">The first library</div>
+          <div class="name">Vintage</div>
+          <p class="format-lore">Vintage is Magic as it was dreamed in 1993: a restricted list, not a wide ban list. The Fantasticar was restricted on August 10, 2026. Museums that still duel.</p>
+          <p class="flavor">“Power nine, handled with care.”</p>
+          <div class="meta">The original constructed format · 400 lists</div>
+        </a><a class="format-tile plane-pauper" href="/formats/pauper.html">
+          <div class="format-kicker">The people’s Magic</div>
+          <div class="name">Pauper</div>
+          <p class="format-lore">Pauper is constructed using only cards printed at common. It is clever, loud, and welcoming — Magic without the rare tax. Wizards clarified Secret Lair Zeta commons in September 2026.</p>
+          <p class="flavor">“Every common is a potential champion.”</p>
+          <div class="meta">Commons only · 400 lists</div>
         </a></div>
       </article>
     </main>
     <footer>
+      <p class="footer-flavor">The Multiverse is vast. These are only the lists we found.</p>
       © <span id="year">2026</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
       <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
@@ -100,7 +135,7 @@
       <a href="/guides/">Guides</a> · <a href="/privacy.html">Privacy</a> · <span>Discord</span>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-2"></script>
+  <script src="/js/site.js?v=mtg-3"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>

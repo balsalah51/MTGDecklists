@@ -3,8 +3,8 @@
   "short_name": "MTG Lists",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f3ef",
-  "theme_color": "#9c1c28",
+  "background_color": "#f4efe4",
+  "theme_color": "#7a1f2b",
   "icons": [
     {
       "src": "/img/mtg-logo-192.png",

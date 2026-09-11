@@ -1,6 +1,7 @@
 (function () {
   var THEME_COOKIE = "mtg-theme";
   var THEME_MAX_AGE = 365 * 24 * 60 * 60;
+  var PAGE_SIZE = 48;
 
   function readTheme() {
     var match = document.cookie.match(/(?:^|; )mtg-theme=(dark|light)/);
@@ -17,10 +18,10 @@
     if (btn) {
       var dark = theme === "dark";
       btn.setAttribute("aria-pressed", dark ? "true" : "false");
-      btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+      btn.setAttribute("aria-label", dark ? "Switch to daylight" : "Switch to night library");
     }
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", theme === "dark" ? "#161213" : "#9c1c28");
+    if (meta) meta.setAttribute("content", theme === "dark" ? "#120e10" : "#7a1f2b");
   }
 
   applyTheme(readTheme());
@@ -34,26 +35,86 @@
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 
-  var params = new URLSearchParams(location.search);
-  var color = params.get("color");
-  if (color) {
+  function colorMatch(colors, needle) {
+    if (!needle || needle === "all") return true;
+    colors = colors || "";
+    if (needle.length === 1) return colors.indexOf(needle) >= 0;
+    return colors === needle;
+  }
+
+  function setupPager(list) {
+    if (!list) return function () {};
+    var shown = PAGE_SIZE;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "show-more";
+    btn.hidden = true;
+    list.after(btn);
+
+    function visibleItems() {
+      return Array.prototype.filter.call(list.querySelectorAll(".recent-item"), function (el) {
+        return !el.classList.contains("hidden-row");
+      });
+    }
+
+    function apply() {
+      var vis = visibleItems();
+      vis.forEach(function (el, i) {
+        if (i >= shown) el.classList.add("page-hidden");
+        else el.classList.remove("page-hidden");
+      });
+      Array.prototype.forEach.call(list.querySelectorAll(".recent-item.hidden-row"), function (el) {
+        el.classList.remove("page-hidden");
+      });
+      var more = vis.length - shown;
+      if (more > 0) {
+        btn.hidden = false;
+        btn.textContent = "Show " + Math.min(PAGE_SIZE, more) + " more · " + vis.length + " lists in this hall";
+      } else {
+        btn.hidden = true;
+      }
+    }
+
+    btn.addEventListener("click", function () {
+      shown += PAGE_SIZE;
+      apply();
+    });
+
+    return function resetAndApply() {
+      shown = PAGE_SIZE;
+      apply();
+    };
+  }
+
+  var list = document.querySelector(".recent-list");
+  var paginate = setupPager(list);
+
+  function applyColorFilter(color) {
     Array.prototype.forEach.call(document.querySelectorAll("[data-colors]"), function (row) {
-      var has = (row.getAttribute("data-colors") || "").indexOf(color) >= 0;
-      if (!has) row.classList.add("hidden-row");
+      var has = colorMatch(row.getAttribute("data-colors") || "", color);
+      row.classList.toggle("hidden-row", !has);
     });
     Array.prototype.forEach.call(document.querySelectorAll(".filter-bar [data-color]"), function (btn) {
-      if (btn.getAttribute("data-color") === color) btn.classList.add("is-on");
+      var key = btn.getAttribute("data-color") || "";
+      btn.classList.toggle("is-on", color ? key === color : key === "all");
     });
+    paginate();
   }
+
+  var params = new URLSearchParams(location.search);
+  var color = params.get("color");
+  applyColorFilter(color);
 
   Array.prototype.forEach.call(document.querySelectorAll(".filter-bar [data-color]"), function (btn) {
     btn.addEventListener("click", function () {
       var next = btn.getAttribute("data-color") || "";
       if (next === "all") {
-        location.search = "";
+        history.replaceState(null, "", location.pathname);
+        applyColorFilter("");
         return;
       }
-      location.search = "?color=" + encodeURIComponent(next);
+      history.replaceState(null, "", location.pathname + "?color=" + encodeURIComponent(next));
+      applyColorFilter(next);
     });
   });
 
