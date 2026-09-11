@@ -477,7 +477,7 @@ def footer() -> str:
       <a href="/guides/advertising.html">Ads</a> · <a href="/privacy.html">Privacy</a>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-4"></script>
+  <script src="/js/site.js?v=mtg-5"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>

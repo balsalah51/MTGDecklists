@@ -139,6 +139,15 @@
       var hits = index.filter(function (item) {
         return (item.hay || "").indexOf(query) >= 0;
       });
+      hits.sort(function (a, b) {
+        function rank(item) {
+          var u = item.url || "";
+          if (u.indexOf("/decklists/") === 0) return 2;
+          if (u.indexOf("/archetypes/") === 0 || u.indexOf("/commanders/") === 0) return 1;
+          return 0;
+        }
+        return rank(a) - rank(b);
+      });
       render(hits, query);
     }
     if (q) {
