@@ -16,7 +16,7 @@ SITE = "https://mtgdecklists.com"
 TODAY = "2026-09-11"
 YEAR = "2026"
 TARGET_PER_FORMAT = 800
-TARGET_COMMANDER = 828
+TARGET_COMMANDER = 4000
 LIST_PAGE_SIZE = 80
 DATE_WINDOW = "June–September 2026"
 
@@ -59,7 +59,7 @@ FORMATS = [
         "name": "Commander",
         "short": "100-card singleton, most-played format",
         "flavor": "One legend. Ninety-nine unique spells. A table of stories.",
-        "blurb": "Commander is 100-card singleton led by a legendary creature. Tables here are public Duel Commander (1v1) leagues from May–September 2026. Color identity is the same rule used at a four-player Commander night. Open a commander page for every list of that legend.",
+        "blurb": "Commander is 100-card singleton led by a legendary creature. The format page mixes public Duel Commander (1v1) leagues with Goldfish Commander lists so the legend hub can show 200+ names with at least five lists each. Color identity is the same rule used at a four-player Commander night.",
         "official": "https://magic.wizards.com/en/formats/commander",
         "popular": True,
         "art": "/img/art/lore-forest-cathedral.jpg",
@@ -183,10 +183,11 @@ ARTS = [
 ]
 
 GUILD = {
-    "WU": "Azorius", "UB": "Dimir", "BR": "Rakdos", "RG": "Gruul", "GW": "Selesnya",
-    "WB": "Orzhov", "UR": "Izzet", "BG": "Golgari", "RW": "Boros", "GU": "Simic",
-    "WUB": "Esper", "UBR": "Grixis", "BRG": "Jund", "RGW": "Naya", "GWU": "Bant",
-    "WBG": "Abzan", "URW": "Jeskai", "BGU": "Sultai", "RWB": "Mardu", "GUR": "Temur",
+    "WU": "Azorius", "UB": "Dimir", "BR": "Rakdos", "RG": "Gruul", "GW": "Selesnya", "WG": "Selesnya",
+    "WB": "Orzhov", "UR": "Izzet", "BG": "Golgari", "RW": "Boros", "WR": "Boros", "GU": "Simic", "UG": "Simic",
+    "WUB": "Esper", "UBR": "Grixis", "BRG": "Jund", "RGW": "Naya", "WRG": "Naya", "GWU": "Bant", "WUG": "Bant",
+    "WBG": "Abzan", "URW": "Jeskai", "WUR": "Jeskai", "BGU": "Sultai", "UBG": "Sultai",
+    "RWB": "Mardu", "WBR": "Mardu", "GUR": "Temur", "URG": "Temur",
     "W": "Mono-White", "U": "Mono-Blue", "B": "Mono-Black", "R": "Mono-Red", "G": "Mono-Green",
     "WUBR": "4-color", "WUBG": "4-color", "WURG": "4-color", "WBRG": "4-color", "UBRG": "4-color",
     "WUBRG": "Five-color",
@@ -399,7 +400,7 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-8" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-9" />
   <link rel="canonical" href="{e(canonical)}" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
@@ -477,7 +478,7 @@ def footer() -> str:
       <a href="/guides/advertising.html">Ads</a> · <a href="/privacy.html">Privacy</a>
     </footer>
   </div>
-  <script src="/js/site.js?v=mtg-5"></script>
+  <script src="/js/site.js?v=mtg-6"></script>
   <script src="/js/tcgplayer.js?v=mtg-1"></script>
 </body>
 </html>
@@ -557,6 +558,7 @@ def _scryfall_images(card: dict) -> dict:
     if not type_line and card.get("card_faces"):
         type_line = card["card_faces"][0].get("type_line") or ""
     is_land = "Land" in type_line and "Creature" not in type_line
+    identity = card.get("color_identity") or []
     return {
         "name": card.get("name") or "",
         "type_line": type_line,
@@ -564,6 +566,7 @@ def _scryfall_images(card: dict) -> dict:
         "small": uris.get("small") or "",
         "normal": uris.get("normal") or "",
         "art_crop": uris.get("art_crop") or "",
+        "color_identity": "".join(c for c in "WUBRG" if c in identity),
     }
 
 
@@ -574,7 +577,7 @@ def load_scryfall(names: set[str]) -> dict:
             cache = json.loads(SCRYFALL_CACHE.read_text())
         except json.JSONDecodeError:
             cache = {}
-    missing = [n for n in sorted(names) if n and n not in cache]
+    missing = [n for n in sorted(names) if n and ("color_identity" not in (cache.get(n) or {}))]
     if missing:
         print(f"scryfall: lookup {len(missing)} cards", flush=True)
         for i in range(0, len(missing), 75):
@@ -627,8 +630,30 @@ def load_scryfall(names: set[str]) -> dict:
     return cache
 
 
+def identity_from_commander(name: str, catalog: dict, by_lower: dict) -> str:
+    pips = set()
+    for part in re.split(r"\s*//\s*", unescape(name or "")):
+        part = part.strip()
+        if not part:
+            continue
+        info = catalog.get(part) or by_lower.get(part.lower())
+        if not info:
+            first = part.split(",")[0].strip()
+            info = catalog.get(first) or by_lower.get(first.lower())
+        code = (info or {}).get("color_identity") or ""
+        pips.update(code)
+    return "".join(c for c in "WUBRG" if c in pips)
+
+
 def assign_faces(decks: list[dict]) -> None:
     names = {n for d in decks for n in face_candidates(d)}
+    for d in decks:
+        if d.get("format") != "commander":
+            continue
+        for part in re.split(r"\s*//\s*", unescape(d.get("archetype") or "")):
+            part = part.strip()
+            if part:
+                names.add(part)
     catalog = load_scryfall(names)
     by_lower = {k.lower(): v for k, v in catalog.items() if k}
     for deck in decks:
@@ -640,6 +665,11 @@ def assign_faces(decks: list[dict]) -> None:
             face = info
             break
         deck["face"] = face or {}
+        if deck.get("format") == "commander":
+            ident = identity_from_commander(deck.get("archetype") or "", catalog, by_lower)
+            if ident:
+                deck["colors"] = ident
+                deck["combo"] = combo_label(ident)
     print("  faces", sum(1 for d in decks if (d.get("face") or {}).get("small")), "of", len(decks), flush=True)
 
 
@@ -677,7 +707,7 @@ def recent_item(deck: dict) -> str:
 
 def date_window(fmt: str | None = None) -> str:
     if fmt == "commander":
-        return "May–September 2026"
+        return "May–September 2026 leagues and public Commander lists"
     return DATE_WINDOW
 
 
@@ -1023,7 +1053,7 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
     if fmt["slug"] == "commander":
         commander_hub = """
         <p><a href="/commanders/">Browse by commander</a> — one page per legend, with every public list we have for that name.</p>
-        <p class="muted">These are Duel Commander (1v1) league tables. Color identity and the 100-card singleton rule are the same as a four-player Commander night. Partner commanders are listed under both names when the source reports them that way.</p>
+        <p class="muted">These are Duel Commander (1v1) league tables plus Goldfish public Commander lists. Color identity and the 100-card singleton rule are the same as a four-player Commander night. Partner commanders are listed under both names when the source reports them that way.</p>
         """
     extra = json_ld(breadcrumb_ld([("/formats/", "Formats"), (f"/formats/{fmt['slug']}.html", fmt["name"])])) + json_ld({
         "@context": "https://schema.org",
@@ -1083,27 +1113,49 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
 """ + footer()
 
 
-def commander_groups(decks: list[dict]) -> list[tuple[str, list[dict]]]:
+def commander_groups(decks: list[dict], *, min_lists: int = 0) -> list[tuple[str, list[dict]]]:
     cmd = [d for d in decks if d["format"] == "commander"]
     by = defaultdict(list)
     for d in cmd:
         by[d["archetype"]].append(d)
     ranked = sorted(by.items(), key=lambda kv: (-len(kv[1]), kv[0].lower()))
-    return ranked[:200]
+    if min_lists:
+        ranked = [
+            kv for kv in ranked
+            if len(kv[1]) >= min_lists or "basim" in kv[0].lower()
+        ]
+    return ranked
+
+
+def commander_section_sort(code: str) -> tuple:
+    code = code or "C"
+    if code == "C":
+        return (6, 0, "Colorless")
+    n = len(code)
+    label = combo_label(code)
+    order = "WUBRG"
+    rank = sum((order.index(c) + 1) * (10 ** (5 - i)) for i, c in enumerate(code) if c in order)
+    if n == 1:
+        return (1, rank, label)
+    if n == 2:
+        return (2, rank, label)
+    if n == 3:
+        return (3, rank, label)
+    if n == 4:
+        return (4, 0, "Four-color")
+    return (5, 0, "Five-color")
 
 
 def commander_url(name: str) -> str:
     return f"/commanders/{slugify(name)}.html"
 
 
-def page_commanders_index(decks: list[dict]) -> str:
-    groups = commander_groups(decks)
-    tiles = ""
-    for name, rows in groups:
-        sample = rows[0]
-        art = art_for(sample, "small")
-        colors = sample.get("colors") or ""
-        tiles += f"""<a class="leader-tile" href="{commander_url(name)}">
+def commander_tile(name: str, rows: list[dict]) -> str:
+    sample = rows[0]
+    art = art_for(sample, "small")
+    colors = sample.get("colors") or ""
+    hay = unescape(name).lower()
+    return f"""<a class="leader-tile" href="{commander_url(name)}" data-name="{e(hay)}" data-colors="{e(colors)}">
           <img src="{e(art[0])}" alt="{e(art[1] if not art[0].startswith('/img/art/') else '')}" />
           <div>
             <div class="name">{e(name)}</div>
@@ -1111,6 +1163,23 @@ def page_commanders_index(decks: list[dict]) -> str:
             <div class="meta">{len(rows)} lists</div>
           </div>
         </a>"""
+
+
+def page_commanders_index(decks: list[dict]) -> str:
+    groups = commander_groups(decks, min_lists=5)
+    by_color: dict[tuple, list[tuple[str, list[dict]]]] = defaultdict(list)
+    for name, rows in groups:
+        code = (rows[0].get("colors") or "") or "C"
+        by_color[commander_section_sort(code)].append((name, rows))
+    sections = ""
+    for key in sorted(by_color):
+        _band, _rank, label = key
+        tiles = "".join(commander_tile(name, rows) for name, rows in sorted(by_color[key], key=lambda kv: kv[0].lower()))
+        sample_colors = (by_color[key][0][1][0].get("colors") or "") if by_color[key] else ""
+        sections += f"""<section class="commander-section" data-section-colors="{e(sample_colors)}" data-section-label="{e(label.lower())}">
+          <h2>{e(label)} <span class="muted">{len(by_color[key])}</span></h2>
+          <div class="leader-grid commander-grid">{tiles}</div>
+        </section>"""
     extra = json_ld(breadcrumb_ld([("/commanders/", "Commanders")])) + json_ld({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
@@ -1139,7 +1208,7 @@ def page_commanders_index(decks: list[dict]) -> str:
                 "name": "Is this EDH or Duel Commander?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "These lists are public Magic Online Duel Commander (1v1) league tables. The same 100-card singleton and color-identity rules apply at a four-player Commander night.",
+                    "text": "Duel Commander league tables sit next to public Goldfish Commander (EDH) lists so each legend can have a full page. Color identity and the 100-card singleton rule are the same at a four-player night.",
                 },
             },
             {
@@ -1147,14 +1216,14 @@ def page_commanders_index(decks: list[dict]) -> str:
                 "name": "How does a commander get a page on this site?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Every unique legend that posted in the May–September 2026 tables we scraped gets a landing page with every list for that name.",
+                    "text": "Every unique legend with public lists on this site gets a landing page. The hub shows names with at least five lists, grouped by color identity. Search the top of this page for a name such as Basim Ibn Ishaq.",
                 },
             },
         ],
     })
     return head(
         "Commander decklists by legend | MTG Decklists",
-        f"{len(groups)} Commander (EDH / Duel Commander) legends with public lists from May–September 2026. Color identity, recent tables, and TCGplayer buy links.",
+        f"{len(groups)} Commander legends with at least five public lists each, sorted by color identity. Search for Basim, Phelia, or any other name.",
         f"{SITE}/commanders/",
         extra=extra,
         image="/img/art/lore-forest-cathedral.jpg",
@@ -1162,14 +1231,28 @@ def page_commanders_index(decks: list[dict]) -> str:
     ) + header("commanders") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/commanders/", "Commanders"))}
-      <article class="card">
+      <article class="card" id="commander-hub">
         <h1>Commanders</h1>
-        <p>Every page is a commander that posted in public Duel Commander tables on this site. Open a legend for every list, color identity, and a buy link. The full sample is on the <a href="/formats/commander.html">Commander format page</a>.</p>
-        <p class="muted">{len(groups)} legends · {sum(len(r) for _, r in groups)} lists</p>
-        <div class="leader-grid commander-grid">{tiles}</div>
+        <p>Search a legend, then browse by color identity. Each page is a commander with at least five public lists — Duel Commander leagues plus Goldfish Commander lists for names that needed a fuller sample. <a href="/formats/commander.html">All Commander lists</a> · <a href="/guides/commander.html">Commander guide</a>.</p>
+        <div class="list-tools commander-search">
+          <label class="list-filter-label" for="commander-filter">Search commanders</label>
+          <input id="commander-filter" type="search" placeholder="Basim, Phelia, Atraxa…" autocomplete="off" />
+        </div>
+        <div class="filter-bar" id="commander-colors" aria-label="Sort by color">
+          <button type="button" data-cmd-color="all" class="is-on">All</button>
+          <button type="button" data-cmd-color="W">White</button>
+          <button type="button" data-cmd-color="U">Blue</button>
+          <button type="button" data-cmd-color="B">Black</button>
+          <button type="button" data-cmd-color="R">Red</button>
+          <button type="button" data-cmd-color="G">Green</button>
+          <button type="button" data-cmd-color="M">Multicolor</button>
+          <button type="button" data-cmd-color="C">Colorless</button>
+        </div>
+        <p class="muted" id="commander-status">{len(groups)} legends · {sum(len(r) for _, r in groups)} lists, grouped by color</p>
+        {sections}
         <div class="faq" style="margin-top:28px">
-          <details open><summary>Is this EDH or Duel Commander?</summary><p>Public Magic Online Duel Commander (1v1) league tables. Color identity and the 100-card singleton rule are the same as a four-player Commander night; the lists themselves are the 1v1 dialect.</p></details>
-          <details><summary>How does a commander get a page?</summary><p>Every unique legend in the May–September 2026 tables on this site gets a landing page. Open a name to see every list, then buy the pile on TCGplayer.</p></details>
+          <details open><summary>Is this EDH or Duel Commander?</summary><p>Public Magic Online Duel Commander (1v1) league tables plus Goldfish public Commander lists. Color identity and the 100-card singleton rule are the same as a four-player Commander night.</p></details>
+          <details><summary>How does a commander get a page?</summary><p>Every unique legend in the sample gets a landing page. This hub lists names with at least five lists, sorted by color. Type a name in the search box — Basim Ibn Ishaq is included.</p></details>
         </div>
       </article>
     </main>
@@ -1192,7 +1275,7 @@ def page_commander(name: str, rows: list[dict]) -> str:
     })
     return head(
         f"{name} Commander decklists ({len(rows)}) | MTG Decklists",
-        f"{name} is a {combo} Commander. {len(rows)} public Duel Commander lists from May–September 2026, with color identity and TCGplayer buy links.",
+        f"{name} is a {combo} Commander. {len(rows)} public lists with color identity and TCGplayer buy links.",
         SITE + commander_url(name),
         image=art[0],
         extra=extra,
@@ -1205,8 +1288,7 @@ def page_commander(name: str, rows: list[dict]) -> str:
         <img class="inline-art card-face" src="{e(art[0])}" alt="{e(art[1])}" />
         <p class="kicker">Commander · {e(combo)}</p>
         <h1>{e(name)}</h1>
-        <p class="flavor">A 100-card singleton legend. Color identity {pip_html(colors)} {e(colors or 'C')}.</p>
-        <p>{e(name)} posted {len(rows)} time{'s' if len(rows) != 1 else ''} in the public Duel Commander tables on this site. The same 100-card singleton rules apply at a four-player Commander night — these lists are the 1v1 league dialect of that format.</p>
+        <p>{e(name)} posted {len(rows)} time{'s' if len(rows) != 1 else ''} in the public Commander tables on this site. Color identity {pip_html(colors)} {e(colors or 'C')} — the same 100-card singleton rule as a four-player Commander night.</p>
         <p><a href="/formats/commander.html">All Commander lists</a> · <a href="/guides/commander.html">Commander guide</a></p>
         <div class="section-title" style="margin-top:22px"><h2>Recent lists</h2><span class="muted">{len(rows)}</span></div>
         <div class="recent-list" data-page-size="{LIST_PAGE_SIZE}">{items}</div>
@@ -1476,9 +1558,9 @@ def guide_extra(slug: str) -> str:
         <p>This site republishes public constructed decklists for news and commentary. We do not run events and we do not claim official winner’s-metagame numbers unless a page cites Magic.gg Metagame Mentor.</p>
         <ul>
           <li><strong>Source.</strong> Magic Online Challenge, Challenge 32, and league tables hosted on MTGGoldfish, plus three Magic.gg Metagame Mentor consensus lists.</li>
-          <li><strong>Date window.</strong> Constructed formats: June–September 2026. Commander: May–September 2026 Duel Commander leagues.</li>
-          <li><strong>Cap.</strong> Up to 800 lists per constructed format and 828 Commander lists, spread across events so a single league cannot fill the sample.</li>
-          <li><strong>Commander.</strong> Tables are Duel Commander (1v1). Color identity and 100-card singleton are the same rules as EDH; the lists themselves are the 1v1 dialect.</li>
+          <li><strong>Date window.</strong> Constructed formats: June–September 2026. Commander leagues: May–September 2026 Duel Commander, plus public Goldfish Commander lists used to give each hub legend at least five lists.</li>
+          <li><strong>Cap.</strong> Up to 800 lists per constructed format. Commander keeps the league sample and adds Goldfish Commander lists so 200 additional legends each have at least five lists.</li>
+          <li><strong>Commander.</strong> The hub at /commanders/ is grouped by color identity and has a name search. Duel Commander (1v1) and EDH share color identity and the 100-card singleton rule.</li>
         </ul>
         <div class="section-title" style="margin-top:22px"><h2>How share is counted</h2></div>
         <p>An archetype’s share on a format page is that name’s count divided by the number of lists on this site for that format. It is a sample of public tables, not a weighted winner’s metagame. Names follow the source (Goldfish’s deck title).</p>
@@ -1592,7 +1674,7 @@ def page_rules() -> str:
         <h1>Formats and the banlist</h1>
         <img class="inline-art" src="/img/art/art-crimson-bolt.jpg" alt="Original crimson bolt illustration" />
         <p class="flavor">Every format is a different promise about which cards are legal — and which stories still get to be told.</p>
-        <p>Lists on this site are public constructed tables from June–September 2026 unless a page says otherwise. Commander pages are Duel Commander leagues (May–September; still 100-card singleton). Pick a format first — lists are not mixed on the homepage.</p>
+        <p>Lists on this site are public constructed tables from June–September 2026 unless a page says otherwise. Commander pages mix Duel Commander leagues with Goldfish public Commander lists so each hub legend has at least five lists. Pick a format first — lists are not mixed on the homepage.</p>
         <section>
           <h3>August 10, 2026 changes</h3>
           <p>From the official <a href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener">banned and restricted announcement</a>:</p>

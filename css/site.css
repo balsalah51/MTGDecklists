@@ -852,6 +852,17 @@ a.pie-card:hover{border-color:var(--gold);box-shadow:var(--shadow)}
 .lore-guild p{margin:8px 0 0;font-size:13px;line-height:1.45;color:var(--text);font-weight:600}
 .leader-tile .flavor{margin:4px 0;font-size:13px}
 .commander-grid{margin-top:16px}
+.commander-search{margin:16px 0 8px}
+#commander-filter{
+  width:100%;max-width:520px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);
+  background:var(--input-bg);color:inherit;font:inherit
+}
+.commander-section{margin-top:28px}
+.commander-section h2{
+  display:flex;align-items:baseline;gap:10px;font-size:20px;margin:0 0 10px
+}
+.commander-section h2 .muted{font-family:var(--font-ui);font-size:13px;font-weight:700;letter-spacing:.04em}
+.leader-tile.filter-hide,.commander-section.filter-hide{display:none}
 .format-standard{--tile:#c4a35a}
 .format-modern{--tile:#4d8ec9}
 .format-pioneer{--tile:#6a1b9a}
