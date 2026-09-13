@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -29,7 +30,8 @@ COMMANDER_MONTHS = ("2026-05", "2026-06", "2026-07", "2026-08", "2026-09")
 MIN_LISTS_PER_COMMANDER = 5
 MAX_NEW_LISTS_PER_COMMANDER = 8
 NEW_COMMANDERS_TARGET = 200
-PIN_COMMANDERS = ("Basim Ibn Ishaq",)
+PINNED_DATES = ("2026-09-10", "2026-09-11", "2026-09-12")
+ADD_DATE_RANGE = "09/10/2026 - 09/12/2026"
 SCRYFALL_UA = "MTGDecklistsBot/1.0 (+https://mtgdecklists.com)"
 SKIP_NAME = re.compile(r"\b(limited|draft|sealed|cube)\b", re.I)
 ROW_RE = re.compile(
@@ -176,11 +178,22 @@ def select_target(decks: list, n: int = TARGET_PER_FORMAT) -> list:
         seen.add(did)
         by[fmt].append(d)
     out = []
+    pin = set(PINNED_DATES)
     for fmt in FORMATS:
+        group = by.get(fmt, [])
         if fmt == "commander":
-            out.extend(select_commanders(by.get(fmt, [])))
-        else:
-            out.extend(_spread(by.get(fmt, []), target_for(fmt)))
+            out.extend(select_commanders(group))
+            continue
+        pinned = [d for d in group if (d.get("date") or "") in pin]
+        rest = [d for d in group if (d.get("date") or "") not in pin]
+        kept, seen_ids = [], set()
+        for d in pinned + _spread(rest, target_for(fmt)):
+            did = str(d.get("id"))
+            if did in seen_ids:
+                continue
+            seen_ids.add(did)
+            kept.append(d)
+        out.extend(kept)
     out.sort(key=lambda x: (x.get("date") or "", str(x.get("id"))), reverse=True)
     return out
 
@@ -434,16 +447,17 @@ def enrich_commanders(existing: list, have: set) -> tuple[list, set, int]:
     return existing, have, added
 
 
-def discover(fmt: str):
+def discover(fmt: str, date_range: str | None = None):
     found = []
     seen = set()
-    queries = [("", fmt, DATE_RANGE), (fmt, "", DATE_RANGE)]
+    dr = date_range or (COMMANDER_DATE_RANGE if fmt == "commander" else DATE_RANGE)
+    queries = [("", fmt, dr), (fmt, "", dr)]
     pages = MAX_PAGES_COMMANDER if fmt == "commander" else MAX_PAGES
     if fmt == "commander":
         queries = [
-            ("duel commander", "", COMMANDER_DATE_RANGE),
-            ("commander", "", COMMANDER_DATE_RANGE),
-            ("", "commander", COMMANDER_DATE_RANGE),
+            ("duel commander", "", dr),
+            ("commander", "", dr),
+            ("", "commander", dr),
         ]
     for name, goldfish_format, date_range in queries:
         for page in range(1, pages + 1):
@@ -484,84 +498,128 @@ def fmt_count(existing, fmt: str) -> int:
     return sum(1 for d in existing if d.get("format") == fmt and in_window(d.get("date") or "", fmt))
 
 
-def main():
+def ingest_events(
+    existing: list,
+    have: set,
+    events: list,
+    fmt: str,
+    *,
+    dates: set[str] | None = None,
+    limit: int | None = None,
+) -> tuple[int, list, set]:
+    added = 0
+    cap_rows = PER_EVENT_COMMANDER if fmt == "commander" else PER_EVENT
+    for fmt_name, url, event, date in events:
+        if dates and date not in dates:
+            continue
+        if limit is not None and fmt_count(existing, fmt) >= limit:
+            break
+        try:
+            html = fetch(url)
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410):
+                continue
+            print("  fail", url, e, flush=True)
+            continue
+        except Exception as e:
+            print("  fail", url, e, flush=True)
+            continue
+        rows = parse_rows(html, cap_rows)
+        if not rows:
+            continue
+        new_here = 0
+        for deck_id, arche, player, place in rows:
+            if limit is not None and fmt_count(existing, fmt) >= limit:
+                break
+            if deck_id in have:
+                continue
+            try:
+                main, side = download_deck(deck_id)
+                time.sleep(0.06)
+            except Exception as e:
+                print("   fail deck", deck_id, e, flush=True)
+                continue
+            if not main:
+                continue
+            existing.append({
+                "id": deck_id,
+                "format": fmt_name,
+                "archetype": arche,
+                "player": player,
+                "place": place,
+                "event": event,
+                "date": date,
+                "source": url,
+                "source_name": "MTGGoldfish",
+                "main": main,
+                "side": side,
+            })
+            have.add(deck_id)
+            added += 1
+            new_here += 1
+        if new_here:
+            print(f"  {event} {date}: +{new_here}/{len(rows)} now {fmt_count(existing, fmt)}", flush=True)
+        time.sleep(0.12)
+    return added, existing, have
+
+
+def scrape_add_dates(existing: list, have: set, date_range: str, dates: set[str]) -> tuple[int, list, set]:
+    added = 0
+    for fmt in FORMATS:
+        print(f"{fmt}: discovering {date_range}", flush=True)
+        events = discover(fmt, date_range)
+        print(f"{fmt}: {len(events)} events in window", flush=True)
+        extra, existing, have = ingest_events(existing, have, events, fmt, dates=dates)
+        added += extra
+        save_decks(existing)
+    return added, existing, have
+
+
+def main(argv: list[str] | None = None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    add_window = None
+    if "--add-dates" in argv:
+        i = argv.index("--add-dates")
+        add_window = argv[i + 1] if i + 1 < len(argv) and not argv[i + 1].startswith("-") else ADD_DATE_RANGE
     existing = json.loads(OUT.read_text()) if OUT.exists() else []
     have = {str(d.get("id")) for d in existing}
     added = 0
-    existing, have, extra = enrich_commanders(existing, have)
-    added += extra
-    for fmt in FORMATS:
-        have_fmt = fmt_count(existing, fmt)
-        need = target_for(fmt)
-        if have_fmt >= need:
-            print(f"{fmt}: already {have_fmt}, skip scrape", flush=True)
-            continue
-        print(f"{fmt}: discovering (have {have_fmt}, need {need})", flush=True)
-        events = discover(fmt)
-        print(f"{fmt}: {len(events)} events", flush=True)
-        cap_rows = PER_EVENT_COMMANDER if fmt == "commander" else PER_EVENT
-        for fmt_name, url, event, date in events:
-            if fmt_count(existing, fmt) >= need:
-                break
-            try:
-                html = fetch(url)
-            except urllib.error.HTTPError as e:
-                if e.code in (404, 410):
-                    continue
-                print("  fail", url, e, flush=True)
+    if add_window:
+        dates = set(PINNED_DATES)
+        print(f"adding lists for {add_window} ({sorted(dates)})", flush=True)
+        extra, existing, have = scrape_add_dates(existing, have, add_window, dates)
+        added += extra
+    else:
+        existing, have, extra = enrich_commanders(existing, have)
+        added += extra
+        for fmt in FORMATS:
+            have_fmt = fmt_count(existing, fmt)
+            need = target_for(fmt)
+            if have_fmt >= need:
+                print(f"{fmt}: already {have_fmt}, skip scrape", flush=True)
                 continue
-            except Exception as e:
-                print("  fail", url, e, flush=True)
-                continue
-            rows = parse_rows(html, cap_rows)
-            if not rows:
-                continue
-            new_here = 0
-            for deck_id, arche, player, place in rows:
-                if fmt_count(existing, fmt) >= need:
-                    break
-                if deck_id in have:
-                    continue
-                try:
-                    main, side = download_deck(deck_id)
-                    time.sleep(0.06)
-                except Exception as e:
-                    print("   fail deck", deck_id, e, flush=True)
-                    continue
-                if not main:
-                    continue
-                existing.append({
-                    "id": deck_id,
-                    "format": fmt_name,
-                    "archetype": arche,
-                    "player": player,
-                    "place": place,
-                    "event": event,
-                    "date": date,
-                    "source": url,
-                    "source_name": "MTGGoldfish",
-                    "main": main,
-                    "side": side,
-                })
-                have.add(deck_id)
-                added += 1
-                new_here += 1
-            if new_here:
-                print(f"  {event} {date}: +{new_here}/{len(rows)} now {fmt_count(existing, fmt)}", flush=True)
-            time.sleep(0.12)
-        OUT.parent.mkdir(parents=True, exist_ok=True)
-        json.dump(existing, OUT.open("w"), separators=(",", ":"))
+            print(f"{fmt}: discovering (have {have_fmt}, need {need})", flush=True)
+            events = discover(fmt)
+            print(f"{fmt}: {len(events)} events", flush=True)
+            extra, existing, have = ingest_events(existing, have, events, fmt, limit=need)
+            added += extra
+            save_decks(existing)
+            # original loop also stopped at cap; ingest_events does not cap, so trim via later select
     trimmed = select_target(existing)
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    json.dump(trimmed, OUT.open("w"), separators=(",", ":"))
+    save_decks(trimmed)
     counts = defaultdict(int)
     months = defaultdict(lambda: defaultdict(int))
+    days = defaultdict(lambda: defaultdict(int))
     for d in trimmed:
         counts[d.get("format")] += 1
         months[d.get("format")][(d.get("date") or "")[:7]] += 1
+        if (d.get("date") or "") in PINNED_DATES:
+            days[d.get("format")][d.get("date")] += 1
     print("added", added, "kept", len(trimmed), dict(counts), flush=True)
     for fmt in FORMATS:
         print(f"  {fmt}: {dict(months[fmt])}", flush=True)
+        if days[fmt]:
+            print(f"    pinned days {dict(days[fmt])}", flush=True)
 
 
 if __name__ == "__main__":
