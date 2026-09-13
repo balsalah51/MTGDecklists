@@ -13,10 +13,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://mtgdecklists.com"
-TODAY = "2026-09-11"
+TODAY = "2026-09-13"
 YEAR = "2026"
 TARGET_PER_FORMAT = 800
 TARGET_COMMANDER = 4000
+PINNED_DATES = {"2026-09-10", "2026-09-11", "2026-09-12"}
 LIST_PAGE_SIZE = 80
 DATE_WINDOW = "June–September 2026"
 
@@ -833,15 +834,18 @@ def cap_per_format(decks: list[dict], n: int | None = None) -> list[dict]:
         cap = TARGET_COMMANDER if fmt == "commander" else TARGET_PER_FORMAT
         group = by.get(fmt, [])
         curated = [d for d in group if str(d.get("id") or "").startswith("mentor-")]
-        rest = [d for d in group if not str(d.get("id") or "").startswith("mentor-")]
+        pinned = [d for d in group if (d.get("date") or "") in PINNED_DATES and not str(d.get("id") or "").startswith("mentor-")]
+        rest = [d for d in group if d not in curated and d not in pinned]
         chosen, seen = [], set()
-        for d in curated + rest:
+        for d in curated + pinned + rest:
             key = d["id"]
             if key in seen:
                 continue
             seen.add(key)
             chosen.append(d)
-            if len(chosen) >= cap:
+            if fmt != "commander" and d not in curated and d not in pinned and sum(1 for x in chosen if x not in curated and x not in pinned) >= cap:
+                break
+            if fmt == "commander" and len(chosen) >= cap:
                 break
         out.extend(chosen)
     out.sort(key=lambda x: (x["date"], x.get("place") or ""), reverse=True)
@@ -1559,7 +1563,7 @@ def guide_extra(slug: str) -> str:
         <ul>
           <li><strong>Source.</strong> Magic Online Challenge, Challenge 32, and league tables hosted on MTGGoldfish, plus three Magic.gg Metagame Mentor consensus lists.</li>
           <li><strong>Date window.</strong> Constructed formats: June–September 2026. Commander leagues: May–September 2026 Duel Commander, plus public Goldfish Commander lists used to give each hub legend at least five lists.</li>
-          <li><strong>Cap.</strong> Up to 800 lists per constructed format. Commander keeps the league sample and adds Goldfish Commander lists so 200 additional legends each have at least five lists.</li>
+          <li><strong>Cap.</strong> Up to 800 lists per constructed format, plus every public table from 10–12 September 2026 so the newest leagues stay in the sample. Commander keeps the league sample and adds Goldfish Commander lists so 200 additional legends each have at least five lists.</li>
           <li><strong>Commander.</strong> The hub at /commanders/ is grouped by color identity and has a name search. Duel Commander (1v1) and EDH share color identity and the 100-card singleton rule.</li>
         </ul>
         <div class="section-title" style="margin-top:22px"><h2>How share is counted</h2></div>
