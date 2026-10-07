@@ -7,6 +7,7 @@ import json
 import re
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -15,10 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://mtgdecklists.com"
 TODAY = "2026-09-11"
 YEAR = "2026"
-TARGET_PER_FORMAT = 800
-TARGET_COMMANDER = 4000
+TARGET_PER_FORMAT = 20000
+TARGET_COMMANDER = 20000
 LIST_PAGE_SIZE = 80
-DATE_WINDOW = "June–September 2026"
+DATE_WINDOW = "public lists from MTGGoldfish, Moxfield, Archidekt, MTGTop8, Deckstats, and AetherHub"
 
 FORMATS = [
     {
@@ -26,44 +27,44 @@ FORMATS = [
         "name": "Standard",
         "short": "Rotating 60-card constructed",
         "flavor": "The living plane — today's cards, this year's story.",
-        "blurb": "Standard is rotating 60-card constructed. The current pool is Wilds of Eldraine forward; there is no fall 2026 rotation. Store RCQs through November 29, 2026 are Standard. Lists on this site are public Challenge and league tables from June–September 2026.",
+        "blurb": "Standard is rotating 60-card constructed. The current pool is Wilds of Eldraine forward; there is no fall 2026 rotation. Store RCQs through November 29, 2026 are Standard. Lists on this site are public tables from MTGGoldfish, Moxfield, Archidekt, MTGTop8, Deckstats, and AetherHub.",
         "official": "https://magic.wizards.com/en/formats/standard",
         "popular": True,
-        "art": "/img/art/lore-plains-citadel.jpg",
-        "art_alt": "Original plains citadel illustration",
+        "art": "",
+        "art_alt": "Sazh's Chocobo",
     },
     {
         "slug": "modern",
         "name": "Modern",
         "short": "Non-rotating from Eighth Edition on",
         "flavor": "A twenty-year library of staples, still being rewritten.",
-        "blurb": "Modern is non-rotating constructed from Eighth Edition and Modern Horizons. It is the constructed format for the September–October 2026 Regional Championships. Lists here are public Challenge and league tables from June–September 2026.",
+        "blurb": "Modern is non-rotating constructed from Eighth Edition and Modern Horizons. It is the constructed format for the September–October 2026 Regional Championships. Lists here are public tables from MTGGoldfish, Moxfield, Archidekt, MTGTop8, Deckstats, and AetherHub.",
         "official": "https://magic.wizards.com/en/formats/modern",
         "popular": True,
-        "art": "/img/art/art-flashback-mage.jpg",
-        "art_alt": "Original flashback mage illustration",
+        "art": "",
+        "art_alt": "Lightning Bolt",
     },
     {
         "slug": "pioneer",
         "name": "Pioneer",
         "short": "Return to Ravnica forward",
         "flavor": "Where the guilds still remember their first war.",
-        "blurb": "Pioneer sits between Standard and Modern (Return to Ravnica forward). After the Cori-Steel Cutter ban, Izzet spells shells and green Badgermole Cub piles split the winner's metagame in August 2026. Lists here are public tables from June–September 2026.",
+        "blurb": "Pioneer sits between Standard and Modern (Return to Ravnica forward). After the Cori-Steel Cutter ban, Izzet spells shells and green Badgermole Cub piles split the winner's metagame in August 2026. Lists here are public tables from MTGGoldfish, Moxfield, Archidekt, MTGTop8, Deckstats, and AetherHub.",
         "official": "https://magic.wizards.com/en/formats/pioneer",
         "popular": False,
-        "art": "/img/art/lore-island-spires.jpg",
-        "art_alt": "Original island spires illustration",
+        "art": "",
+        "art_alt": "Fatal Push",
     },
     {
         "slug": "commander",
         "name": "Commander",
         "short": "100-card singleton, most-played format",
         "flavor": "One legend. Ninety-nine unique spells. A table of stories.",
-        "blurb": "Commander is 100-card singleton led by a legendary creature. The format page mixes public Duel Commander (1v1) leagues with Goldfish Commander lists so the legend hub can show 200+ names with at least five lists each. Color identity is the same rule used at a four-player Commander night.",
+        "blurb": "Commander is 100-card singleton led by a legendary creature. The format page mixes public Duel Commander leagues with Commander lists from MTGGoldfish, Moxfield, Archidekt, and Deckstats. Color identity is the same rule used at a four-player Commander night.",
         "official": "https://magic.wizards.com/en/formats/commander",
         "popular": True,
-        "art": "/img/art/lore-forest-cathedral.jpg",
-        "art_alt": "Original forest cathedral illustration",
+        "art": "",
+        "art_alt": "Sol Ring",
     },
     {
         "slug": "legacy",
@@ -73,8 +74,8 @@ FORMATS = [
         "blurb": "Legacy is eternal constructed with a banned list. The Fantasticar was banned in Legacy on August 10, 2026.",
         "official": "https://magic.wizards.com/en/formats/legacy",
         "popular": False,
-        "art": "/img/art/lore-swamp-lantern.jpg",
-        "art_alt": "Original swamp lantern illustration",
+        "art": "",
+        "art_alt": "Brainstorm",
     },
     {
         "slug": "vintage",
@@ -84,8 +85,8 @@ FORMATS = [
         "blurb": "Vintage uses a restricted list instead of a wide ban list. The Fantasticar was restricted in Vintage on August 10, 2026.",
         "official": "https://magic.wizards.com/en/formats/vintage",
         "popular": False,
-        "art": "/img/art/art-crimson-bolt.jpg",
-        "art_alt": "Original crimson bolt illustration",
+        "art": "",
+        "art_alt": "Black Lotus",
     },
     {
         "slug": "pauper",
@@ -95,8 +96,8 @@ FORMATS = [
         "blurb": "Pauper is constructed using only cards printed at common. Wizards also clarified Secret Lair Zeta commons legality in September 2026.",
         "official": "https://magic.wizards.com/en/formats/pauper",
         "popular": False,
-        "art": "/img/art/art-goblin-scout.jpg",
-        "art_alt": "Original goblin scout illustration",
+        "art": "",
+        "art_alt": "Counterspell",
     },
 ]
 FMT_BY = {f["slug"]: f for f in FORMATS}
@@ -113,35 +114,35 @@ COLOR_NAME = {c: n for c, n, *_ in COLORS}
 COLOR_LORE = [
     {
         "code": "W", "name": "White", "pip": "mana-white.png",
-        "art": "/img/art/lore-plains-citadel.jpg",
+        "art": "",
         "land": "Plains",
         "line": "Peace, order, and the open plains.",
         "body": "White magic builds communities, laws, and shining walls. It heals, protects, and asks a table to stand in the same light. On this site it shows up as soldiers, enchantments, and tidy mana bases.",
     },
     {
         "code": "U", "name": "Blue", "pip": "mana-blue.png",
-        "art": "/img/art/lore-island-spires.jpg",
+        "art": "",
         "land": "Islands",
         "line": "Knowledge, patience, and the turning tide.",
         "body": "Blue magic wants another draw, another counter, another turn to think. Island lists on this site are the control seats, the tempo mages, and the flashback spells that replay yesterday.",
     },
     {
         "code": "B", "name": "Black", "pip": "mana-black.png",
-        "art": "/img/art/lore-swamp-lantern.jpg",
+        "art": "",
         "land": "Swamps",
         "line": "Ambition, sacrifice, and the lantern in the fog.",
         "body": "Black magic pays life and cards for power. It is removal, tutors, and the quiet promise that someone else will lose first. Midrange and reanimator lists wear it well.",
     },
     {
         "code": "R", "name": "Red", "pip": "mana-red.png",
-        "art": "/img/art/lore-mountain-forge.jpg",
+        "art": "",
         "land": "Mountains",
         "line": "Freedom, impulse, and the mountain's fire.",
         "body": "Red magic does not wait. It is goblin scouts, prowess triggers, and the bolt that ends a game before the other player finishes shuffling. Charming, loud, and often 1-drop deep.",
     },
     {
         "code": "G", "name": "Green", "pip": "mana-green.png",
-        "art": "/img/art/lore-forest-cathedral.jpg",
+        "art": "",
         "land": "Forests",
         "line": "Growth, instinct, and the forest's strength.",
         "body": "Green magic wants more land, larger creatures, and a board that feels like a canopy. Landfall, elves, and ramp lists are its current dialect in Standard and beyond.",
@@ -171,16 +172,8 @@ GUILD_LORE = [
     ("GUR", "Temur", "Elemental tempo: card draw strapped to a large green threat."),
 ]
 
-ARTS = [
-    ("/img/art/art-flashback-mage.jpg", "Original flashback mage illustration"),
-    ("/img/art/art-goblin-scout.jpg", "Original goblin scout illustration"),
-    ("/img/art/art-crimson-bolt.jpg", "Original crimson bolt illustration"),
-    ("/img/art/lore-plains-citadel.jpg", "Original plains citadel illustration"),
-    ("/img/art/lore-island-spires.jpg", "Original island spires illustration"),
-    ("/img/art/lore-swamp-lantern.jpg", "Original swamp lantern illustration"),
-    ("/img/art/lore-mountain-forge.jpg", "Original mountain forge illustration"),
-    ("/img/art/lore-forest-cathedral.jpg", "Original forest cathedral illustration"),
-]
+def icon_pair(key: str) -> tuple[str, str]:
+    return ICONS.get(key) or ICONS.get("bolt") or ("", "Magic card")
 
 GUILD = {
     "WU": "Azorius", "UB": "Dimir", "BR": "Rakdos", "RG": "Gruul", "GW": "Selesnya", "WG": "Selesnya",
@@ -258,6 +251,24 @@ BASICS = {
 }
 SCRYFALL_CACHE = ROOT / "data" / "scryfall_cards.json"
 SCRYFALL_UA = "MTGDecklistsBot/1.0 (+https://mtgdecklists.com)"
+ICON_CARDS = {
+    "W": "Plains",
+    "U": "Island",
+    "B": "Swamp",
+    "R": "Mountain",
+    "G": "Forest",
+    "standard": "Sazh's Chocobo",
+    "modern": "Lightning Bolt",
+    "pioneer": "Fatal Push",
+    "commander": "Sol Ring",
+    "legacy": "Brainstorm",
+    "vintage": "Black Lotus",
+    "pauper": "Counterspell",
+    "bolt": "Lightning Bolt",
+    "ring": "Sol Ring",
+    "storm": "Brainstorm",
+}
+ICONS: dict[str, tuple[str, str]] = {}
 
 
 def json_ld(data) -> str:
@@ -379,7 +390,11 @@ def partner_mass(cards) -> str:
     return "https://partner.tcgplayer.com/c/7670706/1780961/21018?u=" + quote(dest, safe="")
 
 
-def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg", extra="", og_type="website", image_alt="MTG Decklists original banner art") -> str:
+def head(title: str, desc: str, canonical: str, image="", extra="", og_type="website", image_alt="") -> str:
+    if not image:
+        image, image_alt = ICONS.get("bolt", ("", "Lightning Bolt"))
+    if not image_alt:
+        image_alt = "Magic: The Gathering card"
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -400,7 +415,7 @@ def head(title: str, desc: str, canonical: str, image="/img/mtg-banner-hero.jpg"
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/site.css?v=mtg-9" />
+  <link rel="stylesheet" href="/css/site.css?v=mtg-10" />
   <link rel="canonical" href="{e(canonical)}" />
   <meta name="google-adsense-account" content="ca-pub-1074015774205047" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1074015774205047" crossorigin="anonymous"></script>
@@ -470,7 +485,8 @@ def footer() -> str:
       <span class="footer-flavor">Public tournament tables, organized by format.</span>
       © <span id="year">{YEAR}</span> MTG Decklists — Fan site, not affiliated with Wizards of the Coast.
       Magic: The Gathering and related marks are trademarks of Wizards of the Coast LLC, used here under fair-use commentary.
-      Sources: MTGGoldfish public tables · Magic.gg Metagame Mentor.
+      Sources: MTGGoldfish · Moxfield · Archidekt · MTGTop8 · Deckstats · AetherHub · Magic.gg.
+      Card images via Scryfall.
       <a href="/tier-list.html">Tier List</a> · <a href="/formats/">Formats</a> ·
       <a href="/commanders/">Commanders</a> ·
       <a href="/format.html">Rules</a> · <a href="/search.html">Search</a> · <a href="/shop/">Shop</a> ·
@@ -570,6 +586,60 @@ def _scryfall_images(card: dict) -> dict:
     }
 
 
+def _is_face_alias(key: str, info: dict) -> bool:
+    stored = (info.get("name") or "").strip()
+    return bool(stored and stored != key and " // " in stored)
+
+
+def _prefer_exact_cards(cache: dict) -> dict:
+    """Keep a real card ahead of a double-faced face that reused its name."""
+    exact: dict = {}
+    aliases: dict = {}
+    for key, info in cache.items():
+        if not isinstance(info, dict):
+            continue
+        stored = (info.get("name") or "").strip()
+        if not stored or stored == key:
+            exact[key] = info
+        else:
+            aliases[key] = info
+    merged = dict(exact)
+    for key, info in aliases.items():
+        if key not in merged:
+            merged[key] = info
+    return merged
+
+
+def _store_scryfall_card(cache: dict, card: dict) -> None:
+    info = _scryfall_images(card)
+    primary = (card.get("name") or "").strip()
+    if primary:
+        cache[primary] = info
+    for face in card.get("card_faces") or []:
+        face_name = (face.get("name") or "").strip()
+        if not face_name or face_name == primary:
+            continue
+        existing = cache.get(face_name)
+        if isinstance(existing, dict) and (existing.get("name") or "").strip() == face_name:
+            continue
+        if face_name not in cache:
+            cache[face_name] = info
+
+
+def _fetch_named_exact(name: str) -> dict | None:
+    url = "https://api.scryfall.com/cards/named?exact=" + urllib.parse.quote(name)
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": SCRYFALL_UA, "Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=40) as r:
+            return json.loads(r.read().decode("utf-8", "replace"))
+    except Exception as err:
+        print("scryfall named fail", name, err, flush=True)
+        return None
+
+
 def load_scryfall(names: set[str]) -> dict:
     cache = {}
     if SCRYFALL_CACHE.exists():
@@ -577,7 +647,20 @@ def load_scryfall(names: set[str]) -> dict:
             cache = json.loads(SCRYFALL_CACHE.read_text())
         except json.JSONDecodeError:
             cache = {}
+    cache = _prefer_exact_cards(cache)
+    held_aliases: dict[str, dict] = {}
+    for n in names:
+        info = cache.get(n)
+        if isinstance(info, dict) and _is_face_alias(n, info):
+            held_aliases[n] = info
+            cache.pop(n, None)
+    for name in set(ICON_CARDS.values()):
+        info = cache.get(name)
+        if isinstance(info, dict) and (info.get("name") or "").strip() not in ("", name):
+            held_aliases.setdefault(name, info)
+            cache.pop(name, None)
     missing = [n for n in sorted(names) if n and ("color_identity" not in (cache.get(n) or {}))]
+    changed = bool(held_aliases) or bool(missing)
     if missing:
         print(f"scryfall: lookup {len(missing)} cards", flush=True)
         for i in range(0, len(missing), 75):
@@ -600,31 +683,36 @@ def load_scryfall(names: set[str]) -> dict:
                 print("scryfall fail", err, flush=True)
                 time.sleep(0.4)
                 continue
-            cards = payload.get("data") or []
-            for card in cards:
-                info = _scryfall_images(card)
-                keys = {card.get("name") or "", info.get("name") or ""}
-                for face in card.get("card_faces") or []:
-                    keys.add(face.get("name") or "")
-                for key in keys:
-                    if key:
-                        cache[key] = info
+            for card in payload.get("data") or []:
+                _store_scryfall_card(cache, card)
             for ident in payload.get("not_found") or []:
                 nm = ident.get("name") or ""
-                if nm:
-                    cache[nm] = {"name": nm, "land": True, "small": "", "normal": ""}
-            by_lower = {k.lower(): v for k, v in cache.items() if k}
+                if not nm or nm in cache:
+                    continue
+                alias = held_aliases.get(nm)
+                if alias and (alias.get("normal") or alias.get("small")):
+                    cache[nm] = alias
+                else:
+                    cache[nm] = {"name": nm, "land": True, "small": "", "normal": "", "color_identity": ""}
             for n in chunk:
                 if n in cache:
                     continue
-                hit = by_lower.get(n.lower())
-                if not hit:
-                    for key, info in cache.items():
-                        if key and (n.lower() in key.lower() or key.lower().startswith(n.lower())):
-                            hit = info
-                            break
-                cache[n] = hit or {"name": n, "land": False, "small": "", "normal": ""}
+                alias = held_aliases.get(n)
+                cache[n] = alias or {"name": n, "land": False, "small": "", "normal": "", "color_identity": ""}
             time.sleep(0.12)
+    for name in sorted(set(ICON_CARDS.values())):
+        info = cache.get(name) or {}
+        if (info.get("name") or "").strip() == name and (info.get("normal") or info.get("small")):
+            continue
+        card = _fetch_named_exact(name)
+        time.sleep(0.12)
+        if not card:
+            continue
+        exact = _scryfall_images(card)
+        if (exact.get("name") or "").strip() == name:
+            cache[name] = exact
+            changed = True
+    if changed:
         SCRYFALL_CACHE.parent.mkdir(parents=True, exist_ok=True)
         SCRYFALL_CACHE.write_text(json.dumps(cache, indent=2, sort_keys=True))
     return cache
@@ -645,9 +733,25 @@ def identity_from_commander(name: str, catalog: dict, by_lower: dict) -> str:
     return "".join(c for c in "WUBRG" if c in pips)
 
 
+def card_info(catalog: dict, by_lower: dict, name: str) -> dict:
+    name = unescape(name or "").strip()
+    if not name:
+        return {}
+    info = catalog.get(name) or by_lower.get(name.lower())
+    if info:
+        return info
+    first = re.split(r"\s*//\s*", name)[0].strip()
+    return catalog.get(first) or by_lower.get(first.lower()) or {}
+
+
 def assign_faces(decks: list[dict]) -> None:
     names = {n for d in decks for n in face_candidates(d)}
+    names.update(ICON_CARDS.values())
     for d in decks:
+        for row in (d.get("main") or []) + (d.get("side") or []):
+            nm = unescape(row.get("name") or "").strip()
+            if nm:
+                names.add(nm)
         if d.get("format") != "commander":
             continue
         for part in re.split(r"\s*//\s*", unescape(d.get("archetype") or "")):
@@ -656,44 +760,59 @@ def assign_faces(decks: list[dict]) -> None:
                 names.add(part)
     catalog = load_scryfall(names)
     by_lower = {k.lower(): v for k, v in catalog.items() if k}
+    for key, card_name in ICON_CARDS.items():
+        info = card_info(catalog, by_lower, card_name)
+        src = info.get("normal") or info.get("small") or ""
+        if src:
+            ICONS[key] = (src, info.get("name") or card_name)
+    for fmt in FORMATS:
+        pair = ICONS.get(fmt["slug"]) or ICONS.get("bolt")
+        if pair:
+            fmt["art"], fmt["art_alt"] = pair
+    for lore in COLOR_LORE:
+        pair = ICONS.get(lore["code"])
+        if pair:
+            lore["art"], lore["art_alt"] = pair
     for deck in decks:
+        for row in (deck.get("main") or []) + (deck.get("side") or []):
+            info = card_info(catalog, by_lower, row.get("name") or "")
+            row["image"] = info.get("normal") or info.get("small") or ""
         face = None
         for name in face_candidates(deck):
-            info = catalog.get(name) or by_lower.get(name.lower())
-            if not info or info.get("land") or not (info.get("small") or info.get("normal")):
+            info = card_info(catalog, by_lower, name)
+            if not info or info.get("land") or not (info.get("normal") or info.get("small")):
                 continue
             face = info
             break
+        if not face:
+            pair = ICONS.get(deck.get("format") or "") or ICONS.get("bolt")
+            if pair:
+                face = {"normal": pair[0], "small": pair[0], "name": pair[1], "land": False}
         deck["face"] = face or {}
         if deck.get("format") == "commander":
             ident = identity_from_commander(deck.get("archetype") or "", catalog, by_lower)
             if ident:
                 deck["colors"] = ident
                 deck["combo"] = combo_label(ident)
-    print("  faces", sum(1 for d in decks if (d.get("face") or {}).get("small")), "of", len(decks), flush=True)
+    pictured = sum(1 for d in decks for row in (d.get("main") or []) if row.get("image"))
+    print("  faces", sum(1 for d in decks if (d.get("face") or {}).get("normal") or (d.get("face") or {}).get("small")), "of", len(decks), "card images", pictured, flush=True)
 
 
 def art_for(deck, size: str = "small") -> tuple[str, str]:
     face = deck.get("face") or {}
-    src = ""
-    if size == "large":
-        src = face.get("normal") or face.get("small") or face.get("art_crop") or ""
-    else:
-        src = face.get("small") or face.get("normal") or face.get("art_crop") or ""
+    src = face.get("normal") or face.get("small") or ""
     if src:
         return src, face.get("name") or "Card"
-    key = str(deck.get("id") or "")
-    try:
-        n = int(key)
-    except ValueError:
-        n = abs(hash(key))
-    return ARTS[n % 3]
+    pair = ICONS.get(deck.get("format") or "") or ICONS.get("bolt")
+    if pair:
+        return pair
+    return ("", "Card")
 
 
 def recent_item(deck: dict) -> str:
     art = art_for(deck, "small")
     colors = deck.get("colors") or ""
-    alt = art[1] if not art[0].startswith("/img/art/") else ""
+    alt = art[1] or ""
     arche = unescape(deck["archetype"])
     return f"""<a class="recent-item" href="{deck_url(deck)}" data-colors="{e(colors)}" data-archetype="{e(arche.lower())}">
   <img class="recent-leader" src="{e(art[0])}" alt="{e(alt)}" width="46" height="64" loading="lazy" decoding="async" />
@@ -707,7 +826,7 @@ def recent_item(deck: dict) -> str:
 
 def date_window(fmt: str | None = None) -> str:
     if fmt == "commander":
-        return "May–September 2026 leagues and public Commander lists"
+        return "public Commander lists from MTGGoldfish, Moxfield, Archidekt, MTGTop8, and Deckstats"
     return DATE_WINDOW
 
 
@@ -859,7 +978,7 @@ def page_index(decks: list[dict]) -> str:
     for fmt in FORMATS:
         n = counts.get(fmt["slug"], 0)
         format_tiles += f"""<a class="format-tile format-{e(fmt['slug'])}" href="/formats/{fmt['slug']}.html">
-          <img class="format-tile-art" src="{e(fmt['art'])}" alt="" />
+          <img class="format-tile-art" src="{e(fmt['art'])}" alt="{e(fmt.get('art_alt') or fmt['name'])}" width="146" height="204" />
           <div class="format-tile-body">
             <div class="name">{e(fmt['name'])}</div>
             <p class="flavor">{e(fmt['flavor'])}</p>
@@ -870,7 +989,7 @@ def page_index(decks: list[dict]) -> str:
     pie = ""
     for c in COLOR_LORE:
         pie += f"""<a class="pie-card pie-{e(c['code'].lower())}" href="/guides/colors.html#{e(c['name'].lower())}">
-          <img src="{e(c['art'])}" alt="{e(c['art'].split('/')[-1].replace('-', ' ').replace('.jpg', ''))}" />
+          <img src="{e(c['art'])}" alt="{e(c.get('art_alt') or c['name'])}" width="146" height="204" />
           <div class="pie-copy">
             <img class="pip" src="/img/mana/{e(c['pip'])}" alt="" />
             <h4>{e(c['name'])}</h4>
@@ -883,16 +1002,14 @@ def page_index(decks: list[dict]) -> str:
         "Public Magic: The Gathering decklists by format. Commander, Standard, and Modern first, then Pioneer, Legacy, Vintage, and Pauper. Color pie, guilds, and TCGplayer buy links on every list.",
         SITE + "/",
         extra=extra,
-        image_alt="Original five-color pentagon banner with a flashback mage and goblin scout",
+        image_alt=ICONS.get("bolt", ("", "Lightning Bolt"))[1],
     ) + header("home") + f"""
     <main class="single home" id="main" role="main">
       <section class="home-splash" aria-label="MTG Decklists">
-        <img class="home-splash-bg" src="/img/mtg-banner-hero.jpg" alt="Original MTG Decklists banner with a flashback mage, goblin scout, crimson bolt, and five-color pentagon" width="1400" height="636" fetchpriority="high" decoding="async">
-        <div class="home-splash-veil" aria-hidden="true"></div>
-        <div class="home-splash-art" aria-hidden="true">
-          <img src="/img/art/art-flashback-mage.jpg" alt="" />
-          <img src="/img/art/art-goblin-scout.jpg" alt="" />
-          <img src="/img/art/art-crimson-bolt.jpg" alt="" />
+        <div class="home-splash-art">
+          <img src="{e(ICONS.get('bolt', ('', ''))[0])}" alt="{e(ICONS.get('bolt', ('', 'Lightning Bolt'))[1])}" width="146" height="204" />
+          <img src="{e(ICONS.get('ring', ('', ''))[0])}" alt="{e(ICONS.get('ring', ('', 'Sol Ring'))[1])}" width="146" height="204" />
+          <img src="{e(ICONS.get('storm', ('', ''))[0])}" alt="{e(ICONS.get('storm', ('', 'Brainstorm'))[1])}" width="146" height="204" />
         </div>
         <div class="home-splash-bar">
           <div>
@@ -953,7 +1070,7 @@ def page_index(decks: list[dict]) -> str:
           <p class="home-leaders-kicker">The color pie</p>
           <h3>Five colors. Infinite lists.</h3>
           <p>White seeks peace. Blue seeks knowledge. Black seeks power. Red seeks freedom. Green seeks growth. Every list on this site is one of those philosophies, shuffled and sleeved.</p>
-          <p class="flavor">Original landscapes stand in for plains, islands, swamps, mountains, and forests — not official card art.</p>
+          <p class="flavor">Each color is the full basic land — Plains, Island, Swamp, Mountain, and Forest.</p>
         </div>
         <div class="pie-grid">{pie}</div>
       </section>
@@ -977,7 +1094,7 @@ def page_index(decks: list[dict]) -> str:
         </div>
       </section>
 
-      <p class="site-disclaimer">MTG Decklists is a fan site. Card names and tournament results are reported for commentary and news reporting. Original illustrations on this site are not official Magic: The Gathering card art. Not affiliated with Wizards of the Coast LLC.</p>
+      <p class="site-disclaimer">MTG Decklists is a fan site. Card names and tournament results are reported for commentary. Full card images are loaded from Scryfall. Not affiliated with Wizards of the Coast LLC.</p>
       {amazon_line()}
     </main>
 """ + footer()
@@ -1036,7 +1153,7 @@ def color_section(fmt_decks: list[dict], slug: str) -> str:
     return f"""
         <div class="section-title"><h3>The color pie</h3></div>
         <p class="flavor">White, blue, black, red, and green — five philosophies, counted from the lists below.</p>
-        <p class="muted">Original mana marks for this site, not the official pentagon. Filter the tables by color.</p>
+        <p class="muted">Filter the tables by color.</p>
         <div class="mana-row">{''.join(chips)}</div>
         <div class="section-title" style="margin-top:22px"><h3>Most popular color combos</h3></div>
         <p class="muted">Guilds, shards, and wedges counted from the lists on this page.</p>
@@ -1046,14 +1163,14 @@ def color_section(fmt_decks: list[dict], slug: str) -> str:
 
 def page_format(fmt: dict, decks: list[dict]) -> str:
     fmt_decks = [d for d in decks if d["format"] == fmt["slug"]]
-    art = (fmt.get("art") or ARTS[0][0], fmt.get("art_alt") or "")
+    art = (fmt.get("art") or icon_pair(fmt["slug"])[0], fmt.get("art_alt") or icon_pair(fmt["slug"])[1])
     items = "".join(recent_item(d) for d in fmt_decks)
     window = date_window(fmt["slug"])
     commander_hub = ""
     if fmt["slug"] == "commander":
         commander_hub = """
         <p><a href="/commanders/">Browse by commander</a> — one page per legend, with every public list we have for that name.</p>
-        <p class="muted">These are Duel Commander (1v1) league tables plus Goldfish public Commander lists. Color identity and the 100-card singleton rule are the same as a four-player Commander night. Partner commanders are listed under both names when the source reports them that way.</p>
+        <p class="muted">These are public Commander lists from MTGGoldfish, Moxfield, Archidekt, MTGTop8, and Deckstats, including Duel Commander leagues. Color identity and the 100-card singleton rule are the same as a four-player Commander night. Partner commanders are listed under both names when the source reports them that way.</p>
         """
     extra = json_ld(breadcrumb_ld([("/formats/", "Formats"), (f"/formats/{fmt['slug']}.html", fmt["name"])])) + json_ld({
         "@context": "https://schema.org",
@@ -1075,7 +1192,7 @@ def page_format(fmt: dict, decks: list[dict]) -> str:
       {crumb(("/formats/", "Formats"), ("", fmt["name"]))}
       <article class="card format-page format-{e(fmt['slug'])}">
         <div class="format-masthead">
-          <img src="{art[0]}" alt="{e(art[1])}" />
+          <img class="card-face" src="{art[0]}" alt="{e(art[1])}" width="146" height="204" />
           <div>
             <p class="kicker">{e(fmt['short'])}</p>
             <h1>{e(fmt['name'])}</h1>
@@ -1156,7 +1273,7 @@ def commander_tile(name: str, rows: list[dict]) -> str:
     colors = sample.get("colors") or ""
     hay = unescape(name).lower()
     return f"""<a class="leader-tile" href="{commander_url(name)}" data-name="{e(hay)}" data-colors="{e(colors)}">
-          <img src="{e(art[0])}" alt="{e(art[1] if not art[0].startswith('/img/art/') else '')}" />
+          <img src="{e(art[0])}" alt="{e(art[1])}" width="146" height="204" />
           <div>
             <div class="name">{e(name)}</div>
             <p class="flavor">{e(sample.get('combo') or '')} · {pip_html(colors)}</p>
@@ -1208,7 +1325,7 @@ def page_commanders_index(decks: list[dict]) -> str:
                 "name": "Is this EDH or Duel Commander?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Duel Commander league tables sit next to public Goldfish Commander (EDH) lists so each legend can have a full page. Color identity and the 100-card singleton rule are the same at a four-player night.",
+                    "text": "Duel Commander league tables sit next to public Commander lists from MTGGoldfish, Moxfield, Archidekt, and Deckstats. Color identity and the 100-card singleton rule are the same at a four-player night.",
                 },
             },
             {
@@ -1226,14 +1343,14 @@ def page_commanders_index(decks: list[dict]) -> str:
         f"{len(groups)} Commander legends with at least five public lists each, sorted by color identity. Search for Basim, Phelia, or any other name.",
         f"{SITE}/commanders/",
         extra=extra,
-        image="/img/art/lore-forest-cathedral.jpg",
-        image_alt="Original forest cathedral illustration",
+        image=ICONS.get("commander", ("", ""))[0],
+        image_alt=ICONS.get("commander", ("", "Sol Ring"))[1],
     ) + header("commanders") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/commanders/", "Commanders"))}
       <article class="card" id="commander-hub">
         <h1>Commanders</h1>
-        <p>Search a legend, then browse by color identity. Each page is a commander with at least five public lists — Duel Commander leagues plus Goldfish Commander lists for names that needed a fuller sample. <a href="/formats/commander.html">All Commander lists</a> · <a href="/guides/commander.html">Commander guide</a>.</p>
+        <p>Search a legend, then browse by color identity. Each hub page is a commander with at least five public lists — Duel Commander leagues plus Commander lists from MTGGoldfish, Moxfield, Archidekt, and Deckstats. <a href="/formats/commander.html">All Commander lists</a> · <a href="/guides/commander.html">Commander guide</a>.</p>
         <div class="list-tools commander-search">
           <label class="list-filter-label" for="commander-filter">Search commanders</label>
           <input id="commander-filter" type="search" placeholder="Basim, Phelia, Atraxa…" autocomplete="off" />
@@ -1251,7 +1368,7 @@ def page_commanders_index(decks: list[dict]) -> str:
         <p class="muted" id="commander-status">{len(groups)} legends · {sum(len(r) for _, r in groups)} lists, grouped by color</p>
         {sections}
         <div class="faq" style="margin-top:28px">
-          <details open><summary>Is this EDH or Duel Commander?</summary><p>Public Magic Online Duel Commander (1v1) league tables plus Goldfish public Commander lists. Color identity and the 100-card singleton rule are the same as a four-player Commander night.</p></details>
+          <details open><summary>Is this EDH or Duel Commander?</summary><p>Public Commander lists from several deck sites, including Duel Commander leagues. Color identity and the 100-card singleton rule are the same as a four-player Commander night.</p></details>
           <details><summary>How does a commander get a page?</summary><p>Every unique legend in the sample gets a landing page. This hub lists names with at least five lists, sorted by color. Type a name in the search box — Basim Ibn Ishaq is included.</p></details>
         </div>
       </article>
@@ -1341,6 +1458,23 @@ def page_archetype(fmt: dict, name: str, rows: list[dict]) -> str:
 """ + footer()
 
 
+def card_board(cards) -> str:
+    figs = []
+    for row in cards or []:
+        src = row.get("image") or ""
+        name = unescape(row.get("name") or "")
+        if not src or not name:
+            continue
+        qty = row.get("qty") or 1
+        figs.append(
+            f'<figure class="full-card"><img src="{e(src)}" alt="{e(name)}" width="146" height="204" loading="lazy" decoding="async" />'
+            f'<figcaption><span class="qty">{qty}</span>{e(name)}</figcaption></figure>'
+        )
+    if not figs:
+        return ""
+    return f'<div class="card-board">{"".join(figs)}</div>'
+
+
 def card_lines(cards, heading) -> str:
     if not cards:
         return ""
@@ -1359,7 +1493,7 @@ def card_lines(cards, heading) -> str:
 
 def page_deck(deck: dict, related: list[dict] | None = None) -> str:
     art = art_for(deck, "large")
-    card_class = "inline-art card-face" if not art[0].startswith("/img/art/") else "inline-art"
+    card_class = "inline-art card-face"
     all_cards = (deck.get("main") or []) + (deck.get("side") or [])
     buy = partner_mass(all_cards)
     fmt = FMT_BY[deck["format"]]
@@ -1414,6 +1548,9 @@ def page_deck(deck: dict, related: list[dict] | None = None) -> str:
           <a class="home-ghost" href="{e(deck['source'])}" target="_blank" rel="noopener">Source: {e(deck.get('source_name') or 'public table')}</a>
         </div>
         <p class="muted" style="margin-top:10px">Affiliate link. We may earn a commission if you buy after clicking TCGplayer. Price is the same.</p>
+        <div class="section-title" style="margin-top:18px"><h2>Main deck</h2></div>
+        {card_board(deck.get('main'))}
+        {card_board(deck.get('side')) and '<div class="section-title"><h2>Sideboard</h2></div>' + card_board(deck.get('side'))}
         <div class="text-deck">
           <div class="text-deck-cols">
             {card_lines(deck.get('main'), "Main deck")}
@@ -1421,7 +1558,7 @@ def page_deck(deck: dict, related: list[dict] | None = None) -> str:
           </div>
         </div>
         {related_html}
-        <p class="site-disclaimer">Public tournament table transcribed for news and commentary. Card images identify the list and come from Scryfall. Not affiliated with Wizards of the Coast. Banner art on this site is original, not official card art.</p>
+        <p class="site-disclaimer">Public list transcribed for news and commentary. Full card images identify the list and come from Scryfall. Not affiliated with Wizards of the Coast.</p>
       </article>
     </main>
 """ + footer()
@@ -1483,7 +1620,7 @@ GUIDES = [
     ("legacy", "Legacy", "Eternal constructed with a banned list. The Fantasticar was banned on August 10, 2026."),
     ("vintage", "Vintage", "Eternal constructed with a restricted list. The Fantasticar was restricted on August 10, 2026."),
     ("pauper", "Pauper", "Commons-only constructed. Watch Secret Lair common legality notes from Wizards."),
-    ("colors", "Colors and mana", "White, blue, black, red, and green — five philosophies of Magic. This site uses original mana marks, not the official pentagon."),
+    ("colors", "Colors and mana", "White, blue, black, red, and green — five philosophies of Magic, shown here as the five basic lands."),
     ("color-pairs", "Color pairs", "The ten two-color guilds plus shards and wedges. Format pages rank the combos that are actually posting."),
     ("rcq", "Regional Championship Qualifiers", "Store RCQs run August 15–November 29, 2026 in Standard or Limited. Destination RCQs may use other constructed formats."),
     ("regional-championships", "Regional Championships", "Modern constructed, starting September 11, 2026. Top finishers earn Pro Tour 2027 invites."),
@@ -1495,7 +1632,7 @@ GUIDES = [
     ("methodology", "Methodology", "How this site counts lists: public tables, date windows, Duel Commander vs EDH, and what a metagame share means here."),
     ("affiliates", "Affiliate links", "Amazon Associates on shop gear. TCGplayer partner links on every card and Buy list button."),
     ("advertising", "Ads and ad networks", "Google AdSense is live. Nitro, Media.net, Playwire, and TCG affiliates are the next networks this site can apply for."),
-    ("fair-use", "Fair use and trademarks", "Tournament reporting and commentary. Original illustrations stand in for Snapcaster-like, Goblin Guide-like, and Lightning Bolt-like art."),
+    ("fair-use", "Fair use and trademarks", "Tournament reporting and commentary. Full card images on this site are loaded from Scryfall."),
 ]
 
 
@@ -1510,11 +1647,11 @@ def page_guides_index() -> str:
       <article class="card">
         <h1>Guides</h1>
         <p>Format notes, the color pie, organized play, and how this site counts lists and uses affiliates.</p>
-        <div class="art-strip">
-          <img src="/img/art/art-flashback-mage.jpg" alt="Original flashback mage" />
-          <img src="/img/art/art-goblin-scout.jpg" alt="Original goblin scout" />
-          <img src="/img/art/art-crimson-bolt.jpg" alt="Original crimson bolt" />
-          <img src="/img/art/lore-forest-cathedral.jpg" alt="Original forest cathedral" />
+        <div class="art-strip card-strip">
+          <img src="{e(ICONS.get('bolt', ('', ''))[0])}" alt="{e(ICONS.get('bolt', ('', 'Lightning Bolt'))[1])}" width="146" height="204" />
+          <img src="{e(ICONS.get('storm', ('', ''))[0])}" alt="{e(ICONS.get('storm', ('', 'Brainstorm'))[1])}" width="146" height="204" />
+          <img src="{e(ICONS.get('ring', ('', ''))[0])}" alt="{e(ICONS.get('ring', ('', 'Sol Ring'))[1])}" width="146" height="204" />
+          <img src="{e(ICONS.get('G', ('', ''))[0])}" alt="{e(ICONS.get('G', ('', 'Forest'))[1])}" width="146" height="204" />
         </div>
         <div class="list">{items}</div>
       </article>
@@ -1527,7 +1664,7 @@ def guide_extra(slug: str) -> str:
         cards = []
         for c in COLOR_LORE:
             cards.append(f"""<article class="lore-block" id="{e(c['name'].lower())}">
-              <img src="{e(c['art'])}" alt="" />
+              <img src="{e(c['art'])}" alt="{e(c.get('art_alt') or c['name'])}" width="146" height="204" />
               <div>
                 <p class="kicker">{e(c['land'])}</p>
                 <h3><img class="pip" src="/img/mana/{e(c['pip'])}" alt="" /> {e(c['name'])}</h3>
@@ -1557,14 +1694,13 @@ def guide_extra(slug: str) -> str:
         <div class="section-title"><h2>What we publish</h2></div>
         <p>This site republishes public constructed decklists for news and commentary. We do not run events and we do not claim official winner’s-metagame numbers unless a page cites Magic.gg Metagame Mentor.</p>
         <ul>
-          <li><strong>Source.</strong> Magic Online Challenge, Challenge 32, and league tables hosted on MTGGoldfish, plus three Magic.gg Metagame Mentor consensus lists.</li>
-          <li><strong>Date window.</strong> Constructed formats: June–September 2026. Commander leagues: May–September 2026 Duel Commander, plus public Goldfish Commander lists used to give each hub legend at least five lists.</li>
-          <li><strong>Cap.</strong> Up to 800 lists per constructed format. Commander keeps the league sample and adds Goldfish Commander lists so 200 additional legends each have at least five lists.</li>
-          <li><strong>Commander.</strong> The hub at /commanders/ is grouped by color identity and has a name search. Duel Commander (1v1) and EDH share color identity and the 100-card singleton rule.</li>
+          <li><strong>Source.</strong> One thousand public lists from each of Moxfield, Archidekt, MTGTop8, and Deckstats, the public AetherHub metagame pages, the existing MTGGoldfish sample, and three Magic.gg Metagame Mentor consensus lists. Every list page links its source.</li>
+          <li><strong>Dates.</strong> Goldfish constructed tables are mostly June–September 2026. The other sites contribute their current public lists, including older Deckstats and Archidekt decks.</li>
+          <li><strong>Commander.</strong> The hub at /commanders/ groups legends with at least five lists by color identity and has a name search. Duel Commander and multiplayer Commander share color identity and the 100-card singleton rule. Newer single lists still have their own pages.</li>
         </ul>
         <div class="section-title" style="margin-top:22px"><h2>How share is counted</h2></div>
-        <p>An archetype’s share on a format page is that name’s count divided by the number of lists on this site for that format. It is a sample of public tables, not a weighted winner’s metagame. Names follow the source (Goldfish’s deck title).</p>
-        <p>Card images identify lists and come from Scryfall. Banner art is original and is not official Magic card art.</p>
+        <p>An archetype’s share on a format page is that name’s count divided by the number of lists on this site for that format. It is a sample of public tables, not a weighted winner’s metagame. Names follow the source deck title or commander.</p>
+        <p>Full card images identify lists and are loaded from Scryfall. This site does not host Wizards’ card files.</p>
         """
     if slug == "advertising":
         return """
@@ -1604,17 +1740,17 @@ def page_guide(slug, name, blurb, decks) -> str:
     if slug in FMT_BY:
         art = (FMT_BY[slug]["art"], FMT_BY[slug].get("art_alt") or "")
     elif slug == "colors":
-        art = ("/img/art/lore-plains-citadel.jpg", "Original plains citadel illustration")
+        art = ICONS.get("W", ("", "Plains"))
     elif slug == "color-pairs":
-        art = ("/img/art/lore-island-spires.jpg", "Original island spires illustration")
+        art = ICONS.get("U", ("", "Island"))
     else:
-        art = ARTS[hash(slug) % len(ARTS)]
+        art = ICONS.get("bolt", ("", "Lightning Bolt"))
     extra = guide_extra(slug)
     return head(f"{name} | MTG Decklists", blurb, f"{SITE}/guides/{slug}.html", image=art[0]) + header("guides") + f"""
     <main class="single" id="main" role="main">
       {crumb(("/guides/", "Guides"), ("", name))}
       <article class="card">
-        <img class="inline-art" src="{art[0]}" alt="{e(art[1])}" />
+        <img class="inline-art card-face" src="{art[0]}" alt="{e(art[1])}" width="146" height="204" />
         <h1>{e(name)}</h1>
         <p>{e(blurb)}</p>
         {extra}
@@ -1635,6 +1771,11 @@ def page_events() -> str:
     <main class="single" id="main" role="main">
       {crumb(("", "Events"))}
       <article class="card">
+        <div class="art-strip card-strip">
+          <img src="{e(ICONS.get('bolt', ('', ''))[0])}" alt="{e(ICONS.get('bolt', ('', 'Lightning Bolt'))[1])}" width="146" height="204" />
+          <img src="{e(ICONS.get('standard', ('', ''))[0])}" alt="{e(ICONS.get('standard', ('', 'Card'))[1])}" width="146" height="204" />
+          <img src="{e(ICONS.get('modern', ('', ''))[0])}" alt="{e(ICONS.get('modern', ('', 'Lightning Bolt'))[1])}" width="146" height="204" />
+        </div>
         <h1>Events and schedules</h1>
         <p class="flavor">The competitive calendar is the other half of the spellbook — RCQs, Regional Championships, and Arena weekends.</p>
         <p>These are official Wizards / Magic.gg links. We do not run events.</p>
@@ -1672,9 +1813,9 @@ def page_rules() -> str:
       {crumb(("", "Rules"))}
       <article class="card policy">
         <h1>Formats and the banlist</h1>
-        <img class="inline-art" src="/img/art/art-crimson-bolt.jpg" alt="Original crimson bolt illustration" />
+        <img class="inline-art card-face" src="{e(ICONS.get('bolt', ('', ''))[0])}" alt="{e(ICONS.get('bolt', ('', 'Lightning Bolt'))[1])}" width="146" height="204" />
         <p class="flavor">Every format is a different promise about which cards are legal — and which stories still get to be told.</p>
-        <p>Lists on this site are public constructed tables from June–September 2026 unless a page says otherwise. Commander pages mix Duel Commander leagues with Goldfish public Commander lists so each hub legend has at least five lists. Pick a format first — lists are not mixed on the homepage.</p>
+        <p>Lists on this site are public constructed tables from MTGGoldfish, Moxfield, Archidekt, MTGTop8, Deckstats, and AetherHub. Commander pages include Duel Commander leagues and public Commander lists so each hub legend can have several lists. Pick a format first — lists are not mixed on the homepage.</p>
         <section>
           <h3>August 10, 2026 changes</h3>
           <p>From the official <a href="https://magic.wizards.com/en/news/announcements/banned-and-restricted-august-10-2026" target="_blank" rel="noopener">banned and restricted announcement</a>:</p>
@@ -1689,7 +1830,7 @@ def page_rules() -> str:
           <h3>Format FAQ</h3>
           <div class="faq">
             <details open><summary>What are the three most popular formats right now?</summary><p>Commander, Standard, and Modern — those names sit on the second line of the site banner.</p></details>
-            <details><summary>Where do the decklists come from?</summary><p>Public Magic Online Challenge/League tables hosted on MTGGoldfish, plus official Magic.gg Metagame Mentor aggregates. Each list page links the source.</p></details>
+            <details><summary>Where do the decklists come from?</summary><p>Public lists from MTGGoldfish, Moxfield, Archidekt, MTGTop8, Deckstats, and AetherHub, plus official Magic.gg Metagame Mentor aggregates. Each list page links the source. Full card images come from Scryfall.</p></details>
             <details><summary>Do buy links use affiliates?</summary><p>Yes. Shop gear uses the same Amazon Associates short links as One Piece Deck Base. Every card and “Buy list” button uses TCGplayer partner <code>c/7670706/1780961/21018</code>.</p></details>
           </div>
         </section>
@@ -1746,7 +1887,7 @@ def page_privacy() -> str:
         </section>
         <section>
           <h3>Fair use and trademarks</h3>
-          <p>MTG Decklists reports publicly posted tournament decklists and official event schedules for news, commentary, and education. Card names, format names, and event names are used to identify Magic: The Gathering products and organized play. List and deck-page thumbnails use publicly available card images (via Scryfall) to identify those lists. Banner and format illustrations on this site are newly created and are not official Magic card art. They are inspired by iconic card <em>ideas</em> (a flashback mage, a goblin mountain scout, a red lightning spell) without copying Wizards' artwork or the official mana pentagon.</p>
+          <p>MTG Decklists reports publicly posted decklists and official event schedules for news, commentary, and education. Card names, format names, and event names are used to identify Magic: The Gathering products and organized play. Pages show full card images loaded from Scryfall so a list can be recognized by the cards in it. This site does not copy those image files onto its own server.</p>
           <p>Magic: The Gathering, Magic, and associated logos and mana symbols are trademarks of Wizards of the Coast LLC, a subsidiary of Hasbro, Inc. This site is not affiliated with, endorsed by, or sponsored by Wizards of the Coast, Hasbro, or any official organized-play partner.</p>
         </section>
         <section>
@@ -1837,7 +1978,7 @@ def page_tier_index(decks: list[dict]) -> str:
     for fmt in FORMATS:
         n = counts.get(fmt["slug"], 0)
         tiles += f"""<a class="format-tile format-{e(fmt['slug'])}" href="{tier_url(fmt['slug'])}">
-          <img class="format-tile-art" src="{e(fmt['art'])}" alt="" />
+          <img class="format-tile-art" src="{e(fmt['art'])}" alt="{e(fmt.get('art_alt') or fmt['name'])}" width="146" height="204" />
           <div class="format-tile-body">
             <div class="name">{e(fmt['name'])} tier list</div>
             <p class="flavor">{e(fmt.get('flavor') or '')}</p>
@@ -1878,7 +2019,7 @@ def page_tier(fmt: dict, decks: list[dict]) -> str:
         leaders = []
         for name, n, sample, share in group:
             art = art_for(sample, "small")
-            alt = art[1] if not art[0].startswith("/img/art/") else ""
+            alt = art[1] or ""
             leaders.append(
                 f'<a class="tier-leader" href="{archetype_url(fmt["slug"], name)}">'
                 f'<img src="{e(art[0])}" alt="{e(alt)}" />'
@@ -1905,7 +2046,7 @@ def page_tier(fmt: dict, decks: list[dict]) -> str:
         f"{fmt['name']} tier list | MTG Decklists",
         f"{fmt['name']} S–D tiers from {total} public lists on this site ({date_window(fmt['slug'])}). One format only.",
         SITE + tier_url(fmt["slug"]),
-        image=fmt.get("art") or "/img/mtg-banner-hero.jpg",
+        image=fmt.get("art") or icon_pair(fmt["slug"])[0],
         extra=extra,
         image_alt=fmt.get("art_alt") or fmt["name"],
     ) + header("tier") + f"""
